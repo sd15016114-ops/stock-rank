@@ -75,4 +75,24 @@ with tempfile.TemporaryDirectory() as tmp:
     assert len(dates) == ft.KEEP_DAYS and dates == sorted(dates, reverse=True)
     assert len(list((Path(tmp) / "history" / "tw").glob("*.json"))) == ft.KEEP_DAYS
     assert ft.save_history("tw", {"status": "failed", "rows": []}) == dates          # 失敗的結果不會存成歷史
+
+# 當日走勢：富果日內 K 線、Alpaca 多檔 K 線
+FUGLE = {"date": "2026-10-07", "symbol": "2330", "timeframe": "5", "data": [
+    {"date": "2026-10-07T09:00:00.000+08:00", "open": 2590, "high": 2595, "low": 2585, "close": 2592, "volume": 8450, "average": 2590.1},
+    {"date": "2026-10-07T09:05:00.000+08:00", "open": 2592, "high": 2600, "low": 2590, "close": 2598, "volume": 3000, "average": 2594.0}]}
+assert ft.parse_fugle(FUGLE, "2026-10-07") == [2590, 2592, 2598]
+assert ft.parse_fugle(FUGLE, "2026-10-08") is None and ft.parse_fugle({"date": "2026-10-07", "data": []}, "2026-10-07") is None
+bars = {}
+assert ft.parse_alpaca({"bars": {"NVDA": [{"t": "2026-10-06T13:30:00Z", "o": 234.0, "h": 236, "l": 233, "c": 235.5, "v": 1, "n": 1, "vw": 235}]},
+                        "next_page_token": "abc"}, bars) == "abc"
+assert ft.parse_alpaca({"bars": {"NVDA": [{"t": "2026-10-06T13:40:00Z", "o": 235.5, "h": 239, "l": 235, "c": 238.9, "v": 1, "n": 1, "vw": 237}]},
+                        "next_page_token": None}, bars) is None
+assert bars == {"NVDA": [(234.0, 235.5), (235.5, 238.9)]}
+assert ft.us_session_utc("2026-10-06") == ("2026-10-06T13:30:00Z", "2026-10-06T20:00:00Z")      # 夏令時間
+assert ft.us_session_utc("2026-12-01") == ("2026-12-01T14:30:00Z", "2026-12-01T21:00:00Z")      # 冬令時間
+rows = [{"code": "2330"}, {"code": "2454"}]
+ft.reuse_sparks(rows, {"date": "2026-10-07", "rows": [{"code": "2330", "spark": [1, 2]}]}, "2026-10-07")
+assert rows[0]["spark"] == [1, 2] and "spark" not in rows[1]
+ft.FUGLE_KEY = ""
+assert ft.add_tw_sparks(rows, "2026-10-07") == (1, 0)          # 沒設金鑰：不連線
 print("全部通過")

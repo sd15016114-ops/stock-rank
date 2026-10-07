@@ -53,6 +53,20 @@
 
 預設保留最近 30 個交易日，要改天數請調整 `scraper/fetch_turnover.py` 的 `KEEP_DAYS`。
 
+## 當日走勢小圖（選用，需要金鑰）
+
+排行每一列的走勢線是當天的盤中價格，來源是兩家有正式 API 的服務，都有免費方案：
+
+| 市場 | 服務 | 免費方案 | 要設定的 Secret |
+|---|---|---|---|
+| 台股 | 富果 Fugle 行情 API | 註冊會員即可，每分鐘 60 次 | `FUGLE_API_KEY` |
+| 美股 | Alpaca Market Data API | 註冊即可，每分鐘 200 次，資料延遲 15 分鐘 | `ALPACA_API_KEY`、`ALPACA_API_SECRET` |
+
+金鑰放在程式庫的 Settings → Secrets and variables → Actions → New repository secret，名稱照上表。
+沒有設定金鑰時程式照常運作，網頁改畫漲跌幅橫條。有設金鑰但超過一半的股票抓不到走勢時，該次執行會顯示失敗。
+
+台股約 300 檔、一檔一次請求，抓走勢大約需要 6 分鐘；同一個交易日已經抓過的不會重抓。
+
 ## 保護機制
 
 - 抓不到資料或檔數太少：不寫入，沿用前一次資料並標記 `stale`，網頁會顯示提示。

@@ -12,6 +12,7 @@
 - 台股以證交所為主；櫃買中心抓不到或日期還沒更新時，先只出上市排行並標記 partial。
 """
 import json
+import os
 import re
 import sys
 import time
@@ -30,6 +31,13 @@ TWSE_URLS = ("https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json
              "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL")      # 第二個是備援，更新較慢
 TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
 NASDAQ_URL = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&offset=0&download=true"
+
+# 當日走勢小圖用的盤中資料（需要金鑰，放在 GitHub 的 Secrets；沒設定就略過，網頁改畫漲跌幅橫條）
+FUGLE_URL = "https://api.fugle.tw/marketdata/v1.0/stock/intraday/candles/%s?timeframe=5"       # 富果，台股
+ALPACA_URL = "https://data.alpaca.markets/v2/stocks/bars"                                       # Alpaca，美股
+FUGLE_KEY = os.environ.get("FUGLE_API_KEY", "").strip()
+ALPACA_ID = os.environ.get("ALPACA_API_KEY", "").strip()
+ALPACA_SECRET = os.environ.get("ALPACA_API_SECRET", "").strip()
 
 KEEP_STOCKS, KEEP_ETFS, KEEP_US = 100, 50, 100     # 每個市場保留的檔數
 KEEP_DAYS = 30                                      # 保留最近幾個交易日的排行，供網頁切換日期與比較名次
@@ -158,7 +166,7 @@ def fetch_twse():
     return best
 
 
-def build_tw():
+def build_tw(old=None):
     date, rows, total = fetch_twse()
     out = {"date": date, "status": "ok", "markets": {"上市": {"date": date, "count": len(rows), "total_value": total}},
            "sources": ["https://www.twse.com.tw/zh/trading/historical/stock-day-all.html"]}
@@ -176,8 +184,106 @@ def build_tw():
         print("      上櫃資料未取得，先只出上市排行：%s" % e)
         out.update(status="partial", error="上櫃：%s" % e)
         rows = top_of(rows)
-    out.update(total_value=total, rows=sorted(rows, key=lambda r: -r["value"]))
+    rows = sorted(rows, key=lambda r: -r["value"])
+    reuse_sparks(rows, old, date)
+    out.update(total_value=total, rows=rows, spark=add_tw_sparks(rows, date))
     return out
+
+
+# ---------------------------------------------------------------- 當日走勢
+def reuse_sparks(rows, old, date):
+    """同一個交易日已經抓過走勢的股票直接沿用，不重複連線。"""
+    if not old or old.get("date") != date:
+        return
+    have = {r["code"]: r["spark"] for r in old.get("rows", []) if r.get("spark")}
+    for r in rows:
+        if r["code"] in have:
+            r["spark"] = have[r["code"]]
+
+
+def parse_fugle(payload, date):
+    """富果日內 K 線 → 當日價格序列（開盤價＋每根 K 線收盤價）；日期不是當天就不收。"""
+    data = (payload or {}).get("data") or []
+    if (payload or {}).get("date") != date or len(data) < 2:
+        return None
+    return [data[0]["open"]] + [c["close"] for c in data]
+
+
+def add_tw_sparks(rows, date):
+    """回傳 (成功檔數, 應抓檔數)。免費方案每分鐘 60 次，所以每檔之間停 1.1 秒。"""
+    todo = [r for r in rows if not r.get("spark")]
+    if not FUGLE_KEY or not todo:
+        return len(rows) - len(todo), len(rows) if FUGLE_KEY else 0
+    s = requests.Session()
+    s.headers.update({"X-API-KEY": FUGLE_KEY, "User-Agent": BOT_UA})
+    for r in todo:
+        for attempt in range(2):
+            try:
+                resp = s.get(FUGLE_URL % r["code"], timeout=20)
+                if resp.status_code == 429:             # 超過速率限制，等一下再試一次
+                    time.sleep(30)
+                    continue
+                if resp.status_code in (401, 403):
+                    print("      富果金鑰無效或沒有權限（HTTP %d），略過走勢" % resp.status_code)
+                    return sum(1 for x in rows if x.get("spark")), len(rows)
+                pts = parse_fugle(resp.json(), date) if resp.ok else None
+                if pts:
+                    r["spark"] = pts
+                break
+            except Exception:       # noqa: BLE001   單一檔失敗不影響其他
+                break
+        time.sleep(1.1)
+    return sum(1 for x in rows if x.get("spark")), len(rows)
+
+
+def us_session_utc(date):
+    """美股正常交易時段（紐約 09:30–16:00）換成 UTC 的起訖時間字串。"""
+    from zoneinfo import ZoneInfo
+    y, m, d = (int(x) for x in date.split("-"))
+    ny = ZoneInfo("America/New_York")
+    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    return (datetime(y, m, d, 9, 30, tzinfo=ny).astimezone(timezone.utc).strftime(fmt),
+            datetime(y, m, d, 16, 0, tzinfo=ny).astimezone(timezone.utc).strftime(fmt))
+
+
+def parse_alpaca(payload, out):
+    """Alpaca 多檔 K 線 → {代號: [(開盤, 收盤), ...]}，分頁時累加到 out。"""
+    for sym, bars in ((payload or {}).get("bars") or {}).items():
+        out.setdefault(sym, []).extend((b["o"], b["c"]) for b in bars)
+    return (payload or {}).get("next_page_token")
+
+
+def add_us_sparks(rows, date):
+    todo = [r for r in rows if not r.get("spark")]
+    if not (ALPACA_ID and ALPACA_SECRET) or not todo:
+        return len(rows) - len(todo), len(rows) if ALPACA_ID and ALPACA_SECRET else 0
+    start, end = us_session_utc(date)
+    s = requests.Session()
+    s.headers.update({"APCA-API-KEY-ID": ALPACA_ID, "APCA-API-SECRET-KEY": ALPACA_SECRET, "User-Agent": BOT_UA})
+    bars = {}
+    for i in range(0, len(todo), 50):
+        params = {"symbols": ",".join(r["code"].replace("/", ".") for r in todo[i:i + 50]), "timeframe": "10Min",
+                  "start": start, "end": end, "limit": 10000, "adjustment": "raw"}
+        for _ in range(10):                             # 分頁
+            try:
+                resp = s.get(ALPACA_URL, params=params, timeout=30)
+                if resp.status_code in (401, 403):
+                    print("      Alpaca 金鑰無效或沒有權限（HTTP %d），略過走勢" % resp.status_code)
+                    return sum(1 for x in rows if x.get("spark")), len(rows)
+                resp.raise_for_status()
+                token = parse_alpaca(resp.json(), bars)
+            except Exception as e:  # noqa: BLE001
+                print("      Alpaca 讀取失敗：%s" % e)
+                break
+            if not token:
+                break
+            params["page_token"] = token
+        time.sleep(0.5)
+    for r in todo:
+        b = bars.get(r["code"].replace("/", "."))
+        if b and len(b) >= 2:
+            r["spark"] = [b[0][0]] + [c for _, c in b]
+    return sum(1 for x in rows if x.get("spark")), len(rows)
 
 
 # ---------------------------------------------------------------- 美股
@@ -218,13 +324,16 @@ def parse_us(payload):
     return rows, int(total)
 
 
-def build_us():
+def build_us(old=None):
     rows, total = parse_us(get_json(NASDAQ_URL, ua=BROWSER_UA))
     if len(rows) < MIN_ROWS["us"]:
         raise ValueError("Nasdaq 資料不完整（%d 檔）" % len(rows))
     rows.sort(key=lambda r: -r["value"])
-    return {"date": us_session_date(), "status": "ok", "count": len(rows), "total_value": total,
-            "sources": ["https://www.nasdaq.com/market-activity/stocks/screener"], "rows": rows[:KEEP_US]}
+    date, count, rows = us_session_date(), len(rows), rows[:KEEP_US]
+    reuse_sparks(rows, old, date)
+    return {"date": date, "status": "ok", "count": count, "total_value": total,
+            "sources": ["https://www.nasdaq.com/market-activity/stocks/screener"], "rows": rows,
+            "spark": add_us_sparks(rows, date)}
 
 
 # ---------------------------------------------------------------- 主程式
@@ -255,7 +364,8 @@ def run(key, label, build):
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
     now = datetime.now(TPE).isoformat(timespec="seconds")
     try:
-        new = build()
+        new = build(old)
+        got, want = new.pop("spark", (0, 0))            # 走勢小圖抓到幾檔；沒設定金鑰時 want 為 0
         if not new["rows"] or new["rows"][0]["value"] <= 0:
             raise ValueError("排行是空的")
         bad = suspicious(new, old if old and old.get("rows") else None)
@@ -267,7 +377,11 @@ def run(key, label, build):
         print("%-5s %s  %s  共 %d 檔  第一名 %s %s%s" % (
             "OK" if new["status"] == "ok" else "PART", label, new["date"], len(new["rows"]), top["code"], top["name"],
             "  （%s）" % new["error"] if new.get("error") else ""))
-        ok = new["status"] == "ok"
+        if want:
+            print("      當日走勢 %d/%d 檔" % (got, want))
+        else:
+            print("      未設定走勢資料的金鑰，略過當日走勢")
+        ok = new["status"] == "ok" and (not want or got >= want * 0.5)     # 有設金鑰卻抓不到一半，視為失敗以便通知
         save_history(key, new)
     except Exception as e:          # noqa: BLE001
         print("FAIL  %s  %s" % (label, e))
