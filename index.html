@@ -78,6 +78,7 @@ section.block h2{font-family:var(--serif);font-weight:900;font-size:24px;margin:
 section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width:44em}
 .tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
 .tools select[hidden]{display:none}
+.pickrow select[hidden]{display:none}
 .tools select,.tools input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:999px;padding:8px 16px;max-width:100%}
 .tools input[type=search]{flex:1 1 200px;min-width:0}
 .tools input::placeholder{color:var(--muted)}
@@ -147,6 +148,8 @@ footer a{color:var(--accent)}
       <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
+      <div class="seg" id="viewSeg" role="group" aria-label="檢視方式"></div>
+      <select id="view" aria-label="檢視方式" hidden><option value="rank" selected>排行</option><option value="heat">熱力圖</option></select>
       <select id="date" aria-label="交易日"></select>
     </div>
     <div class="sums" id="sums"></div>
@@ -159,7 +162,7 @@ footer a{color:var(--accent)}
     <div class="legend" id="heatLegend"></div>
   </section>
 
-  <section class="block">
+  <section class="block" id="rankBlock">
     <h2 id="listTitle">成交值排行</h2>
     <p class="lead" id="lead"></p>
     <div class="tools">
@@ -372,8 +375,13 @@ function heatColor(pct){
 function sign(p){ return p==null ? '' : (p>0?'+':'')+fix(p,2)+'%'; }
 function renderHeat(){
   var d = DATA[MODE], box = $('heat'), list = MODE==='tw' && d && d.industries ? d.industries : null;
-  $('heatBlock').hidden = !list; $('heatBlock').style.display = list ? '' : 'none';
-  if(!list) return;
+  /* 熱力圖是獨立的檢視：有產業資料（台股）才出現切換鈕，選了「熱力圖」才畫，排行就先收起來 */
+  $('viewSeg').hidden = !list; $('viewSeg').style.display = list ? '' : 'none';
+  var on = !!list && $('view').value==='heat';
+  $('heatBlock').hidden = !on; $('heatBlock').style.display = on ? '' : 'none';
+  $('rankBlock').hidden = on; $('rankBlock').style.display = on ? 'none' : '';
+  syncSeg($('viewSeg'), true);
+  if(!on) return;
   if(!$('etf').checked) list = list.filter(function(g){ return g.name!=='ETF'; });
   var W = box.clientWidth, H = W<520 ? 440 : 520, HEAD = 18, total = list.reduce(function(s,g){ return s+g.value; },0);
   box.style.height = H+'px';
@@ -438,7 +446,7 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
 function remember(){
-  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
+  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, view:$('view').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
 }
 var BOOTED = false;
 function setMode(m){
@@ -455,14 +463,15 @@ function setMode(m){
   if(list.length) pickDate(list[0]);
 }
 $('date').addEventListener('input',function(){ pickDate($('date').value); });
-['market','count','etf','q','sort'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
+['market','count','etf','q','sort','view'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
 document.querySelectorAll('.modes button').forEach(function(b){
   b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
 });
 if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
-segFrom('market'); segFrom('count'); segFrom('sort');
+if(SAVED.view==='heat') $('view').value = 'heat';
+segFrom('market'); segFrom('count'); segFrom('sort'); segFrom('view');
 
 function nul(){ return null; }
 Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_dates.json').catch(nul), load('us_dates.json').catch(nul)]).then(function(res){
