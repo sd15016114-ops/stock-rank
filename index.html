@@ -40,8 +40,13 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 
 header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 0 0}
 .brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--accent)}
-.theme{font:inherit;font-size:14px;font-weight:500;color:var(--on-fill);background:var(--fill);border:0;border-radius:999px;padding:6px 16px;cursor:pointer}
-.theme:hover{filter:brightness(1.05)}
+/* 日夜切換：圓角滑軌，圓鈕左右滑動（左邊日間、右邊夜間） */
+.theme{position:relative;flex:none;width:68px;height:34px;padding:0;border:0;border-radius:999px;background:var(--fill);cursor:pointer;transition:background .25s ease}
+.theme span{position:absolute;top:0;width:34px;height:34px;display:grid;place-items:center;font-size:15px;line-height:1;color:var(--on-fill);opacity:.75}
+.theme .sun{left:0} .theme .moon{right:0}
+.theme i{position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:var(--sheet);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.theme[aria-checked=true] i{transform:translateX(34px)}
+@media (prefers-reduced-motion: reduce){ .theme,.theme i{transition:none} }
 .intro{padding:36px 0 8px}
 .intro h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5vw,44px);line-height:1.3;margin:0 0 8px}
 .intro p{margin:0;color:var(--muted);max-width:40em}
@@ -107,7 +112,7 @@ footer a{color:var(--accent)}
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><div class="brand">股市動能排行</div><button type="button" class="theme" id="theme" aria-label="切換日間版或夜間版"></button></header>
+  <header class="top"><div class="brand">股市動能排行</div><button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button></header>
 
   <section class="intro">
     <h1>今天的錢流向哪裡</h1>
@@ -280,7 +285,7 @@ function isDark(){
   var t = document.documentElement.getAttribute('data-theme');
   return t ? t==='dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
 }
-function paintTheme(){ $('theme').textContent = isDark() ? '☀ 日間版' : '☾ 夜間版'; }
+function paintTheme(){ $('theme').setAttribute('aria-checked', isDark() ? 'true' : 'false'); }
 $('theme').addEventListener('click',function(){
   var next = isDark() ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
