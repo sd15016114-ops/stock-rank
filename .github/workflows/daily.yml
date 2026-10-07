@@ -52,6 +52,11 @@ jobs:
         if: inputs.task != 'probe' && inputs.task != 'backfill'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
+      - name: 回補台股歷史資料
+        id: backfill
+        if: inputs.task == 'backfill'
+        run: python scraper/fetch_turnover.py backfill ${{ inputs.days }}
+        continue-on-error: true
       - name: 提交變更
         run: |
           git config user.name "rank-bot"
@@ -61,5 +66,5 @@ jobs:
           git pull --rebase origin ${{ github.ref_name }}   # 執行期間若有其他更新推上來，先接上再推
           git push origin HEAD:${{ github.ref_name }}
       - name: 有市場抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
-        if: steps.fetch.outcome == 'failure'
+        if: steps.fetch.outcome == 'failure' || steps.backfill.outcome == 'failure'
         run: exit 1
