@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name "rank-bot"
           git config user.email "rank-bot@users.noreply.github.com"
-          git add data/tw.json data/us.json
+          git add -A data
           git diff --cached --quiet || git commit -m "排行更新 $(date -u +%F)"
           git pull --rebase origin main   # 執行期間若有其他更新推上來，先接上再推
           git push

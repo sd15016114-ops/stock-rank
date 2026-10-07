@@ -32,6 +32,7 @@ TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
 NASDAQ_URL = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&offset=0&download=true"
 
 KEEP_STOCKS, KEEP_ETFS, KEEP_US = 100, 50, 100     # 每個市場保留的檔數
+KEEP_DAYS = 30                                      # 保留最近幾個交易日的排行，供網頁切換日期與比較名次
 MIN_ROWS = {"twse": 500, "tpex": 300, "us": 2000}  # 少於這個數字代表資料不完整
 
 
@@ -235,6 +236,20 @@ def suspicious(new, old):
     return None
 
 
+def save_history(key, snap):
+    """把當天的排行另存一份到 data/history/<市場>/<日期>.json，只留最近 KEEP_DAYS 個交易日，並更新日期清單。"""
+    folder = DATA / "history" / key
+    folder.mkdir(parents=True, exist_ok=True)
+    if snap and snap.get("date") and snap.get("rows"):
+        (folder / ("%s.json" % snap["date"])).write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    files = sorted((f for f in folder.glob("*.json") if re.match(r"^\d{4}-\d\d-\d\d$", f.stem)), reverse=True)
+    for f in files[KEEP_DAYS:]:
+        f.unlink()
+    dates = [f.stem for f in files[:KEEP_DAYS]]
+    (DATA / ("%s_dates.json" % key)).write_text(json.dumps({"dates": dates}, ensure_ascii=False) + "\n", encoding="utf-8")
+    return dates
+
+
 def run(key, label, build):
     path = DATA / ("%s.json" % key)
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
@@ -253,6 +268,7 @@ def run(key, label, build):
             "OK" if new["status"] == "ok" else "PART", label, new["date"], len(new["rows"]), top["code"], top["name"],
             "  （%s）" % new["error"] if new.get("error") else ""))
         ok = new["status"] == "ok"
+        save_history(key, new)
     except Exception as e:          # noqa: BLE001
         print("FAIL  %s  %s" % (label, e))
         new = dict(old, status="stale", error=str(e), checked=now) if old and old.get("rows") else \

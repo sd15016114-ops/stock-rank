@@ -65,4 +65,14 @@ assert tw_kind("0050") == "etf" and tw_kind("2330") == "stock" and tw_kind("2881
 assert us_session_date(datetime(2026, 10, 7, 22, 30, tzinfo=timezone.utc)) == "2026-10-07"     # 週三收盤後
 assert us_session_date(datetime(2026, 10, 12, 13, 0, tzinfo=timezone.utc)) == "2026-10-09"     # 週一開盤前 → 上週五
 assert suspicious({"total_value": 1}, {"total_value": 100}) and not suspicious({"total_value": 90}, {"total_value": 100})
+
+# 歷史檔：只留最近 KEEP_DAYS 天，日期清單由新到舊
+import tempfile, fetch_turnover as ft
+with tempfile.TemporaryDirectory() as tmp:
+    ft.DATA = Path(tmp)
+    for i in range(1, 36):
+        dates = ft.save_history("tw", {"date": "2026-%02d-%02d" % (8 + i // 29, i % 28 + 1), "rows": [{"code": "2330"}]})
+    assert len(dates) == ft.KEEP_DAYS and dates == sorted(dates, reverse=True)
+    assert len(list((Path(tmp) / "history" / "tw").glob("*.json"))) == ft.KEEP_DAYS
+    assert ft.save_history("tw", {"status": "failed", "rows": []}) == dates          # 失敗的結果不會存成歷史
 print("全部通過")
