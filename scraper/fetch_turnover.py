@@ -11,6 +11,9 @@
 - 抓不到、筆數太少或數值異常時，不寫入壞資料，沿用前一次的檔案並標記 stale。
 - 台股以證交所為主；櫃買中心抓不到或日期還沒更新時，先只出上市排行並標記 partial。
 """
+import builtins
+import csv
+import io
 import json
 import re
 import sys
@@ -37,6 +40,42 @@ MIN_ROWS = {"twse": 500, "tpex": 300, "us": 2000}  # 少於這個數字代表資
 
 
 # ---------------------------------------------------------------- 共用
+LOG = []
+
+
+def print(*args):               # noqa: A001   訊息同時留一份，寫進 data/run_<市場>.log 方便事後查看
+    LOG.append(" ".join(str(a) for a in args))
+    builtins.print(*args)
+
+
+def get_text(url, ua=BOT_UA, tries=3):
+    last = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, timeout=40, headers={
+                "User-Agent": ua, "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8", "Cache-Control": "no-cache"})
+            r.raise_for_status()
+            r.encoding = r.encoding if r.encoding and r.encoding.lower() != "iso-8859-1" else "utf-8"
+            return r.text.lstrip("\ufeff")
+        except Exception as e:      # noqa: BLE001
+            last = e
+            time.sleep(3 * (i + 1))
+    raise last
+
+
+def records(text):
+    """回應可能是 JSON，也可能是 CSV（證交所官網有時回 CSV）；CSV 轉成和 openapi 一樣的物件陣列。"""
+    t = text.strip()
+    if t[:1] in "{[":
+        return json.loads(t)
+    lines = t.splitlines()
+    head = next(i for i, l in enumerate(lines) if "證券代號" in l)
+    rows = list(csv.reader(io.StringIO("\n".join(lines[head:]))))
+    names = [re.sub(r"\s", "", c) for c in rows[0]]
+    clean = lambda c: re.sub(r'^="?|"$', "", c.strip())
+    return [dict(zip(names, (clean(c) for c in r))) for r in rows[1:] if len(r) >= len(names) - 1 and r[0].strip()]
+
 def get_json(url, ua=BOT_UA, tries=3):
     last = None
     for i in range(tries):
@@ -146,7 +185,8 @@ def fetch_twse():
     for url in TWSE_URLS:
         try:
             fresh = url + ("&" if "?" in url else "?") + "_=%d" % int(time.time())   # 加上時間參數，避免拿到快取裡前一天的舊資料
-            date, rows, total = parse_twse(get_json(fresh))
+            date, rows, total = parse_twse(records(get_text(fresh)))
+            print("      證交所 %s：%s，%d 檔" % (url.split("/")[2], date, len(rows)))
             if not date or len(rows) < MIN_ROWS["twse"]:
                 raise ValueError("證交所資料不完整（%d 檔）" % len(rows))
             if not best or date > best[0]:
@@ -167,6 +207,7 @@ def build_tw():
         tdate, trows, ttotal = parse_tpex(get_json(TPEX_URL + "?_=%d" % int(time.time())))
         if len(trows) < MIN_ROWS["tpex"]:
             raise ValueError("櫃買中心資料不完整（%d 檔）" % len(trows))
+        print("      櫃買中心：%s，%d 檔" % (tdate, len(trows)))
         if tdate != date:
             raise ValueError("櫃買中心日期是 %s，證交所是 %s，還沒同步" % (tdate, date))
         out["markets"]["上櫃"] = {"date": tdate, "count": len(trows), "total_value": ttotal}
@@ -252,6 +293,15 @@ def save_history(key, snap):
 
 
 def run(key, label, build):
+    del LOG[:]
+    try:
+        return run_inner(key, label, build)
+    finally:
+        DATA.mkdir(parents=True, exist_ok=True)
+        (DATA / ("run_%s.log" % key)).write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
+
+
+def run_inner(key, label, build):
     path = DATA / ("%s.json" % key)
     old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
     now = datetime.now(TPE).isoformat(timespec="seconds")

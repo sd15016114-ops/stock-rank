@@ -88,4 +88,12 @@ with tempfile.TemporaryDirectory() as tmp:
     newer = lambda: dict(part(), date="2026-10-07")
     assert ft.run("tw", "台股", newer) is False                      # 新的一天只有上市：照寫，但標記為不完整
     assert json.loads((Path(tmp) / "tw.json").read_text(encoding="utf-8"))["date"] == "2026-10-07"
+
+# 證交所官網回 CSV 時也要能讀
+CSVTEXT = '\ufeff"日期","證券代號","證券名稱","成交股數","成交金額","開盤價","最高價","最低價","收盤價","漲跌價差","成交筆數"\r\n' \
+    '"1151007","00400A","主動國泰動能高息","65642556","1084672563","16.57","16.68","16.43","16.47","-0.1400","17068"\r\n' \
+    '"1151007","2330","台積電","30,000,000","45,000,000,000","2,590.00","2,600.00","2,580.00","2,595.00","10.0000","50,000"\r\n'
+date, rows, total = parse_twse(ft.records(CSVTEXT.lstrip("\ufeff")))
+assert date == "2026-10-07" and [r["code"] for r in rows] == ["00400A", "2330"] and rows[1]["close"] == 2595 and rows[0]["pct"] < 0, (date, rows)
+assert ft.records('[{"Code": "2330"}]') == [{"Code": "2330"}]
 print("全部通過")
