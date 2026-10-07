@@ -60,7 +60,8 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:16p
 .seg.still .thumb{transition:none}
 .seg button{position:relative;flex:none;font:inherit;font-size:15px;font-weight:500;line-height:1.4;color:var(--muted);background:transparent;border:0;border-radius:999px;padding:6px 16px;cursor:pointer;white-space:nowrap;transition:color .2s}
 .seg button[aria-pressed=true]{color:var(--on-fill);font-weight:700}
-.modes{margin:22px 0 0}
+.pickrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 0}
+.pickrow select{font:inherit;font-size:15px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:999px;padding:8px 16px;max-width:100%}
 .modes button{padding:7px 26px}
 @media (prefers-reduced-motion: reduce){ .seg .thumb,.seg button{transition:none} }
 
@@ -103,6 +104,17 @@ section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width
 .val{position:relative;min-width:150px}
 .val i{position:absolute;right:8px;top:8px;bottom:8px;background:var(--soft);border-radius:2px}
 .val span{position:relative;font-weight:700}
+.val small{display:none;position:relative;font-size:12px;line-height:1.2;color:var(--muted)}
+.rt{color:var(--muted)} .rt.hot,.val small.hot{color:var(--accent);font-weight:700}
+/* 產業熱力圖 */
+.heat{position:relative;width:100%;background:var(--sheet);border:1px solid var(--rule);overflow:hidden}
+.heat .ind{position:absolute;overflow:hidden;box-shadow:inset 0 0 0 1px var(--sheet)}
+.heat .ind>b{position:absolute;left:0;right:0;top:0;height:18px;padding:0 5px;font-size:11px;font-weight:700;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,.28);color:#fff;z-index:1}
+.heat .st{position:absolute;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.15;box-shadow:inset 0 0 0 .5px rgba(128,128,128,.45)}
+.heat .st span{font-size:12px;font-weight:700;white-space:nowrap;max-width:100%;overflow:hidden}
+.heat .st small{font-size:10.5px;white-space:nowrap}
+.legend{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{width:26px;height:10px;display:inline-block}
 .empty{padding:20px 16px;color:var(--muted)}
 .fine{font-size:13px;color:var(--muted);margin:12px 0 0;max-width:46em}
 footer{padding:44px 0 40px;font-size:13px;color:var(--muted)}
@@ -114,7 +126,8 @@ footer a{color:var(--accent)}
   .rank td.who{min-width:0}
   .rank th .u{display:none}
   .rank th .us{display:inline}
-  .rank .vol{display:none}
+  .rank .vol,.rank .rtc{display:none}
+  .val small{display:block}
   .val{min-width:66px}
   .val i{right:2px}
   .wrap{padding:0 16px}
@@ -130,21 +143,32 @@ footer a{color:var(--accent)}
     <h1>今天的錢流向哪裡</h1>
     <p>每天收盤後整理台股與美股的成交值排行。成交值是當天實際換手的金額，比成交量更能看出資金集中在哪些股票。</p>
     <div class="updated" id="updated">資料載入中…</div>
-    <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
+    <div class="pickrow">
+      <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
+      <select id="date" aria-label="交易日"></select>
+    </div>
     <div class="sums" id="sums"></div>
+  </section>
+
+  <section class="block" id="heatBlock" hidden>
+    <h2>產業熱力圖</h2>
+    <p class="lead" id="heatLead"></p>
+    <div class="heat" id="heat"></div>
+    <div class="legend" id="heatLegend"></div>
   </section>
 
   <section class="block">
     <h2 id="listTitle">成交值排行</h2>
     <p class="lead" id="lead"></p>
     <div class="tools">
-      <select id="date" aria-label="交易日"></select>
       <div class="seg" id="marketSeg" role="group" aria-label="市場別"></div>
       <select id="market" aria-label="市場別" hidden><option value="all">上市＋上櫃</option><option value="上市">只看上市</option><option value="上櫃">只看上櫃</option></select>
       <div class="seg" id="countSeg" role="group" aria-label="顯示名次"></div>
       <select id="count" aria-label="顯示名次" hidden><option value="20">前 20 名</option><option value="50" selected>前 50 名</option><option value="100">前 100 名</option></select>
+      <div class="seg" id="sortSeg" role="group" aria-label="排序方式"></div>
+      <select id="sort" aria-label="排序方式" hidden><option value="value" selected>依成交值</option><option value="ratio">依放大倍數</option></select>
       <label id="etfWrap"><input type="checkbox" id="etf" checked> 含 ETF</label>
       <input type="search" id="q" placeholder="搜尋代號或名稱" aria-label="搜尋代號或名稱">
     </div>
@@ -269,22 +293,30 @@ function render(){
       +(d.status==='partial'?'<span class="stale">上櫃資料尚未取得，目前只有上市</span>':'')
     : '';
   $('lead').textContent = !has ? '' : '依當日成交值由高到低排列，橫條長度代表與第一名的相對大小。'
+    + (MODE==='tw' && d.avg_days>=5 ? '放大倍數是當日成交值除以前 '+d.avg_days+' 個交易日的平均，2 倍以上會標示出來。' : '')
     + (map ? '名次下方是與前一個交易日（'+tradeDay(PREV[MODE].date)+'）相比的升降。' : '這是目前保存的最早一天，還沒有前一日可以比較。');
   renderSums(d||{}, all);
+  renderHeat();
   var max = all.length ? all[0].value : 1;
   var rows = all.map(function(r,i){ r._no = i+1; return r; }).filter(function(r){ return !q || plain(r.code+r.name).indexOf(q)>=0; });
+  var hasRatio = MODE==='tw' && all.some(function(r){ return r.ratio!=null; }), byRatio = hasRatio && $('sort').value==='ratio';
+  $('sortSeg').hidden = !hasRatio; $('sortSeg').style.display = hasRatio ? '' : 'none';
+  if(byRatio) rows = rows.slice().sort(function(a,b){ return (b.ratio==null?-1:b.ratio)-(a.ratio==null?-1:a.ratio); });
+  syncSeg($('sortSeg'), true);
+  function times(r){ return r.ratio==null ? '—' : fix(r.ratio, r.ratio>=10 ? 1 : 2)+'×'; }
   if(!has){
     $('rank').innerHTML = '<div class="empty">'+(MODE==='tw'?'台股':'美股')+'排行資料還沒有產生。請到 GitHub 的 Actions 分頁手動執行一次「盤後更新成交值排行」。</div>';
   }else if(!rows.length){
     $('rank').innerHTML = '<div class="empty">'+(q?'前 '+all.length+' 名之中找不到符合的股票，可以把顯示名次調大再試。':'沒有符合條件的股票。')+'</div>';
   }else{
-    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th><th class="vol">成交量</th></tr>'
+    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th>'+(hasRatio?'<th class="rtc">放大倍數</th>':'')+'<th class="vol">成交量</th></tr>'
       + rows.map(function(r){
-        var sub = MODE==='tw' ? r.market : (r.sector||'');
+        var sub = MODE==='tw' ? r.market+(r.ind && r.ind!=='ETF' ? '・'+r.ind : '') : (r.sector||''), hot = r.ratio>=2 ? ' hot' : '';
         return '<tr'+(r._no<=3?' class="top3"':'')+'><td class="no l">'+r._no+moveCell(r,map)+'</td>'
           + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+'</small></td>'
           + '<td class="px">'+price(r.close)+'</td>'+pctCell(r)
-          + '<td class="val"><i style="width:calc('+(r.value/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(r.value)+'</span></td>'
+          + '<td class="val"><i style="width:calc('+(r.value/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(r.value)+'</span>'+(hasRatio?'<small class="'+hot+'">'+times(r)+'</small>':'')+'</td>'
+          + (hasRatio?'<td class="rtc rt'+hot+'">'+times(r)+'</td>':'')
           + '<td class="vol">'+M.vol(r.volume)+'</td></tr>';
       }).join('') + '</table>';
   }
@@ -304,9 +336,73 @@ $('theme').addEventListener('click',function(){
   var next = isDark() ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   try{ localStorage.setItem('stock-rank-theme', next); }catch(e){}
-  paintTheme();
+  paintTheme(); renderHeat();
 });
 paintTheme();
+
+/* ===== 產業熱力圖 ===== */
+/* squarify：把一串數值排成盡量接近正方形的矩形，面積與數值成正比。items 需由大到小 */
+function squarify(items, x, y, w, h){
+  var total = items.reduce(function(s,i){ return s+i.v; },0), out = [];
+  if(!(total>0) || w<=0 || h<=0) return out;
+  var k = w*h/total, rest = items.map(function(i){ return {item:i, a:i.v*k}; });
+  while(rest.length){
+    var side = Math.min(w,h), row = [], sum = 0, best = Infinity, mx = 0, mn = Infinity;
+    while(rest.length){
+      var a = rest[0].a, s2 = sum+a, hi = Math.max(mx,a), lo = Math.min(mn,a);
+      var worst = Math.max(side*side*hi/(s2*s2), s2*s2/(side*side*lo));
+      if(row.length && worst>best) break;
+      row.push(rest.shift()); sum = s2; best = worst; mx = hi; mn = lo;
+    }
+    var thick = sum/side, pos;
+    if(w>=h){ pos = y; row.forEach(function(r){ var len = r.a/thick; out.push({item:r.item, x:x, y:pos, w:thick, h:len}); pos += len; }); x += thick; w -= thick; }
+    else    { pos = x; row.forEach(function(r){ var len = r.a/thick; out.push({item:r.item, x:pos, y:y, w:len, h:thick}); pos += len; }); y += thick; h -= thick; }
+  }
+  return out;
+}
+/* 漲跌幅 → 顏色：紅漲綠跌，5% 以上最深；回傳 [底色, 字色] */
+function heatColor(pct){
+  var dark = isDark(), base = dark ? [42,42,42] : [232,238,243];
+  if(pct==null || !pct) return ['rgb('+base.join(',')+')', dark ? '#E6E6E6' : '#16242F'];
+  var to = pct>0 ? (dark ? [226,74,62] : [214,52,52]) : (dark ? [34,160,107] : [18,138,90]);
+  var t = .18 + .82*Math.min(Math.abs(pct)/5, 1);
+  var c = base.map(function(b,i){ return Math.round(b+(to[i]-b)*t); });
+  return ['rgb('+c.join(',')+')', t>.42 ? '#fff' : (dark ? '#E6E6E6' : '#16242F')];
+}
+function sign(p){ return p==null ? '' : (p>0?'+':'')+fix(p,2)+'%'; }
+function renderHeat(){
+  var d = DATA[MODE], box = $('heat'), list = MODE==='tw' && d && d.industries ? d.industries : null;
+  $('heatBlock').hidden = !list; $('heatBlock').style.display = list ? '' : 'none';
+  if(!list) return;
+  if(!$('etf').checked) list = list.filter(function(g){ return g.name!=='ETF'; });
+  var W = box.clientWidth, H = W<520 ? 440 : 520, HEAD = 18, total = list.reduce(function(s,g){ return s+g.value; },0);
+  box.style.height = H+'px';
+  var html = squarify(list.map(function(g){ return {v:g.value, g:g}; }), 0, 0, W, H).map(function(R){
+    var g = R.item.g, col = heatColor(g.pct), head = R.w>44 && R.h>40 ? HEAD : 0, inner = '';
+    var shown = g.top.reduce(function(s,t){ return s+t[2]; },0), items = g.top.map(function(t){ return {v:t[2], t:t}; });
+    var restV = g.value-shown, restP = null;       /* 沒列出來的個股合成一塊「其他」，漲跌幅由產業的加權平均反推 */
+    if(restV>0){
+      if(g.pct!=null) restP = (g.pct*g.value - g.top.reduce(function(s,t){ return s+(t[3]||0)*t[2]; },0))/restV;
+      items.push({v:restV, t:null, p:restP});
+    }
+    items.sort(function(a,b){ return b.v-a.v; });
+    squarify(items, 0, head, R.w, R.h-head).forEach(function(r){
+      var t = r.item.t, c = heatColor(t ? t[3] : r.item.p), txt = '';
+      if(t && r.w>38 && r.h>18) txt = '<span>'+esc(t[1])+'</span>'+(r.h>34 && r.w>46 ? '<small>'+sign(t[3])+'</small>' : '');
+      else if(!t && r.w>38 && r.h>18) txt = '<small>其他</small>';
+      inner += '<div class="st" style="left:'+r.x.toFixed(1)+'px;top:'+r.y.toFixed(1)+'px;width:'+r.w.toFixed(1)+'px;height:'+r.h.toFixed(1)+'px;background:'+c[0]+';color:'+c[1]+'"'
+        + (t ? ' title="'+esc(t[1])+'（'+esc(t[0])+'）　'+yi(t[2])+' 億元　'+sign(t[3])+'"' : ' title="'+esc(g.name)+'其他個股　'+yi(r.item.v)+' 億元　'+sign(r.item.p)+'"')+'>'+txt+'</div>';
+    });
+    return '<div class="ind" style="left:'+R.x.toFixed(1)+'px;top:'+R.y.toFixed(1)+'px;width:'+R.w.toFixed(1)+'px;height:'+R.h.toFixed(1)+'px;background:'+col[0]+'" title="'
+      + esc(g.name)+'　'+yi(g.value)+' 億元（占 '+fix(g.value/total*100,1)+'%）　'+sign(g.pct)+'　'+g.count+' 檔">'
+      + (head ? '<b>'+esc(g.name)+' '+sign(g.pct)+'</b>' : '')+inner+'</div>';
+  }).join('');
+  box.innerHTML = html;
+  $('heatLead').textContent = '全市場 '+list.length+' 個產業'+($('etf').checked?'（ETF 自成一類）':'')+'。方塊面積是成交值，顏色是漲跌幅；產業的漲跌幅以成交值加權平均，每個產業列出成交值最大的 '
+    + Math.max.apply(null, list.map(function(g){ return g.top.length; }))+' 檔。滑鼠移上去或點一下可以看數字。';
+  $('heatLegend').innerHTML = '跌 '+[-5,-2.5,-1,0,1,2.5,5].map(function(p){ return '<i style="background:'+heatColor(p)[0]+'" title="'+p+'%"></i>'; }).join('')+' 漲（±5% 以上最深）';
+}
+window.addEventListener('resize', function(){ renderHeat(); });
 
 /* ===== 橫移式分類按鈕 ===== */
 /* 把選取的底色移到目前選中的按鈕底下；still 為 true 時不播動畫（剛載入或視窗大小改變時） */
@@ -355,18 +451,18 @@ function setMode(m){
   $('date').hidden = list.length<1; $('date').style.display = list.length<1 ? 'none' : '';
   DATA[MODE] = LATEST[MODE]; PREV[MODE] = null;
   render();
-  syncSeg(document.querySelector('.modes'), !BOOTED); syncSeg($('marketSeg'), true); syncSeg($('countSeg'), true); BOOTED = true;
+  syncSeg(document.querySelector('.modes'), !BOOTED); syncSeg($('marketSeg'), true); syncSeg($('countSeg'), true); syncSeg($('sortSeg'), true); BOOTED = true;
   if(list.length) pickDate(list[0]);
 }
 $('date').addEventListener('input',function(){ pickDate($('date').value); });
-['market','count','etf','q'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
+['market','count','etf','q','sort'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
 document.querySelectorAll('.modes button').forEach(function(b){
   b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
 });
 if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
-segFrom('market'); segFrom('count');
+segFrom('market'); segFrom('count'); segFrom('sort');
 
 function nul(){ return null; }
 Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_dates.json').catch(nul), load('us_dates.json').catch(nul)]).then(function(res){

@@ -49,7 +49,7 @@ TPEX_DAY_URL = ("https://www.tpex.org.tw/web/stock/aftertrading/otc_quotes_no143
 IND_TWSE_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
 IND_TPEX_URL = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O"
 IND_REFRESH_DAYS = 7
-IND_TOP = 12                                        # 熱力圖每個產業列出成交值前幾檔
+IND_TOP = 25                                        # 熱力圖每個產業列出成交值前幾檔
 INDUSTRY_NAMES = {
     "01": "水泥工業", "02": "食品工業", "03": "塑膠工業", "04": "紡織纖維", "05": "電機機械", "06": "電器電纜",
     "08": "玻璃陶瓷", "09": "造紙工業", "10": "鋼鐵工業", "11": "橡膠工業", "12": "汽車工業", "14": "建材營造",
@@ -415,11 +415,11 @@ def build_tw():
     return snapshot(date, rows, total, trows, ttotal, [SRC_TWSE, SRC_TPEX])
 
 
-def backfill(want):
+def backfill(want, force=False):
     """回補台股最近 want 個交易日：全市場精簡檔、每日排行，最後重算每一天的均值。休市日（來源回空的）自動跳過。"""
     del LOG[:]
     try:
-        have, day, scanned, added = set(full_dates()), datetime.now(TPE).date(), 0, 0
+        have, day, scanned, added = set() if force else set(full_dates()), datetime.now(TPE).date(), 0, 0      # force：已有的日期也重抓
         latest_path = DATA / "tw.json"
         latest = json.loads(latest_path.read_text(encoding="utf-8")) if latest_path.exists() else {}
         folder = DATA / "history" / "tw"
@@ -595,7 +595,7 @@ def run_inner(key, label, build):
 def main(only):
     if "backfill" in only:
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
-        return backfill(n[0] if n else 60)
+        return backfill(n[0] if n else 60, force="force" in only)
     jobs = [("tw", "台股", build_tw), ("us", "美股", build_us)]
     results = [run(*j) for j in jobs if not only or j[0] in only]
     return 0 if all(results) else 1

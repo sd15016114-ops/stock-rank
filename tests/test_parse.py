@@ -174,6 +174,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert oldest["avg_days"] == 0 and "ratio" not in oldest["rows"][0]
     n = len(calls)
     assert ft.backfill(8) == 0 and len(calls) == n                                             # 已經有的日期不重抓
+    assert ft.backfill(8, force=True) == 0 and len(calls) > n                                  # force：全部重抓
 
 # ---- 美股休市：內容和前一個交易日完全相同就不存檔
 with tempfile.TemporaryDirectory() as tmp:
