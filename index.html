@@ -90,8 +90,15 @@ section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width
 .rank td.who{white-space:normal;min-width:8em}
 .who b{font-weight:700}
 .who small{display:block;font-size:13px;color:var(--muted)}
+.rank th .us{display:none}
 .tag{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;background:var(--soft);color:var(--accent);margin-left:6px;font-weight:400;white-space:nowrap}
 .up{color:var(--up)} .down{color:var(--down)}
+/* 漲跌幅小圖：中線往右是漲、往左是跌，滿格為 10% */
+.pc{display:inline-flex;align-items:center;justify-content:flex-end;gap:10px}
+.mini{position:relative;flex:none;width:64px;height:12px;border-radius:999px;background:var(--tint);overflow:hidden}
+.mini::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--rule)}
+.mini i{position:absolute;top:2px;bottom:2px;min-width:2px;background:currentColor;border-radius:999px}
+.mini i.r{left:50%} .mini i.f{right:50%}
 .val{position:relative;min-width:150px}
 .val i{position:absolute;right:8px;top:8px;bottom:8px;background:var(--soft);border-radius:2px}
 .val span{position:relative;font-weight:700}
@@ -102,9 +109,15 @@ footer p{margin:0 0 6px;max-width:50em}
 footer a{color:var(--accent)}
 
 @media (max-width:700px){
-  .rank th,.rank td{padding:9px 8px}
+  .rank th,.rank td{padding:9px 6px}
+  .rank td.who{min-width:0}
+  .rank th .u{display:none}
+  .rank th .us{display:inline}
   .rank .vol{display:none}
-  .val{min-width:96px}
+  .pc{flex-direction:column-reverse;align-items:flex-end;gap:4px}
+  .mini{width:48px;height:8px} .mini i{top:1px;bottom:1px}
+  .val{min-width:66px}
+  .val i{right:2px}
   .wrap{padding:0 16px}
 }
 @media (max-width:420px){ .rank .px{display:none} }
@@ -226,7 +239,9 @@ function vsPrev(sum, n){
 function pctCell(r){
   if(r.pct==null) return '<td>—</td>';
   var c = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '';
-  return '<td class="'+c+'">'+(r.pct>0?'▲ ':r.pct<0?'▼ ':'')+fix(Math.abs(r.pct),2)+'%</td>';
+  var w = (Math.min(Math.abs(r.pct),10)/10*50).toFixed(1);
+  return '<td class="'+c+'"><span class="pc"><span class="mini" aria-hidden="true">'+(r.pct?'<i class="'+(r.pct>0?'r':'f')+'" style="width:'+w+'%"></i>':'')+'</span>'
+    + '<span>'+(r.pct>0?'▲ ':r.pct<0?'▼ ':'')+fix(Math.abs(r.pct),2)+'%</span></span></td>';
 }
 function renderSums(d, rows){
   var M = MODES[MODE];
@@ -254,7 +269,7 @@ function render(){
     ? '交易日 '+tradeDay(d.date)+'，資料更新於 '+day(d.updated)+(d.status==='stale'&&isLatest?'<span class="stale">最近一次更新失敗，顯示的是前一次資料</span>':'')
       +(d.status==='partial'?'<span class="stale">上櫃資料尚未取得，目前只有上市</span>':'')
     : '';
-  $('lead').textContent = !has ? '' : '依當日成交值由高到低排列，橫條長度代表與第一名的相對大小。'
+  $('lead').textContent = !has ? '' : '依當日成交值由高到低排列，橫條長度代表與第一名的相對大小。漲跌幅旁的小圖以中線為零，往右是漲、往左是跌，滿格為 10%。'
     + (map ? '名次下方是與前一個交易日（'+tradeDay(PREV[MODE].date)+'）相比的升降。' : '這是目前保存的最早一天，還沒有前一日可以比較。');
   renderSums(d||{}, all);
   var max = all.length ? all[0].value : 1;
@@ -264,7 +279,7 @@ function render(){
   }else if(!rows.length){
     $('rank').innerHTML = '<div class="empty">'+(q?'前 '+all.length+' 名之中找不到符合的股票，可以把顯示名次調大再試。':'沒有符合條件的股票。')+'</div>';
   }else{
-    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th>漲跌幅</th><th>成交值（'+M.unit+'）</th><th class="vol">成交量</th></tr>'
+    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th><th class="vol">成交量</th></tr>'
       + rows.map(function(r){
         var sub = MODE==='tw' ? r.market : (r.sector||'');
         return '<tr'+(r._no<=3?' class="top3"':'')+'><td class="no l">'+r._no+moveCell(r,map)+'</td>'
