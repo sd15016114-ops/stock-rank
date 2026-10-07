@@ -145,7 +145,8 @@ def fetch_twse():
     best, err = None, None
     for url in TWSE_URLS:
         try:
-            date, rows, total = parse_twse(get_json(url))
+            fresh = url + ("&" if "?" in url else "?") + "_=%d" % int(time.time())   # 加上時間參數，避免拿到快取裡前一天的舊資料
+            date, rows, total = parse_twse(get_json(fresh))
             if not date or len(rows) < MIN_ROWS["twse"]:
                 raise ValueError("證交所資料不完整（%d 檔）" % len(rows))
             if not best or date > best[0]:
@@ -163,7 +164,7 @@ def build_tw():
     out = {"date": date, "status": "ok", "markets": {"上市": {"date": date, "count": len(rows), "total_value": total}},
            "sources": ["https://www.twse.com.tw/zh/trading/historical/stock-day-all.html"]}
     try:
-        tdate, trows, ttotal = parse_tpex(get_json(TPEX_URL))
+        tdate, trows, ttotal = parse_tpex(get_json(TPEX_URL + "?_=%d" % int(time.time())))
         if len(trows) < MIN_ROWS["tpex"]:
             raise ValueError("櫃買中心資料不完整（%d 檔）" % len(trows))
         if tdate != date:
