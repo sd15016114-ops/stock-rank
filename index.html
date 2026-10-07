@@ -2,55 +2,62 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
+<script>/* 先套用上次選的日間／夜間版，避免畫面閃一下 */
+try{ var t = localStorage.getItem('stock-rank-theme'); if(t==='light'||t==='dark') document.documentElement.setAttribute('data-theme', t); }catch(e){}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>股市動能排行｜台股、美股盤後成交值排行</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
 <style>
 :root{
-  --paper:#F2F6F3; --sheet:#FFFFFF; --ink:#17262B; --muted:#5B6E6C;
-  --rule:#CFDDD6; --green:#0E5E4E; --green-soft:#DCEBE4; --seal:#C23A2E;
-  --up:#C23A2E; --down:#12805F; --bar:#DCEBE4;
+  /* 日間：白底、寶寶藍。--fill 是按鈕底色，--accent 是白底上的藍色文字（比寶寶藍深一點才看得清楚） */
+  --paper:#FFFFFF; --sheet:#FFFFFF; --tint:#F2F9FE; --ink:#16242F; --muted:#5F7180;
+  --rule:#D5E6F3; --fill:#89CFF0; --on-fill:#0C3350; --accent:#1F7FBF; --soft:#E3F3FC; --seal:#D23B3B;
+  --up:#D23B3B; --down:#16885A;
   --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --serif:"Noto Serif TC","PMingLiU","Songti TC",serif;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
+/* 夜間：黑底、淡橘。沒按過切換鈕時跟著裝置的深色模式 */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#0F1A19; --sheet:#162523; --ink:#E6EFEA; --muted:#94A9A3;
-    --rule:#2A3F3A; --green:#5FC2A6; --green-soft:#1D3530; --seal:#F0705F;
-    --up:#F0705F; --down:#5FC2A6; --bar:#1D3530;
+    --paper:#000000; --sheet:#0E0E0E; --tint:#161616; --ink:#F2EDE8; --muted:#A39A91;
+    --rule:#2B2620; --fill:#FFC48A; --on-fill:#2B1600; --accent:#FFC48A; --soft:#2E2013; --seal:#FF8A75;
+    --up:#FF8A75; --down:#62D6A0;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#0F1A19; --sheet:#162523; --ink:#E6EFEA; --muted:#94A9A3;
-  --rule:#2A3F3A; --green:#5FC2A6; --green-soft:#1D3530; --seal:#F0705F;
-  --up:#F0705F; --down:#5FC2A6; --bar:#1D3530;
+    --paper:#000000; --sheet:#0E0E0E; --tint:#161616; --ink:#F2EDE8; --muted:#A39A91;
+    --rule:#2B2620; --fill:#FFC48A; --on-fill:#2B1600; --accent:#FFC48A; --soft:#2E2013; --seal:#FF8A75;
+    --up:#FF8A75; --down:#62D6A0;
 }
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;font-variant-numeric:tabular-nums}
 .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
-:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 0 0}
-.brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--green)}
+.brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--accent)}
+.theme{font:inherit;font-size:14px;font-weight:500;color:var(--on-fill);background:var(--fill);border:0;border-radius:999px;padding:6px 16px;cursor:pointer}
+.theme:hover{filter:brightness(1.05)}
 .intro{padding:36px 0 8px}
 .intro h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5vw,44px);line-height:1.3;margin:0 0 8px}
 .intro p{margin:0;color:var(--muted);max-width:40em}
 .updated{font-size:13px;color:var(--muted);margin-top:6px}
 .stale{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;border:1px solid var(--seal);color:var(--seal);margin-left:6px}
 
-.modes{display:inline-flex;margin:22px 0 0;border:1px solid var(--green);border-radius:999px;overflow:hidden;background:var(--sheet)}
-.modes button{font:inherit;font-size:15px;font-weight:500;color:var(--green);background:transparent;border:0;padding:7px 24px;cursor:pointer}
-.modes button+button{border-left:1px solid var(--green)}
-.modes button[aria-pressed=true]{background:var(--green);color:var(--sheet);font-weight:700}
+.modes{display:inline-flex;margin:22px 0 0;border:1px solid var(--fill);border-radius:999px;overflow:hidden;background:var(--sheet)}
+.modes button{font:inherit;font-size:15px;font-weight:500;color:var(--accent);background:transparent;border:0;padding:7px 24px;cursor:pointer}
+.modes button+button{border-left:1px solid var(--fill)}
+.modes button[aria-pressed=true]{background:var(--fill);color:var(--on-fill);font-weight:700}
 
 /* 摘要 */
 .sums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:22px}
-.sum{background:var(--sheet);border:1px solid var(--rule);border-top:4px solid var(--green);padding:14px 16px}
+.sum{background:var(--sheet);border:1px solid var(--rule);border-top:4px solid var(--fill);padding:14px 16px}
 .sum .k{font-size:14px;color:var(--muted)}
-.sum .v{font-family:var(--serif);font-weight:900;font-size:30px;line-height:1.25;color:var(--green)}
+.sum .v{font-family:var(--serif);font-weight:900;font-size:30px;line-height:1.25;color:var(--accent)}
 .sum .v small{font-family:var(--sans);font-weight:500;font-size:14px;color:var(--muted);margin-left:4px}
 .sum .n{font-size:13px;color:var(--muted)}
 
@@ -62,32 +69,32 @@ section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width
 .tools input[type=search]{flex:1 1 200px;min-width:0}
 .tools input::placeholder{color:var(--muted)}
 .tools label{display:flex;align-items:center;gap:6px;font-size:15px;cursor:pointer}
-.tools label input{accent-color:var(--green);width:16px;height:16px}
+.tools label input{accent-color:var(--accent);width:16px;height:16px}
 
 .rank{background:var(--sheet);border:1px solid var(--rule);overflow-x:auto}
 .rank table{border-collapse:collapse;width:100%}
 .rank th,.rank td{padding:10px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
 .rank tr:last-child td{border-bottom:0}
-.rank th{font-weight:400;color:var(--muted);font-size:13px;background:var(--paper)}
+.rank th{font-weight:400;color:var(--muted);font-size:13px;background:var(--tint)}
 .rank th.l,.rank td.l{text-align:left}
 .rank td.no{width:1%;color:var(--muted);font-family:var(--serif);font-weight:700;font-size:17px;padding-right:4px}
-.rank tr.top3 td.no{color:var(--seal)}
+.rank tr.top3 td.no{color:var(--accent)}
 .rank td.no small{display:block;font-family:var(--sans);font-weight:500;font-size:12px;line-height:1.2;color:var(--muted);white-space:nowrap}
 .rank td.no small.up{color:var(--up)} .rank td.no small.down{color:var(--down)}
-.rank td.no small.new{color:var(--green)}
+.rank td.no small.new{color:var(--accent)}
 .rank td.who{white-space:normal;min-width:8em}
 .who b{font-weight:700}
 .who small{display:block;font-size:13px;color:var(--muted)}
-.tag{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;background:var(--green-soft);color:var(--green);margin-left:6px;font-weight:400;white-space:nowrap}
+.tag{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;background:var(--soft);color:var(--accent);margin-left:6px;font-weight:400;white-space:nowrap}
 .up{color:var(--up)} .down{color:var(--down)}
 .val{position:relative;min-width:150px}
-.val i{position:absolute;right:8px;top:8px;bottom:8px;background:var(--bar);border-radius:2px}
+.val i{position:absolute;right:8px;top:8px;bottom:8px;background:var(--soft);border-radius:2px}
 .val span{position:relative;font-weight:700}
 .empty{padding:20px 16px;color:var(--muted)}
 .fine{font-size:13px;color:var(--muted);margin:12px 0 0;max-width:46em}
 footer{padding:44px 0 40px;font-size:13px;color:var(--muted)}
 footer p{margin:0 0 6px;max-width:50em}
-footer a{color:var(--green)}
+footer a{color:var(--accent)}
 
 @media (max-width:700px){
   .rank th,.rank td{padding:9px 8px}
@@ -100,7 +107,7 @@ footer a{color:var(--green)}
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><div class="brand">股市動能排行</div></header>
+  <header class="top"><div class="brand">股市動能排行</div><button type="button" class="theme" id="theme" aria-label="切換日間版或夜間版"></button></header>
 
   <section class="intro">
     <h1>今天的錢流向哪裡</h1>
@@ -267,6 +274,20 @@ function render(){
     var n = /twse/.test(u)?'臺灣證券交易所':/tpex/.test(u)?'證券櫃檯買賣中心':/nasdaq/.test(u)?'Nasdaq':u;
     return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+n+'</a>'; }).join('、')+'，每個交易日收盤後自動擷取。' : '';
 }
+
+/* 日間版／夜間版切換：按過之後記在這台裝置，沒按過就跟著裝置設定 */
+function isDark(){
+  var t = document.documentElement.getAttribute('data-theme');
+  return t ? t==='dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+}
+function paintTheme(){ $('theme').textContent = isDark() ? '☀ 日間版' : '☾ 夜間版'; }
+$('theme').addEventListener('click',function(){
+  var next = isDark() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem('stock-rank-theme', next); }catch(e){}
+  paintTheme();
+});
+paintTheme();
 
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
