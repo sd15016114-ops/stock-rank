@@ -12,6 +12,14 @@ on:
         type: choice
         default: 全部
         options: [全部, tw, us]
+      task:
+        description: 要做什麼（一般更新選 update）
+        type: choice
+        default: update
+        options: [update, probe, backfill]
+      days:
+        description: backfill 要回補幾個交易日
+        default: "60"
 
 permissions:
   contents: write
@@ -36,8 +44,12 @@ jobs:
             if [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then echo "market=us" >> "$GITHUB_OUTPUT"; else echo "market=tw" >> "$GITHUB_OUTPUT"; fi
           elif [ "${{ inputs.market }}" = "全部" ]; then echo "market=" >> "$GITHUB_OUTPUT"
           else echo "market=${{ inputs.market }}" >> "$GITHUB_OUTPUT"; fi
+      - name: 實測資料來源
+        if: inputs.task == 'probe'
+        run: python scraper/probe.py
       - name: 抓取成交值排行
         id: fetch
+        if: inputs.task != 'probe' && inputs.task != 'backfill'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
       - name: 提交變更
@@ -46,8 +58,8 @@ jobs:
           git config user.email "rank-bot@users.noreply.github.com"
           git add -A data
           git diff --cached --quiet || git commit -m "排行更新 $(date -u +%F)"
-          git pull --rebase origin main   # 執行期間若有其他更新推上來，先接上再推
-          git push
+          git pull --rebase origin ${{ github.ref_name }}   # 執行期間若有其他更新推上來，先接上再推
+          git push origin HEAD:${{ github.ref_name }}
       - name: 有市場抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
         if: steps.fetch.outcome == 'failure'
         run: exit 1
