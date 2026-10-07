@@ -373,8 +373,10 @@ function heatColor(pct){
   return ['rgb('+c.join(',')+')', t>.42 ? '#fff' : (dark ? '#E6E6E6' : '#16242F')];
 }
 function sign(p){ return p==null ? '' : (p>0?'+':'')+fix(p,2)+'%'; }
+/* 熱力圖功能的總開關：目前先隱藏。要重新開放時把 false 改成 true 就好，其他程式和資料都還在 */
+var SHOW_HEAT = false;
 function renderHeat(){
-  var d = DATA[MODE], box = $('heat'), list = MODE==='tw' && d && d.industries ? d.industries : null;
+  var d = DATA[MODE], box = $('heat'), list = SHOW_HEAT && MODE==='tw' && d && d.industries ? d.industries : null;
   /* 熱力圖是獨立的檢視：有產業資料（台股）才出現切換鈕，選了「熱力圖」才畫，排行就先收起來 */
   $('viewSeg').hidden = !list; $('viewSeg').style.display = list ? '' : 'none';
   var on = !!list && $('view').value==='heat';
