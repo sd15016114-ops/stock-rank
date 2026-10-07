@@ -39,10 +39,6 @@ jobs:
       - name: 抓取成交值排行
         id: fetch
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
-        env:                         # 當日走勢小圖用的金鑰；沒設定也能跑，只是沒有走勢線
-          FUGLE_API_KEY: ${{ secrets.FUGLE_API_KEY }}
-          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
-          ALPACA_API_SECRET: ${{ secrets.ALPACA_API_SECRET }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
       - name: 提交變更
         run: |
