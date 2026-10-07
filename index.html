@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>股市動能排行｜台股、美股盤後成交值排行</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+:root{
+  --paper:#F2F6F3; --sheet:#FFFFFF; --ink:#17262B; --muted:#5B6E6C;
+  --rule:#CFDDD6; --green:#0E5E4E; --green-soft:#DCEBE4; --seal:#C23A2E;
+  --up:#C23A2E; --down:#12805F; --bar:#DCEBE4;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:"Noto Serif TC","PMingLiU","Songti TC",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1A19; --sheet:#162523; --ink:#E6EFEA; --muted:#94A9A3;
+    --rule:#2A3F3A; --green:#5FC2A6; --green-soft:#1D3530; --seal:#F0705F;
+    --up:#F0705F; --down:#5FC2A6; --bar:#1D3530;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1A19; --sheet:#162523; --ink:#E6EFEA; --muted:#94A9A3;
+  --rule:#2A3F3A; --green:#5FC2A6; --green-soft:#1D3530; --seal:#F0705F;
+  --up:#F0705F; --down:#5FC2A6; --bar:#1D3530;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
+header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 0 0}
+.brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--green)}
+.intro{padding:36px 0 8px}
+.intro h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5vw,44px);line-height:1.3;margin:0 0 8px}
+.intro p{margin:0;color:var(--muted);max-width:40em}
+.updated{font-size:13px;color:var(--muted);margin-top:6px}
+.stale{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;border:1px solid var(--seal);color:var(--seal);margin-left:6px}
+
+.modes{display:inline-flex;margin:22px 0 0;border:1px solid var(--green);border-radius:999px;overflow:hidden;background:var(--sheet)}
+.modes button{font:inherit;font-size:15px;font-weight:500;color:var(--green);background:transparent;border:0;padding:7px 24px;cursor:pointer}
+.modes button+button{border-left:1px solid var(--green)}
+.modes button[aria-pressed=true]{background:var(--green);color:var(--sheet);font-weight:700}
+
+/* 摘要 */
+.sums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:22px}
+.sum{background:var(--sheet);border:1px solid var(--rule);border-top:4px solid var(--green);padding:14px 16px}
+.sum .k{font-size:14px;color:var(--muted)}
+.sum .v{font-family:var(--serif);font-weight:900;font-size:30px;line-height:1.25;color:var(--green)}
+.sum .v small{font-family:var(--sans);font-weight:500;font-size:14px;color:var(--muted);margin-left:4px}
+.sum .n{font-size:13px;color:var(--muted)}
+
+section.block{padding:36px 0 0}
+section.block h2{font-family:var(--serif);font-weight:900;font-size:24px;margin:0 0 4px}
+section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width:44em}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
+.tools select,.tools input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:7px 12px;max-width:100%}
+.tools input[type=search]{flex:1 1 200px;min-width:0}
+.tools input::placeholder{color:var(--muted)}
+.tools label{display:flex;align-items:center;gap:6px;font-size:15px;cursor:pointer}
+.tools label input{accent-color:var(--green);width:16px;height:16px}
+
+.rank{background:var(--sheet);border:1px solid var(--rule)}
+.rank table{border-collapse:collapse;width:100%}
+.rank th,.rank td{padding:10px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--rule)}
+.rank tr:last-child td{border-bottom:0}
+.rank th{font-weight:400;color:var(--muted);font-size:13px;background:var(--paper)}
+.rank th.l,.rank td.l{text-align:left}
+.rank td.no{width:1%;color:var(--muted);font-family:var(--serif);font-weight:700;font-size:17px;padding-right:4px}
+.rank tr.top3 td.no{color:var(--seal)}
+.rank td.who{white-space:normal;min-width:8em}
+.who b{font-weight:700}
+.who small{display:block;font-size:13px;color:var(--muted)}
+.tag{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;background:var(--green-soft);color:var(--green);margin-left:6px;font-weight:400;white-space:nowrap}
+.up{color:var(--up)} .down{color:var(--down)}
+.val{position:relative;min-width:150px}
+.val i{position:absolute;right:8px;top:8px;bottom:8px;background:var(--bar);border-radius:2px}
+.val span{position:relative;font-weight:700}
+.empty{padding:20px 16px;color:var(--muted)}
+.fine{font-size:13px;color:var(--muted);margin:12px 0 0;max-width:46em}
+footer{padding:44px 0 40px;font-size:13px;color:var(--muted)}
+footer p{margin:0 0 6px;max-width:50em}
+footer a{color:var(--green)}
+
+@media (max-width:700px){
+  .rank th,.rank td{padding:9px 8px}
+  .rank .vol{display:none}
+  .val{min-width:96px}
+  .wrap{padding:0 16px}
+}
+@media (max-width:420px){ .rank .px{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="brand">股市動能排行</div></header>
+
+  <section class="intro">
+    <h1>今天的錢流向哪裡</h1>
+    <p>每天收盤後整理台股與美股的成交值排行。成交值是當天實際換手的金額，比成交量更能看出資金集中在哪些股票。</p>
+    <div class="updated" id="updated">資料載入中…</div>
+    <div class="modes" role="group" aria-label="市場">
+      <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
+    </div>
+    <div class="sums" id="sums"></div>
+  </section>
+
+  <section class="block">
+    <h2 id="listTitle">成交值排行</h2>
+    <p class="lead" id="lead"></p>
+    <div class="tools">
+      <select id="market" aria-label="市場別"><option value="all">上市＋上櫃</option><option value="上市">只看上市</option><option value="上櫃">只看上櫃</option></select>
+      <select id="count" aria-label="顯示名次"><option value="20">前 20 名</option><option value="50" selected>前 50 名</option><option value="100">前 100 名</option></select>
+      <label id="etfWrap"><input type="checkbox" id="etf" checked> 含 ETF</label>
+      <input type="search" id="q" placeholder="搜尋代號或名稱" aria-label="搜尋代號或名稱">
+    </div>
+    <div class="rank" id="rank"></div>
+    <p class="fine" id="note"></p>
+  </section>
+
+  <footer>
+    <p id="src"></p>
+    <p>漲跌顏色採台灣慣例：紅色上漲、綠色下跌。美股成交值以「收盤價 × 成交量」估算，與實際成交金額會有些微差距，且不含 ETF。</p>
+    <p>本站僅整理公開資訊供參考，不構成任何投資建議。</p>
+  </footer>
+</div>
+
+<script>
+/* ===== 資料：讀取每日抓取的 data/tw.json 與 data/us.json ===== */
+var MODES = {
+  tw:{title:'台股成交值排行', unit:'億元',   div:1e8, cur:'元',   vol:function(n){ return Math.round(n/1000).toLocaleString('zh-TW')+' 張'; }},
+  us:{title:'美股成交值排行', unit:'億美元', div:1e8, cur:'美元', vol:function(n){ return (n/1e4).toLocaleString('zh-TW',{maximumFractionDigits:0})+' 萬股'; }}
+};
+var MODE = 'tw', DATA = {tw:null, us:null}, SAVED = {};
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function plain(t){ return String(t).toLowerCase().replace(/臺/g,'台').replace(/\s/g,''); }
+function fix(n,d){ return n.toLocaleString('zh-TW',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function yi(n){ var v = n/1e8; return fix(v, v>=100 ? 0 : v>=10 ? 1 : 2); }       /* 換算成「億」 */
+function price(n){ return n==null ? '—' : fix(n, 2); }
+function day(iso){ var d = new Date(iso); if(isNaN(d)) return ''; function p(n){ return (n<10?'0':'')+n; }
+  return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+function tradeDay(s){ var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(s||''); if(!m) return '';
+  return m[1]+'/'+m[2]+'/'+m[3]+'（'+'日一二三四五六'.charAt(new Date(+m[1],m[2]-1,+m[3]).getDay())+'）'; }
+function getJSON(url){
+  return fetch(url,{cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); });
+}
+/* 放在 GitHub Pages 時，直接讀程式庫裡最新的檔案，抓取程式一更新網站就跟著更新 */
+function dataUrl(file){
+  var m = location.hostname.match(/^([^.]+)\.github\.io$/), repo = location.pathname.split('/')[1];
+  return m && repo ? 'https://raw.githubusercontent.com/'+m[1]+'/'+repo+'/main/data/'+file : null;
+}
+function load(file){
+  var remote = dataUrl(file), local = 'data/'+file;
+  return remote ? getJSON(remote).catch(function(){ return getJSON(local); }) : getJSON(local);
+}
+
+/* ===== 依目前的篩選條件排出名次 ===== */
+function ranked(){
+  var d = DATA[MODE], rows = (d && d.rows) || [], mk = $('market').value, etf = $('etf').checked;
+  if(MODE==='tw') rows = rows.filter(function(r){ return (mk==='all' || r.market===mk) && (etf || !r.etf); });
+  return rows.slice().sort(function(a,b){ return b.value-a.value; }).slice(0, parseInt($('count').value,10));
+}
+function pctCell(r){
+  if(r.pct==null) return '<td>—</td>';
+  var c = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '';
+  return '<td class="'+c+'">'+(r.pct>0?'▲ ':r.pct<0?'▼ ':'')+fix(Math.abs(r.pct),2)+'%</td>';
+}
+function renderSums(d, rows){
+  var M = MODES[MODE];
+  if(!rows.length){ $('sums').innerHTML=''; return; }
+  var sum = rows.reduce(function(s,r){ return s+r.value; },0), top10 = rows.slice(0,10).reduce(function(s,r){ return s+r.value; },0);
+  var up = rows.filter(function(r){ return r.pct>0; }).length, down = rows.filter(function(r){ return r.pct<0; }).length;
+  var whole = MODE==='tw' && $('market').value!=='all' ? ((d.markets||{})[$('market').value]||{}).total_value : d.total_value;
+  var all = whole && (MODE!=='tw' || $('etf').checked);       /* 全市場合計含 ETF，排除 ETF 時不拿來算占比 */
+  var cards = [
+    ['成交值第一名', esc(rows[0].name), esc(rows[0].code)+'，'+yi(rows[0].value)+' '+M.unit, true],
+    ['前 '+rows.length+' 名合計', yi(sum)+'<small>'+M.unit+'</small>', all ? '占全市場 '+fix(sum/whole*100,1)+'%（全市場 '+yi(whole)+' '+M.unit+'）' : '', false],
+    ['資金集中度', (all ? fix(top10/whole*100,1) : fix(top10/sum*100,1))+'<small>%</small>', '前 10 名占'+(all?'全市場':'前 '+rows.length+' 名')+'成交值的比重', false],
+    ['漲跌家數', '<span class="up">'+up+'</span><small>漲</small> <span class="down">'+down+'</span><small>跌</small>', '前 '+rows.length+' 名之中', false]
+  ];
+  $('sums').innerHTML = cards.map(function(c){
+    return '<div class="sum"><div class="k">'+c[0]+'</div><div class="v"'+(c[3]?' style="font-size:24px;line-height:1.55"':'')+'>'+c[1]+'</div><div class="n">'+c[2]+'</div></div>';
+  }).join('');
+}
+function render(){
+  var M = MODES[MODE], d = DATA[MODE], all = ranked(), q = plain($('q').value);
+  var has = d && d.rows && d.rows.length;
+  $('listTitle').textContent = M.title;
+  $('updated').innerHTML = has
+    ? '交易日 '+tradeDay(d.date)+'，資料更新於 '+day(d.updated)+(d.status==='stale'?'<span class="stale">最近一次更新失敗，顯示的是前一次資料</span>':'')
+      +(d.status==='partial'?'<span class="stale">上櫃資料尚未取得，目前只有上市</span>':'')
+    : '';
+  $('lead').textContent = has ? '依當日成交值由高到低排列，橫條長度代表與第一名的相對大小。' : '';
+  renderSums(d||{}, all);
+  var max = all.length ? all[0].value : 1;
+  var rows = all.map(function(r,i){ r._no = i+1; return r; }).filter(function(r){ return !q || plain(r.code+r.name).indexOf(q)>=0; });
+  if(!has){
+    $('rank').innerHTML = '<div class="empty">'+(MODE==='tw'?'台股':'美股')+'排行資料還沒有產生。請到 GitHub 的 Actions 分頁手動執行一次「盤後更新成交值排行」。</div>';
+  }else if(!rows.length){
+    $('rank').innerHTML = '<div class="empty">'+(q?'前 '+all.length+' 名之中找不到符合的股票，可以把顯示名次調大再試。':'沒有符合條件的股票。')+'</div>';
+  }else{
+    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th>漲跌幅</th><th>成交值（'+M.unit+'）</th><th class="vol">成交量</th></tr>'
+      + rows.map(function(r){
+        var sub = MODE==='tw' ? r.market : (r.sector||'');
+        return '<tr'+(r._no<=3?' class="top3"':'')+'><td class="no l">'+r._no+'</td>'
+          + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+'</small></td>'
+          + '<td class="px">'+price(r.close)+'</td>'+pctCell(r)
+          + '<td class="val"><i style="width:calc('+(r.value/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(r.value)+'</span></td>'
+          + '<td class="vol">'+M.vol(r.volume)+'</td></tr>';
+      }).join('') + '</table>';
+  }
+  $('note').textContent = has && MODE==='us' ? '共統計 '+(d.count||0).toLocaleString('zh-TW')+' 檔在 NYSE、Nasdaq、NYSE American 掛牌的股票。交易日以美東時間為準。' : '';
+  $('src').innerHTML = has && d.sources ? '資料來源：'+d.sources.map(function(u){
+    var n = /twse/.test(u)?'臺灣證券交易所':/tpex/.test(u)?'證券櫃檯買賣中心':/nasdaq/.test(u)?'Nasdaq':u;
+    return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+n+'</a>'; }).join('、')+'，每個交易日收盤後自動擷取。' : '';
+}
+
+/* 記住上次看的市場與篩選（只存在這台裝置） */
+try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
+function remember(){
+  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
+}
+function setMode(m){
+  MODE = MODES[m] ? m : 'tw';
+  $('market').hidden = $('etfWrap').hidden = MODE!=='tw';
+  $('market').style.display = $('etfWrap').style.display = MODE==='tw' ? '' : 'none';
+  document.querySelectorAll('.modes button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.mode===MODE ? 'true' : 'false'); });
+  render();
+}
+['market','count','etf','q'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
+document.querySelectorAll('.modes button').forEach(function(b){
+  b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
+});
+if(SAVED.market) $('market').value = SAVED.market;
+if(SAVED.count) $('count').value = SAVED.count;
+if(SAVED.etf===false) $('etf').checked = false;
+
+Promise.all([load('tw.json').catch(function(){ return null; }), load('us.json').catch(function(){ return null; })]).then(function(res){
+  DATA.tw = res[0]; DATA.us = res[1];
+  if(!res[0] && !res[1]) $('updated').textContent = '資料載入失敗，請稍後重新整理。';
+  setMode(SAVED.mode||'tw');
+});
+</script>
+</body>
+</html>

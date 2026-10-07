@@ -1,0 +1,49 @@
+name: 盤後更新成交值排行
+
+on:
+  schedule:
+    - cron: "30 9 * * 1-5"    # UTC 09:30 = 台灣時間 17:30，抓台股
+    - cron: "30 13 * * 1-5"   # UTC 13:30 = 台灣時間 21:30，再抓一次台股（補上較晚公布的資料）
+    - cron: "30 22 * * 1-5"   # UTC 22:30 = 台灣時間隔天 06:30，美股收盤後抓美股
+  workflow_dispatch:           # 也可以在 GitHub 網頁上手動執行
+    inputs:
+      market:
+        description: 要抓哪個市場
+        type: choice
+        default: 全部
+        options: [全部, tw, us]
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r scraper/requirements.txt
+      - name: 決定這次抓哪個市場
+        id: which
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then echo "market=us" >> "$GITHUB_OUTPUT"; else echo "market=tw" >> "$GITHUB_OUTPUT"; fi
+          elif [ "${{ inputs.market }}" = "全部" ]; then echo "market=" >> "$GITHUB_OUTPUT"
+          else echo "market=${{ inputs.market }}" >> "$GITHUB_OUTPUT"; fi
+      - name: 抓取成交值排行
+        id: fetch
+        run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
+        continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
+      - name: 提交變更
+        run: |
+          git config user.name "rank-bot"
+          git config user.email "rank-bot@users.noreply.github.com"
+          git add data/tw.json data/us.json
+          git diff --cached --quiet || git commit -m "排行更新 $(date -u +%F)"
+          git pull --rebase origin main   # 執行期間若有其他更新推上來，先接上再推
+          git push
+      - name: 有市場抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
+        if: steps.fetch.outcome == 'failure'
+        run: exit 1
