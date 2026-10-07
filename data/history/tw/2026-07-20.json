@@ -1,0 +1,9055 @@
+{
+ "date": "2026-07-20",
+ "status": "ok",
+ "markets": {
+  "上市": {
+   "date": "2026-07-20",
+   "count": 1310,
+   "total_value": 1039208434028
+  },
+  "上櫃": {
+   "date": "2026-07-20",
+   "count": 989,
+   "total_value": 187765231060
+  }
+ },
+ "sources": [
+  "https://www.twse.com.tw/zh/trading/historical/mi-index.html",
+  "https://www.tpex.org.tw/zh-tw/mainboard/trading/info/pricing.html"
+ ],
+ "total_value": 1226973665088,
+ "rows": [
+  {
+   "code": "2330",
+   "name": "台積電",
+   "market": "上市",
+   "etf": false,
+   "close": 2320.0,
+   "change": 30.0,
+   "pct": 1.31,
+   "volume": 55790346,
+   "value": 129815956839,
+   "ind": "半導體",
+   "avg": 94724685838,
+   "ratio": 1.37
+  },
+  {
+   "code": "2303",
+   "name": "聯電",
+   "market": "上市",
+   "etf": false,
+   "close": 130.0,
+   "change": -14.0,
+   "pct": -9.72,
+   "volume": 297589744,
+   "value": 39091767011,
+   "ind": "半導體",
+   "avg": 15474969713,
+   "ratio": 2.53
+  },
+  {
+   "code": "0050",
+   "name": "元大台灣50",
+   "market": "上市",
+   "etf": true,
+   "close": 99.2,
+   "change": -0.95,
+   "pct": -0.95,
+   "volume": 373784717,
+   "value": 37210773781,
+   "ind": "ETF",
+   "avg": 16069996456,
+   "ratio": 2.32
+  },
+  {
+   "code": "2454",
+   "name": "聯發科",
+   "market": "上市",
+   "etf": false,
+   "close": 3340.0,
+   "change": -30.0,
+   "pct": -0.89,
+   "volume": 9227986,
+   "value": 30849610283,
+   "ind": "半導體",
+   "avg": 31390686887,
+   "ratio": 0.98
+  },
+  {
+   "code": "2408",
+   "name": "南亞科",
+   "market": "上市",
+   "etf": false,
+   "close": 381.0,
+   "change": -14.5,
+   "pct": -3.67,
+   "volume": 73602466,
+   "value": 28824468384,
+   "ind": "半導體",
+   "avg": 42337240232,
+   "ratio": 0.68
+  },
+  {
+   "code": "2327",
+   "name": "國巨*",
+   "market": "上市",
+   "etf": false,
+   "close": 630.0,
+   "change": -69.0,
+   "pct": -9.87,
+   "volume": 39385060,
+   "value": 25211432022,
+   "ind": "電子零組件",
+   "avg": 50059532265,
+   "ratio": 0.5
+  },
+  {
+   "code": "3037",
+   "name": "欣興",
+   "market": "上市",
+   "etf": false,
+   "close": 750.0,
+   "change": -44.0,
+   "pct": -5.54,
+   "volume": 30661875,
+   "value": 23514772172,
+   "ind": "電子零組件",
+   "avg": 28993132178,
+   "ratio": 0.81
+  },
+  {
+   "code": "1303",
+   "name": "南亞",
+   "market": "上市",
+   "etf": false,
+   "close": 186.5,
+   "change": -12.5,
+   "pct": -6.28,
+   "volume": 112072991,
+   "value": 21137199791,
+   "ind": "塑膠工業",
+   "avg": 21168726532,
+   "ratio": 1.0
+  },
+  {
+   "code": "8046",
+   "name": "南電",
+   "market": "上市",
+   "etf": false,
+   "close": 1105.0,
+   "change": -45.0,
+   "pct": -3.91,
+   "volume": 18077328,
+   "value": 20383430745,
+   "ind": "電子零組件",
+   "avg": 24680211057,
+   "ratio": 0.83
+  },
+  {
+   "code": "2308",
+   "name": "台達電",
+   "market": "上市",
+   "etf": false,
+   "close": 1705.0,
+   "change": -35.0,
+   "pct": -2.01,
+   "volume": 11567901,
+   "value": 19883325570,
+   "ind": "電子零組件",
+   "avg": 19257047134,
+   "ratio": 1.03
+  },
+  {
+   "code": "3481",
+   "name": "群創",
+   "market": "上市",
+   "etf": false,
+   "close": 50.4,
+   "change": -2.2,
+   "pct": -4.18,
+   "volume": 366167261,
+   "value": 18647172011,
+   "ind": "光電",
+   "avg": 26714441428,
+   "ratio": 0.7
+  },
+  {
+   "code": "3711",
+   "name": "日月光投控",
+   "market": "上市",
+   "etf": false,
+   "close": 597.0,
+   "change": -17.0,
+   "pct": -2.77,
+   "volume": 30646403,
+   "value": 18333992563,
+   "ind": "半導體",
+   "avg": 17218844358,
+   "ratio": 1.06
+  },
+  {
+   "code": "4958",
+   "name": "臻鼎-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 478.5,
+   "change": -42.5,
+   "pct": -8.16,
+   "volume": 35909408,
+   "value": 17470514128,
+   "ind": "電子零組件",
+   "avg": 25436492498,
+   "ratio": 0.69
+  },
+  {
+   "code": "3189",
+   "name": "景碩",
+   "market": "上市",
+   "etf": false,
+   "close": 679.0,
+   "change": -14.0,
+   "pct": -2.02,
+   "volume": 23743793,
+   "value": 16462657909,
+   "ind": "半導體",
+   "avg": 3020939124,
+   "ratio": 5.45
+  },
+  {
+   "code": "2344",
+   "name": "華邦電",
+   "market": "上市",
+   "etf": false,
+   "close": 151.0,
+   "change": -4.0,
+   "pct": -2.58,
+   "volume": 107223362,
+   "value": 16338516837,
+   "ind": "半導體",
+   "avg": 24329105789,
+   "ratio": 0.67
+  },
+  {
+   "code": "6488",
+   "name": "環球晶",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1265.0,
+   "change": 25.0,
+   "pct": 2.02,
+   "volume": 11808000,
+   "value": 14781430000,
+   "ind": "半導體",
+   "avg": 15428973888,
+   "ratio": 0.96
+  },
+  {
+   "code": "2383",
+   "name": "台光電",
+   "market": "上市",
+   "etf": false,
+   "close": 4395.0,
+   "change": -100.0,
+   "pct": -2.22,
+   "volume": 3220536,
+   "value": 14161004110,
+   "ind": "電子零組件",
+   "avg": 12938278913,
+   "ratio": 1.09
+  },
+  {
+   "code": "6182",
+   "name": "合晶",
+   "market": "上櫃",
+   "etf": false,
+   "close": 135.0,
+   "change": -14.5,
+   "pct": -9.7,
+   "volume": 96006000,
+   "value": 13135398500,
+   "ind": "半導體",
+   "avg": 21261659777,
+   "ratio": 0.62
+  },
+  {
+   "code": "6213",
+   "name": "聯茂",
+   "market": "上市",
+   "etf": false,
+   "close": 322.5,
+   "change": 3.5,
+   "pct": 1.1,
+   "volume": 36321779,
+   "value": 11849413356,
+   "ind": "電子零組件",
+   "avg": 10455542088,
+   "ratio": 1.13
+  },
+  {
+   "code": "6770",
+   "name": "力積電",
+   "market": "上市",
+   "etf": false,
+   "close": 63.0,
+   "change": -5.9,
+   "pct": -8.56,
+   "volume": 179760556,
+   "value": 11583911314,
+   "ind": "半導體",
+   "avg": 14782142605,
+   "ratio": 0.78
+  },
+  {
+   "code": "2317",
+   "name": "鴻海",
+   "market": "上市",
+   "etf": false,
+   "close": 234.5,
+   "change": 0.5,
+   "pct": 0.21,
+   "volume": 48579978,
+   "value": 11422510146,
+   "ind": "其他電子",
+   "avg": 10681923581,
+   "ratio": 1.07
+  },
+  {
+   "code": "2382",
+   "name": "廣達",
+   "market": "上市",
+   "etf": false,
+   "close": 316.0,
+   "change": -9.5,
+   "pct": -2.92,
+   "volume": 36017076,
+   "value": 11350929340,
+   "ind": "電腦及週邊",
+   "avg": 8369766250,
+   "ratio": 1.36
+  },
+  {
+   "code": "00631L",
+   "name": "元大台灣50正2",
+   "market": "上市",
+   "etf": true,
+   "close": 32.06,
+   "change": -0.11,
+   "pct": -0.34,
+   "volume": 327989317,
+   "value": 10631268811,
+   "ind": "ETF",
+   "avg": 11790234625,
+   "ratio": 0.9
+  },
+  {
+   "code": "8039",
+   "name": "台虹",
+   "market": "上市",
+   "etf": false,
+   "close": 193.0,
+   "change": 0.5,
+   "pct": 0.26,
+   "volume": 54015044,
+   "value": 10408964427,
+   "ind": "電子零組件",
+   "avg": 4420271092,
+   "ratio": 2.35
+  },
+  {
+   "code": "6274",
+   "name": "台燿",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1125.0,
+   "change": -45.0,
+   "pct": -3.85,
+   "volume": 8910000,
+   "value": 9940075000,
+   "ind": "電子零組件",
+   "avg": 8914054444,
+   "ratio": 1.12
+  },
+  {
+   "code": "3017",
+   "name": "奇鋐",
+   "market": "上市",
+   "etf": false,
+   "close": 2135.0,
+   "change": -65.0,
+   "pct": -2.95,
+   "volume": 4416999,
+   "value": 9356599417,
+   "ind": "電腦及週邊",
+   "avg": 8906426298,
+   "ratio": 1.05
+  },
+  {
+   "code": "2337",
+   "name": "旺宏",
+   "market": "上市",
+   "etf": false,
+   "close": 117.5,
+   "change": -7.5,
+   "pct": -6.0,
+   "volume": 71475589,
+   "value": 8542824697,
+   "ind": "半導體",
+   "avg": 9636616949,
+   "ratio": 0.89
+  },
+  {
+   "code": "2313",
+   "name": "華通",
+   "market": "上市",
+   "etf": false,
+   "close": 199.0,
+   "change": -13.0,
+   "pct": -6.13,
+   "volume": 42275231,
+   "value": 8319360274,
+   "ind": "電子零組件",
+   "avg": 9943487975,
+   "ratio": 0.84
+  },
+  {
+   "code": "5483",
+   "name": "中美晶",
+   "market": "上櫃",
+   "etf": false,
+   "close": 227.5,
+   "change": -8.0,
+   "pct": -3.4,
+   "volume": 35799000,
+   "value": 8301377500,
+   "ind": "半導體",
+   "avg": 10267146277,
+   "ratio": 0.81
+  },
+  {
+   "code": "0056",
+   "name": "元大高股息",
+   "market": "上市",
+   "etf": true,
+   "close": 49.95,
+   "change": -0.8,
+   "pct": -1.58,
+   "volume": 166201337,
+   "value": 8291600176,
+   "ind": "ETF",
+   "avg": 3825109164,
+   "ratio": 2.17
+  },
+  {
+   "code": "2345",
+   "name": "智邦",
+   "market": "上市",
+   "etf": false,
+   "close": 2090.0,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 3939531,
+   "value": 8248378455,
+   "ind": "通信網路",
+   "avg": 6625060065,
+   "ratio": 1.25
+  },
+  {
+   "code": "2449",
+   "name": "京元電子",
+   "market": "上市",
+   "etf": false,
+   "close": 270.5,
+   "change": -16.0,
+   "pct": -5.58,
+   "volume": 30195062,
+   "value": 8131545819,
+   "ind": "半導體",
+   "avg": 10217103215,
+   "ratio": 0.8
+  },
+  {
+   "code": "6505",
+   "name": "台塑化",
+   "market": "上市",
+   "etf": false,
+   "close": 77.7,
+   "change": -3.6,
+   "pct": -4.43,
+   "volume": 96798018,
+   "value": 7839096557,
+   "ind": "油電燃氣",
+   "avg": 3774445181,
+   "ratio": 2.08
+  },
+  {
+   "code": "8299",
+   "name": "群聯",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1735.0,
+   "change": -50.0,
+   "pct": -2.8,
+   "volume": 4456000,
+   "value": 7815675000,
+   "ind": "半導體",
+   "avg": 9683205000,
+   "ratio": 0.81
+  },
+  {
+   "code": "3231",
+   "name": "緯創",
+   "market": "上市",
+   "etf": false,
+   "close": 143.5,
+   "change": 4.5,
+   "pct": 3.24,
+   "volume": 51717481,
+   "value": 7482595188,
+   "ind": "電腦及週邊",
+   "avg": 4903256247,
+   "ratio": 1.53
+  },
+  {
+   "code": "00981A",
+   "name": "主動統一台股增長",
+   "market": "上市",
+   "etf": true,
+   "close": 25.9,
+   "change": -0.53,
+   "pct": -2.01,
+   "volume": 271681930,
+   "value": 7052080689,
+   "ind": "ETF",
+   "avg": 7580209018,
+   "ratio": 0.93
+  },
+  {
+   "code": "3661",
+   "name": "世芯-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 3365.0,
+   "change": -115.0,
+   "pct": -3.3,
+   "volume": 2061321,
+   "value": 6926497805,
+   "ind": "半導體",
+   "avg": 8178119697,
+   "ratio": 0.85
+  },
+  {
+   "code": "6669",
+   "name": "緯穎",
+   "market": "上市",
+   "etf": false,
+   "close": 4685.0,
+   "change": 65.0,
+   "pct": 1.41,
+   "volume": 1414812,
+   "value": 6703381695,
+   "ind": "電腦及週邊",
+   "avg": 6780403773,
+   "ratio": 0.99
+  },
+  {
+   "code": "3443",
+   "name": "創意",
+   "market": "上市",
+   "etf": false,
+   "close": 3745.0,
+   "change": -90.0,
+   "pct": -2.35,
+   "volume": 1809521,
+   "value": 6700555410,
+   "ind": "半導體",
+   "avg": 8431445906,
+   "ratio": 0.79
+  },
+  {
+   "code": "2059",
+   "name": "川湖",
+   "market": "上市",
+   "etf": false,
+   "close": 7750.0,
+   "change": -140.0,
+   "pct": -1.77,
+   "volume": 797667,
+   "value": 6244304770,
+   "ind": "電子零組件",
+   "avg": 5585355571,
+   "ratio": 1.12
+  },
+  {
+   "code": "3105",
+   "name": "穩懋",
+   "market": "上櫃",
+   "etf": false,
+   "close": 313.5,
+   "change": -19.0,
+   "pct": -5.71,
+   "volume": 19447000,
+   "value": 6170298000,
+   "ind": "半導體",
+   "avg": 6838900555,
+   "ratio": 0.9
+  },
+  {
+   "code": "3665",
+   "name": "貿聯-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 1820.0,
+   "change": 55.0,
+   "pct": 3.12,
+   "volume": 3398243,
+   "value": 6081515040,
+   "ind": "其他電子",
+   "avg": 5427468686,
+   "ratio": 1.12
+  },
+  {
+   "code": "3008",
+   "name": "大立光",
+   "market": "上市",
+   "etf": false,
+   "close": 3875.0,
+   "change": -135.0,
+   "pct": -3.37,
+   "volume": 1549724,
+   "value": 6050596645,
+   "ind": "光電",
+   "avg": 10361175719,
+   "ratio": 0.58
+  },
+  {
+   "code": "2409",
+   "name": "友達",
+   "market": "上市",
+   "etf": false,
+   "close": 25.4,
+   "change": -0.4,
+   "pct": -1.55,
+   "volume": 235634776,
+   "value": 6032277865,
+   "ind": "光電",
+   "avg": 10569585551,
+   "ratio": 0.57
+  },
+  {
+   "code": "8033",
+   "name": "雷虎",
+   "market": "上市",
+   "etf": false,
+   "close": 204.5,
+   "change": -14.5,
+   "pct": -6.62,
+   "volume": 27186589,
+   "value": 5921446203,
+   "ind": "其他",
+   "avg": 1618954399,
+   "ratio": 3.66
+  },
+  {
+   "code": "5274",
+   "name": "信驊",
+   "market": "上櫃",
+   "etf": false,
+   "close": 12915.0,
+   "change": -35.0,
+   "pct": -0.27,
+   "volume": 463000,
+   "value": 5911305000,
+   "ind": "半導體",
+   "avg": 4226937222,
+   "ratio": 1.4
+  },
+  {
+   "code": "6239",
+   "name": "力成",
+   "market": "上市",
+   "etf": false,
+   "close": 266.5,
+   "change": -21.5,
+   "pct": -7.47,
+   "volume": 20952221,
+   "value": 5758783760,
+   "ind": "半導體",
+   "avg": 7859239779,
+   "ratio": 0.73
+  },
+  {
+   "code": "2634",
+   "name": "漢翔",
+   "market": "上市",
+   "etf": false,
+   "close": 65.0,
+   "change": 3.8,
+   "pct": 6.21,
+   "volume": 86889053,
+   "value": 5716906372,
+   "ind": "航運業",
+   "avg": 3690140573,
+   "ratio": 1.55
+  },
+  {
+   "code": "3532",
+   "name": "台勝科",
+   "market": "上市",
+   "etf": false,
+   "close": 466.0,
+   "change": 42.0,
+   "pct": 9.91,
+   "volume": 12923121,
+   "value": 5634281076,
+   "ind": "半導體",
+   "avg": 4818457211,
+   "ratio": 1.17
+  },
+  {
+   "code": "5347",
+   "name": "世界",
+   "market": "上櫃",
+   "etf": false,
+   "close": 152.5,
+   "change": -16.5,
+   "pct": -9.76,
+   "volume": 35366000,
+   "value": 5450753500,
+   "ind": "半導體",
+   "avg": 5113233388,
+   "ratio": 1.07
+  },
+  {
+   "code": "2368",
+   "name": "金像電",
+   "market": "上市",
+   "etf": false,
+   "close": 927.0,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 5875440,
+   "value": 5400372163,
+   "ind": "電子零組件",
+   "avg": 5600282038,
+   "ratio": 0.96
+  },
+  {
+   "code": "8150",
+   "name": "南茂",
+   "market": "上市",
+   "etf": false,
+   "close": 103.0,
+   "change": -7.5,
+   "pct": -6.79,
+   "volume": 49833726,
+   "value": 5180565968,
+   "ind": "半導體",
+   "avg": 9448809740,
+   "ratio": 0.55
+  },
+  {
+   "code": "6147",
+   "name": "頎邦",
+   "market": "上櫃",
+   "etf": false,
+   "close": 164.0,
+   "change": -14.5,
+   "pct": -8.12,
+   "volume": 31309000,
+   "value": 5174837000,
+   "ind": "半導體",
+   "avg": 6153816444,
+   "ratio": 0.84
+  },
+  {
+   "code": "3374",
+   "name": "精材",
+   "market": "上櫃",
+   "etf": false,
+   "close": 345.5,
+   "change": -13.0,
+   "pct": -3.63,
+   "volume": 14774000,
+   "value": 5151440000,
+   "ind": "半導體",
+   "avg": 6931260833,
+   "ratio": 0.74
+  },
+  {
+   "code": "2887",
+   "name": "台新新光金",
+   "market": "上市",
+   "etf": false,
+   "close": 35.15,
+   "change": -0.4,
+   "pct": -1.13,
+   "volume": 146407830,
+   "value": 5116259375,
+   "ind": "金融保險",
+   "avg": 2868892204,
+   "ratio": 1.78
+  },
+  {
+   "code": "6223",
+   "name": "旺矽",
+   "market": "上櫃",
+   "etf": false,
+   "close": 5455.0,
+   "change": -145.0,
+   "pct": -2.59,
+   "volume": 944000,
+   "value": 5064975000,
+   "ind": "半導體",
+   "avg": 4612828333,
+   "ratio": 1.1
+  },
+  {
+   "code": "3653",
+   "name": "健策",
+   "market": "上市",
+   "etf": false,
+   "close": 3200.0,
+   "change": -10.0,
+   "pct": -0.31,
+   "volume": 1510316,
+   "value": 4772558810,
+   "ind": "電子零組件",
+   "avg": 2931941438,
+   "ratio": 1.63
+  },
+  {
+   "code": "7769",
+   "name": "鴻勁",
+   "market": "上市",
+   "etf": false,
+   "close": 6005.0,
+   "change": -65.0,
+   "pct": -1.07,
+   "volume": 770274,
+   "value": 4570466425,
+   "ind": "半導體",
+   "avg": 4093774836,
+   "ratio": 1.12
+  },
+  {
+   "code": "00403A",
+   "name": "主動統一升級50",
+   "market": "上市",
+   "etf": true,
+   "close": 9.28,
+   "change": -0.24,
+   "pct": -2.52,
+   "volume": 461738249,
+   "value": 4309793572,
+   "ind": "ETF",
+   "avg": 4158117971,
+   "ratio": 1.04
+  },
+  {
+   "code": "2891",
+   "name": "中信金",
+   "market": "上市",
+   "etf": false,
+   "close": 61.5,
+   "change": -0.6,
+   "pct": -0.97,
+   "volume": 69848055,
+   "value": 4282479852,
+   "ind": "金融保險",
+   "avg": 4494942454,
+   "ratio": 0.95
+  },
+  {
+   "code": "2360",
+   "name": "致茂",
+   "market": "上市",
+   "etf": false,
+   "close": 1835.0,
+   "change": -15.0,
+   "pct": -0.81,
+   "volume": 2310803,
+   "value": 4258810080,
+   "ind": "其他電子",
+   "avg": 6266377016,
+   "ratio": 0.68
+  },
+  {
+   "code": "2412",
+   "name": "中華電",
+   "market": "上市",
+   "etf": false,
+   "close": 139.0,
+   "change": 1.0,
+   "pct": 0.72,
+   "volume": 26231910,
+   "value": 3630829854,
+   "ind": "通信網路",
+   "avg": 3568306833,
+   "ratio": 1.02
+  },
+  {
+   "code": "8996",
+   "name": "高力",
+   "market": "上市",
+   "etf": false,
+   "close": 971.0,
+   "change": -44.0,
+   "pct": -4.33,
+   "volume": 3790952,
+   "value": 3576567028,
+   "ind": "電機機械",
+   "avg": 1861851549,
+   "ratio": 1.92
+  },
+  {
+   "code": "00685L",
+   "name": "群益臺灣加權正2",
+   "market": "上市",
+   "etf": true,
+   "close": 10.41,
+   "change": -0.13,
+   "pct": -1.23,
+   "volume": 337745894,
+   "value": 3558961868,
+   "ind": "ETF",
+   "avg": 6616915726,
+   "ratio": 0.54
+  },
+  {
+   "code": "6446",
+   "name": "藥華藥",
+   "market": "上市",
+   "etf": false,
+   "close": 1175.0,
+   "change": -20.0,
+   "pct": -1.67,
+   "volume": 2926691,
+   "value": 3516317815,
+   "ind": "生技醫療",
+   "avg": 5131549348,
+   "ratio": 0.69
+  },
+  {
+   "code": "2885",
+   "name": "元大金",
+   "market": "上市",
+   "etf": false,
+   "close": 62.9,
+   "change": -2.1,
+   "pct": -3.23,
+   "volume": 54774292,
+   "value": 3495654839,
+   "ind": "金融保險",
+   "avg": 2057865657,
+   "ratio": 1.7
+  },
+  {
+   "code": "3081",
+   "name": "聯亞",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1435.0,
+   "change": -45.0,
+   "pct": -3.04,
+   "volume": 2462000,
+   "value": 3490820000,
+   "ind": "通信網路",
+   "avg": 3471417222,
+   "ratio": 1.01
+  },
+  {
+   "code": "009816",
+   "name": "凱基台灣TOP50",
+   "market": "上市",
+   "etf": true,
+   "close": 14.14,
+   "change": -0.14,
+   "pct": -0.98,
+   "volume": 242830957,
+   "value": 3455059185,
+   "ind": "ETF",
+   "avg": 2898249605,
+   "ratio": 1.19
+  },
+  {
+   "code": "1326",
+   "name": "台化",
+   "market": "上市",
+   "etf": false,
+   "close": 64.2,
+   "change": -1.9,
+   "pct": -2.87,
+   "volume": 52416077,
+   "value": 3423309741,
+   "ind": "塑膠工業",
+   "avg": 6145969128,
+   "ratio": 0.56
+  },
+  {
+   "code": "2881",
+   "name": "富邦金",
+   "market": "上市",
+   "etf": false,
+   "close": 123.5,
+   "change": -1.0,
+   "pct": -0.8,
+   "volume": 26626575,
+   "value": 3292941355,
+   "ind": "金融保險",
+   "avg": 3148305758,
+   "ratio": 1.05
+  },
+  {
+   "code": "2301",
+   "name": "光寶科",
+   "market": "上市",
+   "etf": false,
+   "close": 193.5,
+   "change": -3.0,
+   "pct": -1.53,
+   "volume": 16919854,
+   "value": 3286276729,
+   "ind": "電腦及週邊",
+   "avg": 4534443255,
+   "ratio": 0.72
+  },
+  {
+   "code": "5371",
+   "name": "中光電",
+   "market": "上櫃",
+   "etf": false,
+   "close": 83.8,
+   "change": 2.3,
+   "pct": 2.82,
+   "volume": 38007000,
+   "value": 3227840600,
+   "ind": "其他",
+   "avg": 4337716422,
+   "ratio": 0.74
+  },
+  {
+   "code": "3491",
+   "name": "昇達科",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1220.0,
+   "change": -135.0,
+   "pct": -9.96,
+   "volume": 2543000,
+   "value": 3212125000,
+   "ind": "通信網路",
+   "avg": 2744201250,
+   "ratio": 1.17
+  },
+  {
+   "code": "00919",
+   "name": "群益台灣精選高息",
+   "market": "上市",
+   "etf": true,
+   "close": 28.55,
+   "change": -0.38,
+   "pct": -1.31,
+   "volume": 108186430,
+   "value": 3099851926,
+   "ind": "ETF",
+   "avg": 2313744572,
+   "ratio": 1.34
+  },
+  {
+   "code": "2379",
+   "name": "瑞昱",
+   "market": "上市",
+   "etf": false,
+   "close": 709.0,
+   "change": -9.0,
+   "pct": -1.25,
+   "volume": 4306249,
+   "value": 3049069162,
+   "ind": "半導體",
+   "avg": 4445745589,
+   "ratio": 0.69
+  },
+  {
+   "code": "5289",
+   "name": "宜鼎",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1215.0,
+   "change": -60.0,
+   "pct": -4.71,
+   "volume": 2467000,
+   "value": 3026250000,
+   "ind": "電腦及週邊",
+   "avg": 4024928888,
+   "ratio": 0.75
+  },
+  {
+   "code": "3026",
+   "name": "禾伸堂",
+   "market": "上市",
+   "etf": false,
+   "close": 621.0,
+   "change": -69.0,
+   "pct": -10.0,
+   "volume": 4726567,
+   "value": 3010195200,
+   "ind": "電子零組件",
+   "avg": 14013889618,
+   "ratio": 0.21
+  },
+  {
+   "code": "3260",
+   "name": "威剛",
+   "market": "上櫃",
+   "etf": false,
+   "close": 348.5,
+   "change": -18.0,
+   "pct": -4.91,
+   "volume": 8550000,
+   "value": 2998147500,
+   "ind": "半導體",
+   "avg": 3045715888,
+   "ratio": 0.98
+  },
+  {
+   "code": "3036",
+   "name": "文曄",
+   "market": "上市",
+   "etf": false,
+   "close": 187.0,
+   "change": -1.5,
+   "pct": -0.8,
+   "volume": 16065018,
+   "value": 2975553791,
+   "ind": "電子通路",
+   "avg": 1650966621,
+   "ratio": 1.8
+  },
+  {
+   "code": "6442",
+   "name": "光聖",
+   "market": "上市",
+   "etf": false,
+   "close": 1220.0,
+   "change": -80.0,
+   "pct": -6.15,
+   "volume": 2422294,
+   "value": 2964599575,
+   "ind": "通信網路",
+   "avg": 3093374780,
+   "ratio": 0.96
+  },
+  {
+   "code": "6415",
+   "name": "矽力*-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 427.5,
+   "change": -7.5,
+   "pct": -1.72,
+   "volume": 6790313,
+   "value": 2911372824,
+   "ind": "半導體",
+   "avg": 2387361852,
+   "ratio": 1.22
+  },
+  {
+   "code": "8028",
+   "name": "昇陽半導體",
+   "market": "上市",
+   "etf": false,
+   "close": 300.0,
+   "change": -15.0,
+   "pct": -4.76,
+   "volume": 9537577,
+   "value": 2897811412,
+   "ind": "半導體",
+   "avg": 2930816258,
+   "ratio": 0.99
+  },
+  {
+   "code": "2884",
+   "name": "玉山金",
+   "market": "上市",
+   "etf": false,
+   "close": 35.85,
+   "change": 0.75,
+   "pct": 2.14,
+   "volume": 80234731,
+   "value": 2859648480,
+   "ind": "金融保險",
+   "avg": 1672709327,
+   "ratio": 1.71
+  },
+  {
+   "code": "1301",
+   "name": "台塑",
+   "market": "上市",
+   "etf": false,
+   "close": 60.6,
+   "change": -2.2,
+   "pct": -3.5,
+   "volume": 46496573,
+   "value": 2849523660,
+   "ind": "塑膠工業",
+   "avg": 5264488891,
+   "ratio": 0.54
+  },
+  {
+   "code": "00991A",
+   "name": "主動復華未來50",
+   "market": "上市",
+   "etf": true,
+   "close": 16.5,
+   "change": -0.32,
+   "pct": -1.9,
+   "volume": 169980984,
+   "value": 2819875155,
+   "ind": "ETF",
+   "avg": 3313447671,
+   "ratio": 0.85
+  },
+  {
+   "code": "2882",
+   "name": "國泰金",
+   "market": "上市",
+   "etf": false,
+   "close": 94.0,
+   "change": -0.3,
+   "pct": -0.32,
+   "volume": 29681623,
+   "value": 2804700385,
+   "ind": "金融保險",
+   "avg": 2683766073,
+   "ratio": 1.05
+  },
+  {
+   "code": "6139",
+   "name": "亞翔",
+   "market": "上市",
+   "etf": false,
+   "close": 775.0,
+   "change": -24.0,
+   "pct": -3.0,
+   "volume": 3589109,
+   "value": 2794882679,
+   "ind": "其他電子",
+   "avg": 3459516396,
+   "ratio": 0.81
+  },
+  {
+   "code": "8358",
+   "name": "金居",
+   "market": "上櫃",
+   "etf": false,
+   "close": 371.0,
+   "change": -27.5,
+   "pct": -6.9,
+   "volume": 7352000,
+   "value": 2755064500,
+   "ind": "電子零組件",
+   "avg": 4133095277,
+   "ratio": 0.67
+  },
+  {
+   "code": "2645",
+   "name": "長榮航太",
+   "market": "上市",
+   "etf": false,
+   "close": 208.0,
+   "change": -8.5,
+   "pct": -3.93,
+   "volume": 12404585,
+   "value": 2667632456,
+   "ind": "航運業",
+   "avg": 2280588697,
+   "ratio": 1.17
+  },
+  {
+   "code": "6531",
+   "name": "愛普*",
+   "market": "上市",
+   "etf": false,
+   "close": 780.0,
+   "change": -39.0,
+   "pct": -4.76,
+   "volume": 3373745,
+   "value": 2656948308,
+   "ind": "半導體",
+   "avg": 2823193156,
+   "ratio": 0.94
+  },
+  {
+   "code": "2404",
+   "name": "漢唐",
+   "market": "上市",
+   "etf": false,
+   "close": 1135.0,
+   "change": -25.0,
+   "pct": -2.16,
+   "volume": 2265237,
+   "value": 2594730485,
+   "ind": "其他電子",
+   "avg": 3164949351,
+   "ratio": 0.82
+  },
+  {
+   "code": "2357",
+   "name": "華碩",
+   "market": "上市",
+   "etf": false,
+   "close": 688.0,
+   "change": -12.0,
+   "pct": -1.71,
+   "volume": 3669278,
+   "value": 2564729415,
+   "ind": "電腦及週邊",
+   "avg": 3068157775,
+   "ratio": 0.84
+  },
+  {
+   "code": "2376",
+   "name": "技嘉",
+   "market": "上市",
+   "etf": false,
+   "close": 331.0,
+   "change": 6.0,
+   "pct": 1.85,
+   "volume": 7450480,
+   "value": 2443968446,
+   "ind": "電腦及週邊",
+   "avg": 1748224773,
+   "ratio": 1.4
+  },
+  {
+   "code": "2481",
+   "name": "強茂",
+   "market": "上市",
+   "etf": false,
+   "close": 139.5,
+   "change": -12.0,
+   "pct": -7.92,
+   "volume": 17365258,
+   "value": 2439008145,
+   "ind": "半導體",
+   "avg": 2774589421,
+   "ratio": 0.88
+  },
+  {
+   "code": "1216",
+   "name": "統一",
+   "market": "上市",
+   "etf": false,
+   "close": 80.3,
+   "change": 0.3,
+   "pct": 0.38,
+   "volume": 30472521,
+   "value": 2436736700,
+   "ind": "食品工業",
+   "avg": 1748668406,
+   "ratio": 1.39
+  },
+  {
+   "code": "6515",
+   "name": "穎崴",
+   "market": "上市",
+   "etf": false,
+   "close": 6050.0,
+   "change": -5.0,
+   "pct": -0.08,
+   "volume": 388870,
+   "value": 2334485925,
+   "ind": "半導體",
+   "avg": 3338312897,
+   "ratio": 0.7
+  },
+  {
+   "code": "0052",
+   "name": "富邦科技",
+   "market": "上市",
+   "etf": true,
+   "close": 57.6,
+   "change": -0.3,
+   "pct": -0.52,
+   "volume": 38675342,
+   "value": 2239800396,
+   "ind": "ETF",
+   "avg": 1691713842,
+   "ratio": 1.32
+  },
+  {
+   "code": "3211",
+   "name": "順達",
+   "market": "上櫃",
+   "etf": false,
+   "close": 354.0,
+   "change": -31.5,
+   "pct": -8.17,
+   "volume": 6053000,
+   "value": 2196671000,
+   "ind": "電腦及週邊",
+   "avg": 4642101000,
+   "ratio": 0.47
+  },
+  {
+   "code": "2886",
+   "name": "兆豐金",
+   "market": "上市",
+   "etf": false,
+   "close": 48.2,
+   "change": 0.6,
+   "pct": 1.26,
+   "volume": 45571317,
+   "value": 2183275344,
+   "ind": "金融保險",
+   "avg": 1363794901,
+   "ratio": 1.6
+  },
+  {
+   "code": "2890",
+   "name": "永豐金",
+   "market": "上市",
+   "etf": false,
+   "close": 39.7,
+   "change": -0.3,
+   "pct": -0.75,
+   "volume": 54944931,
+   "value": 2175086446,
+   "ind": "金融保險",
+   "avg": 1430042365,
+   "ratio": 1.52
+  },
+  {
+   "code": "4979",
+   "name": "華星光",
+   "market": "上櫃",
+   "etf": false,
+   "close": 340.0,
+   "change": -16.0,
+   "pct": -4.49,
+   "volume": 6391000,
+   "value": 2167650500,
+   "ind": "通信網路",
+   "avg": 2382512000,
+   "ratio": 0.91
+  },
+  {
+   "code": "00929",
+   "name": "復華台灣科技優息",
+   "market": "上市",
+   "etf": true,
+   "close": 27.94,
+   "change": -0.58,
+   "pct": -2.03,
+   "volume": 76837846,
+   "value": 2157042988,
+   "ind": "ETF",
+   "avg": 1242293288,
+   "ratio": 1.74
+  },
+  {
+   "code": "00632R",
+   "name": "元大台灣50反1",
+   "market": "上市",
+   "etf": true,
+   "close": 10.9,
+   "change": 0.07,
+   "pct": 0.65,
+   "volume": 198909293,
+   "value": 2152751007,
+   "ind": "ETF",
+   "avg": 1659550859,
+   "ratio": 1.3
+  },
+  {
+   "code": "3533",
+   "name": "嘉澤",
+   "market": "上市",
+   "etf": false,
+   "close": 1905.0,
+   "change": 40.0,
+   "pct": 2.14,
+   "volume": 1139929,
+   "value": 2145251430,
+   "ind": "電子零組件",
+   "avg": 1872295156,
+   "ratio": 1.15
+  },
+  {
+   "code": "3163",
+   "name": "波若威",
+   "market": "上櫃",
+   "etf": false,
+   "close": 622.0,
+   "change": -30.0,
+   "pct": -4.6,
+   "volume": 3474000,
+   "value": 2139999000,
+   "ind": "通信網路",
+   "avg": 2121713000,
+   "ratio": 1.01
+  },
+  {
+   "code": "2883",
+   "name": "凱基金",
+   "market": "上市",
+   "etf": false,
+   "close": 29.55,
+   "change": -0.45,
+   "pct": -1.5,
+   "volume": 70442629,
+   "value": 2107155998,
+   "ind": "金融保險",
+   "avg": 1734893356,
+   "ratio": 1.21
+  },
+  {
+   "code": "4541",
+   "name": "晟田",
+   "market": "上櫃",
+   "etf": false,
+   "close": 68.9,
+   "change": -3.7,
+   "pct": -5.1,
+   "volume": 28555000,
+   "value": 2092972200,
+   "ind": "其他",
+   "avg": 1097001455,
+   "ratio": 1.91
+  },
+  {
+   "code": "3045",
+   "name": "台灣大",
+   "market": "上市",
+   "etf": false,
+   "close": 112.0,
+   "change": 1.0,
+   "pct": 0.9,
+   "volume": 18734382,
+   "value": 2092596735,
+   "ind": "通信網路",
+   "avg": 2435535180,
+   "ratio": 0.86
+  },
+  {
+   "code": "6285",
+   "name": "啟碁",
+   "market": "上市",
+   "etf": false,
+   "close": 235.0,
+   "change": 0.5,
+   "pct": 0.21,
+   "volume": 8934026,
+   "value": 2087053768,
+   "ind": "通信網路",
+   "avg": 2883478422,
+   "ratio": 0.72
+  },
+  {
+   "code": "2324",
+   "name": "仁寶",
+   "market": "上市",
+   "etf": false,
+   "close": 34.4,
+   "change": -1.6,
+   "pct": -4.44,
+   "volume": 58621914,
+   "value": 2024619549,
+   "ind": "電腦及週邊",
+   "avg": 1841896458,
+   "ratio": 1.1
+  },
+  {
+   "code": "5871",
+   "name": "中租-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 122.5,
+   "change": 3.0,
+   "pct": 2.51,
+   "volume": 16696536,
+   "value": 2019448865,
+   "ind": "其他",
+   "avg": 870426806,
+   "ratio": 2.32
+  },
+  {
+   "code": "3529",
+   "name": "力旺",
+   "market": "上櫃",
+   "etf": false,
+   "close": 2300.0,
+   "change": -50.0,
+   "pct": -2.13,
+   "volume": 888000,
+   "value": 2013200000,
+   "ind": "半導體",
+   "avg": 1938214444,
+   "ratio": 1.04
+  },
+  {
+   "code": "4904",
+   "name": "遠傳",
+   "market": "上市",
+   "etf": false,
+   "close": 104.5,
+   "change": 1.5,
+   "pct": 1.46,
+   "volume": 19211896,
+   "value": 2007494610,
+   "ind": "通信網路",
+   "avg": 1755407170,
+   "ratio": 1.14
+  },
+  {
+   "code": "2603",
+   "name": "長榮",
+   "market": "上市",
+   "etf": false,
+   "close": 196.0,
+   "change": -2.0,
+   "pct": -1.01,
+   "volume": 10069119,
+   "value": 1996815195,
+   "ind": "航運業",
+   "avg": 2404000457,
+   "ratio": 0.83
+  },
+  {
+   "code": "00878",
+   "name": "國泰永續高股息",
+   "market": "上市",
+   "etf": true,
+   "close": 31.36,
+   "change": -0.45,
+   "pct": -1.41,
+   "volume": 62783112,
+   "value": 1973387603,
+   "ind": "ETF",
+   "avg": 1255726224,
+   "ratio": 1.57
+  },
+  {
+   "code": "2356",
+   "name": "英業達",
+   "market": "上市",
+   "etf": false,
+   "close": 57.2,
+   "change": -1.3,
+   "pct": -2.22,
+   "volume": 33764507,
+   "value": 1972412765,
+   "ind": "電腦及週邊",
+   "avg": 3228793473,
+   "ratio": 0.61
+  },
+  {
+   "code": "2486",
+   "name": "一詮",
+   "market": "上市",
+   "etf": false,
+   "close": 216.5,
+   "change": -19.0,
+   "pct": -8.07,
+   "volume": 8987284,
+   "value": 1967231921,
+   "ind": "光電",
+   "avg": 2615125018,
+   "ratio": 0.75
+  },
+  {
+   "code": "2395",
+   "name": "研華",
+   "market": "上市",
+   "etf": false,
+   "close": 516.0,
+   "change": 3.0,
+   "pct": 0.58,
+   "volume": 3844639,
+   "value": 1966262917,
+   "ind": "電腦及週邊",
+   "avg": 1909709212,
+   "ratio": 1.03
+  },
+  {
+   "code": "3324",
+   "name": "雙鴻",
+   "market": "上櫃",
+   "etf": false,
+   "close": 858.0,
+   "change": -55.0,
+   "pct": -6.02,
+   "volume": 2272000,
+   "value": 1961011000,
+   "ind": "其他電子",
+   "avg": 1781954666,
+   "ratio": 1.1
+  },
+  {
+   "code": "3042",
+   "name": "晶技",
+   "market": "上市",
+   "etf": false,
+   "close": 157.0,
+   "change": -11.5,
+   "pct": -6.82,
+   "volume": 12292397,
+   "value": 1947504436,
+   "ind": "電子零組件",
+   "avg": 5273284921,
+   "ratio": 0.37
+  },
+  {
+   "code": "3034",
+   "name": "聯詠",
+   "market": "上市",
+   "etf": false,
+   "close": 458.0,
+   "change": -2.5,
+   "pct": -0.54,
+   "volume": 4215309,
+   "value": 1944388113,
+   "ind": "半導體",
+   "avg": 3331445028,
+   "ratio": 0.58
+  },
+  {
+   "code": "6683",
+   "name": "雍智科技",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1105.0,
+   "change": -110.0,
+   "pct": -9.05,
+   "volume": 1715000,
+   "value": 1938255000,
+   "ind": "半導體",
+   "avg": 1029292222,
+   "ratio": 1.88
+  },
+  {
+   "code": "3167",
+   "name": "大量",
+   "market": "上市",
+   "etf": false,
+   "close": 733.0,
+   "change": -33.0,
+   "pct": -4.31,
+   "volume": 2621566,
+   "value": 1908922628,
+   "ind": "電機機械",
+   "avg": 3734542104,
+   "ratio": 0.51
+  },
+  {
+   "code": "5269",
+   "name": "祥碩",
+   "market": "上市",
+   "etf": false,
+   "close": 1470.0,
+   "change": 35.0,
+   "pct": 2.44,
+   "volume": 1285723,
+   "value": 1881008640,
+   "ind": "半導體",
+   "avg": 1301361508,
+   "ratio": 1.45
+  },
+  {
+   "code": "2377",
+   "name": "微星",
+   "market": "上市",
+   "etf": false,
+   "close": 141.5,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 13485283,
+   "value": 1856441170,
+   "ind": "電腦及週邊",
+   "avg": 2363295967,
+   "ratio": 0.79
+  },
+  {
+   "code": "4939",
+   "name": "亞電",
+   "market": "上櫃",
+   "etf": false,
+   "close": 66.2,
+   "change": 6.0,
+   "pct": 9.97,
+   "volume": 28967000,
+   "value": 1849596700,
+   "ind": "電子零組件",
+   "avg": 636788400,
+   "ratio": 2.9
+  },
+  {
+   "code": "2880",
+   "name": "華南金",
+   "market": "上市",
+   "etf": false,
+   "close": 39.9,
+   "change": -0.25,
+   "pct": -0.62,
+   "volume": 45552145,
+   "value": 1828205009,
+   "ind": "金融保險",
+   "avg": 819837095,
+   "ratio": 2.23
+  },
+  {
+   "code": "1802",
+   "name": "台玻",
+   "market": "上市",
+   "etf": false,
+   "close": 53.3,
+   "change": -3.3,
+   "pct": -5.83,
+   "volume": 33569742,
+   "value": 1815153673,
+   "ind": "玻璃陶瓷",
+   "avg": 2481599939,
+   "ratio": 0.73
+  },
+  {
+   "code": "3413",
+   "name": "京鼎",
+   "market": "上市",
+   "etf": false,
+   "close": 359.0,
+   "change": -12.0,
+   "pct": -3.23,
+   "volume": 5030232,
+   "value": 1808613550,
+   "ind": "半導體",
+   "avg": 1742911648,
+   "ratio": 1.04
+  },
+  {
+   "code": "1590",
+   "name": "亞德客-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 1335.0,
+   "change": 70.0,
+   "pct": 5.53,
+   "volume": 1342429,
+   "value": 1790879125,
+   "ind": "電機機械",
+   "avg": 953131094,
+   "ratio": 1.88
+  },
+  {
+   "code": "006208",
+   "name": "富邦台50",
+   "market": "上市",
+   "etf": true,
+   "close": 226.0,
+   "change": -1.75,
+   "pct": -0.77,
+   "volume": 7475916,
+   "value": 1697529636,
+   "ind": "ETF",
+   "avg": 1349277540,
+   "ratio": 1.26
+  },
+  {
+   "code": "6187",
+   "name": "萬潤",
+   "market": "上櫃",
+   "etf": false,
+   "close": 935.0,
+   "change": -40.0,
+   "pct": -4.1,
+   "volume": 1788000,
+   "value": 1688263000,
+   "ind": "半導體",
+   "avg": 2350461000,
+   "ratio": 0.72
+  },
+  {
+   "code": "1560",
+   "name": "中砂",
+   "market": "上市",
+   "etf": false,
+   "close": 647.0,
+   "change": -9.0,
+   "pct": -1.37,
+   "volume": 2601632,
+   "value": 1677643881,
+   "ind": "電機機械",
+   "avg": 1016977787,
+   "ratio": 1.65
+  },
+  {
+   "code": "5351",
+   "name": "鈺創",
+   "market": "上櫃",
+   "etf": false,
+   "close": 82.8,
+   "change": -5.2,
+   "pct": -5.91,
+   "volume": 20020000,
+   "value": 1674568400,
+   "ind": "半導體",
+   "avg": 4024405622,
+   "ratio": 0.42
+  },
+  {
+   "code": "3006",
+   "name": "晶豪科",
+   "market": "上市",
+   "etf": false,
+   "close": 188.5,
+   "change": -9.5,
+   "pct": -4.8,
+   "volume": 8543683,
+   "value": 1625894848,
+   "ind": "半導體",
+   "avg": 3322791617,
+   "ratio": 0.49
+  },
+  {
+   "code": "00927",
+   "name": "群益半導體收益",
+   "market": "上市",
+   "etf": true,
+   "close": 34.5,
+   "change": -1.18,
+   "pct": -3.31,
+   "volume": 46379843,
+   "value": 1611882618,
+   "ind": "ETF",
+   "avg": 2620306543,
+   "ratio": 0.62
+  },
+  {
+   "code": "2472",
+   "name": "立隆電",
+   "market": "上市",
+   "etf": false,
+   "close": 265.5,
+   "change": -22.5,
+   "pct": -7.81,
+   "volume": 5994228,
+   "value": 1598101026,
+   "ind": "電子零組件",
+   "avg": 2785244314,
+   "ratio": 0.57
+  },
+  {
+   "code": "4991",
+   "name": "環宇-KY",
+   "market": "上櫃",
+   "etf": false,
+   "close": 348.0,
+   "change": -12.0,
+   "pct": -3.33,
+   "volume": 4564000,
+   "value": 1579399000,
+   "ind": "半導體",
+   "avg": 2188807277,
+   "ratio": 0.72
+  },
+  {
+   "code": "8021",
+   "name": "尖點",
+   "market": "上市",
+   "etf": false,
+   "close": 409.5,
+   "change": -45.0,
+   "pct": -9.9,
+   "volume": 3805600,
+   "value": 1563050584,
+   "ind": "其他電子",
+   "avg": 461664837,
+   "ratio": 3.39
+  },
+  {
+   "code": "3363",
+   "name": "上詮",
+   "market": "上櫃",
+   "etf": false,
+   "close": 503.0,
+   "change": -1.0,
+   "pct": -0.2,
+   "volume": 3218000,
+   "value": 1559317000,
+   "ind": "通信網路",
+   "avg": 2352981000,
+   "ratio": 0.66
+  },
+  {
+   "code": "2618",
+   "name": "長榮航",
+   "market": "上市",
+   "etf": false,
+   "close": 41.2,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 37206444,
+   "value": 1534883900,
+   "ind": "航運業",
+   "avg": 2641490482,
+   "ratio": 0.58
+  },
+  {
+   "code": "6451",
+   "name": "訊芯-KY",
+   "market": "上市",
+   "etf": false,
+   "close": 395.5,
+   "change": -34.0,
+   "pct": -7.92,
+   "volume": 3818617,
+   "value": 1520131237,
+   "ind": "半導體",
+   "avg": 1893652693,
+   "ratio": 0.8
+  },
+  {
+   "code": "1785",
+   "name": "光洋科",
+   "market": "上櫃",
+   "etf": false,
+   "close": 104.5,
+   "change": -3.0,
+   "pct": -2.79,
+   "volume": 14399000,
+   "value": 1490074500,
+   "ind": "其他電子",
+   "avg": 2125492500,
+   "ratio": 0.7
+  },
+  {
+   "code": "6414",
+   "name": "樺漢",
+   "market": "上市",
+   "etf": false,
+   "close": 405.0,
+   "change": 10.0,
+   "pct": 2.53,
+   "volume": 3549738,
+   "value": 1438860018,
+   "ind": "電腦及週邊",
+   "avg": 848298288,
+   "ratio": 1.7
+  },
+  {
+   "code": "1519",
+   "name": "華城",
+   "market": "上市",
+   "etf": false,
+   "close": 668.0,
+   "change": 13.0,
+   "pct": 1.98,
+   "volume": 2159488,
+   "value": 1438383270,
+   "ind": "電機機械",
+   "avg": 1481834821,
+   "ratio": 0.97
+  },
+  {
+   "code": "1815",
+   "name": "富喬",
+   "market": "上櫃",
+   "etf": false,
+   "close": 77.3,
+   "change": -4.2,
+   "pct": -5.15,
+   "volume": 18231000,
+   "value": 1407718300,
+   "ind": "電子零組件",
+   "avg": 1328395188,
+   "ratio": 1.06
+  },
+  {
+   "code": "00663L",
+   "name": "國泰臺灣加權正2",
+   "market": "上市",
+   "etf": true,
+   "close": 91.2,
+   "change": -1.05,
+   "pct": -1.14,
+   "volume": 14738568,
+   "value": 1361907460,
+   "ind": "ETF",
+   "avg": 1502813657,
+   "ratio": 0.91
+  },
+  {
+   "code": "3264",
+   "name": "欣銓",
+   "market": "上櫃",
+   "etf": false,
+   "close": 197.5,
+   "change": -16.5,
+   "pct": -7.71,
+   "volume": 6423000,
+   "value": 1291638000,
+   "ind": "半導體",
+   "avg": 2034253444,
+   "ratio": 0.63
+  },
+  {
+   "code": "00935",
+   "name": "野村臺灣新科技50",
+   "market": "上市",
+   "etf": true,
+   "close": 52.2,
+   "change": -1.2,
+   "pct": -2.25,
+   "volume": 22587462,
+   "value": 1185391055,
+   "ind": "ETF",
+   "avg": 897617016,
+   "ratio": 1.32
+  },
+  {
+   "code": "00988A",
+   "name": "主動統一全球創新",
+   "market": "上市",
+   "etf": true,
+   "close": 16.56,
+   "change": 0.32,
+   "pct": 1.97,
+   "volume": 71023669,
+   "value": 1177861097,
+   "ind": "ETF",
+   "avg": 1932768258,
+   "ratio": 0.61
+  },
+  {
+   "code": "5536",
+   "name": "聖暉*",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1140.0,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 1005000,
+   "value": 1127715000,
+   "ind": "其他電子",
+   "avg": 1211819444,
+   "ratio": 0.93
+  },
+  {
+   "code": "4966",
+   "name": "譜瑞-KY",
+   "market": "上櫃",
+   "etf": false,
+   "close": 567.0,
+   "change": -18.0,
+   "pct": -3.08,
+   "volume": 1980000,
+   "value": 1121914000,
+   "ind": "半導體",
+   "avg": 1050468000,
+   "ratio": 1.07
+  },
+  {
+   "code": "3680",
+   "name": "家登",
+   "market": "上櫃",
+   "etf": false,
+   "close": 437.5,
+   "change": -27.0,
+   "pct": -5.81,
+   "volume": 2524000,
+   "value": 1115744000,
+   "ind": "半導體",
+   "avg": 1190805722,
+   "ratio": 0.94
+  },
+  {
+   "code": "8069",
+   "name": "元太",
+   "market": "上櫃",
+   "etf": false,
+   "close": 175.5,
+   "change": null,
+   "pct": null,
+   "volume": 6199000,
+   "value": 1084885000,
+   "ind": "光電",
+   "avg": 1247484944,
+   "ratio": 0.87
+  },
+  {
+   "code": "00982A",
+   "name": "主動群益台灣強棒",
+   "market": "上市",
+   "etf": true,
+   "close": 21.08,
+   "change": -0.35,
+   "pct": -1.63,
+   "volume": 49787622,
+   "value": 1050286192,
+   "ind": "ETF",
+   "avg": 789829975,
+   "ratio": 1.33
+  },
+  {
+   "code": "5425",
+   "name": "台半",
+   "market": "上櫃",
+   "etf": false,
+   "close": 86.0,
+   "change": -6.5,
+   "pct": -7.03,
+   "volume": 12154000,
+   "value": 1048221100,
+   "ind": "半導體",
+   "avg": 1600687122,
+   "ratio": 0.65
+  },
+  {
+   "code": "00830",
+   "name": "國泰費城半導體",
+   "market": "上市",
+   "etf": true,
+   "close": 84.65,
+   "change": 1.55,
+   "pct": 1.87,
+   "volume": 12357383,
+   "value": 1043848776,
+   "ind": "ETF",
+   "avg": 1074773801,
+   "ratio": 0.97
+  },
+  {
+   "code": "00888",
+   "name": "永豐台灣ESG",
+   "market": "上櫃",
+   "etf": true,
+   "close": 33.19,
+   "change": -1.24,
+   "pct": -3.6,
+   "volume": 27566000,
+   "value": 921839250,
+   "ind": "ETF",
+   "avg": 662746887,
+   "ratio": 1.39
+  },
+  {
+   "code": "00881",
+   "name": "國泰台灣科技龍頭",
+   "market": "上市",
+   "etf": true,
+   "close": 48.85,
+   "change": -0.68,
+   "pct": -1.37,
+   "volume": 18607163,
+   "value": 913354154,
+   "ind": "ETF",
+   "avg": 608578164,
+   "ratio": 1.5
+  },
+  {
+   "code": "6510",
+   "name": "精測",
+   "market": "上櫃",
+   "etf": false,
+   "close": 2565.0,
+   "change": -20.0,
+   "pct": -0.77,
+   "volume": 360000,
+   "value": 907410000,
+   "ind": "半導體",
+   "avg": 1021471666,
+   "ratio": 0.89
+  },
+  {
+   "code": "3293",
+   "name": "鈊象",
+   "market": "上櫃",
+   "etf": false,
+   "close": 706.0,
+   "change": 20.0,
+   "pct": 2.92,
+   "volume": 1294000,
+   "value": 903612000,
+   "ind": "文化創意",
+   "avg": 1129906111,
+   "ratio": 0.8
+  },
+  {
+   "code": "00675L",
+   "name": "富邦臺灣加權正2",
+   "market": "上市",
+   "etf": true,
+   "close": 275.05,
+   "change": -3.7,
+   "pct": -1.33,
+   "volume": 3232700,
+   "value": 902571970,
+   "ind": "ETF",
+   "avg": 891101052,
+   "ratio": 1.01
+  },
+  {
+   "code": "00637L",
+   "name": "元大滬深300正2",
+   "market": "上市",
+   "etf": true,
+   "close": 20.12,
+   "change": 0.83,
+   "pct": 4.3,
+   "volume": 42046321,
+   "value": 841305238,
+   "ind": "ETF",
+   "avg": 633413862,
+   "ratio": 1.33
+  },
+  {
+   "code": "7734",
+   "name": "印能科技",
+   "market": "上櫃",
+   "etf": false,
+   "close": 2835.0,
+   "change": -15.0,
+   "pct": -0.53,
+   "volume": 290000,
+   "value": 811605000,
+   "ind": "半導體",
+   "avg": 663807777,
+   "ratio": 1.22
+  },
+  {
+   "code": "00918",
+   "name": "大華優利高填息30",
+   "market": "上市",
+   "etf": true,
+   "close": 30.92,
+   "change": -0.09,
+   "pct": -0.29,
+   "volume": 25877023,
+   "value": 800593650,
+   "ind": "ETF",
+   "avg": 690301057,
+   "ratio": 1.16
+  },
+  {
+   "code": "5439",
+   "name": "高技",
+   "market": "上櫃",
+   "etf": false,
+   "close": 248.0,
+   "change": -14.0,
+   "pct": -5.34,
+   "volume": 3180000,
+   "value": 783106000,
+   "ind": "電子零組件",
+   "avg": 630262222,
+   "ratio": 1.24
+  },
+  {
+   "code": "00990A",
+   "name": "主動元大AI新經濟",
+   "market": "上市",
+   "etf": true,
+   "close": 15.82,
+   "change": 0.33,
+   "pct": 2.13,
+   "volume": 49190774,
+   "value": 777494511,
+   "ind": "ETF",
+   "avg": 854100195,
+   "ratio": 0.91
+  },
+  {
+   "code": "6290",
+   "name": "良維",
+   "market": "上櫃",
+   "etf": false,
+   "close": 239.5,
+   "change": 7.0,
+   "pct": 3.01,
+   "volume": 3326000,
+   "value": 758544500,
+   "ind": "電子零組件",
+   "avg": 1290227722,
+   "ratio": 0.59
+  },
+  {
+   "code": "3131",
+   "name": "弘塑",
+   "market": "上櫃",
+   "etf": false,
+   "close": 2885.0,
+   "change": -45.0,
+   "pct": -1.54,
+   "volume": 264000,
+   "value": 755045000,
+   "ind": "半導體",
+   "avg": 1447826111,
+   "ratio": 0.52
+  },
+  {
+   "code": "8043",
+   "name": "蜜望實",
+   "market": "上櫃",
+   "etf": false,
+   "close": 135.5,
+   "change": -5.5,
+   "pct": -3.9,
+   "volume": 5664000,
+   "value": 753144500,
+   "ind": "電子零組件",
+   "avg": 1531650888,
+   "ratio": 0.49
+  },
+  {
+   "code": "8932",
+   "name": "智通*",
+   "market": "上櫃",
+   "etf": false,
+   "close": 116.5,
+   "change": -0.5,
+   "pct": -0.43,
+   "volume": 6566000,
+   "value": 744994500,
+   "ind": "數位雲端",
+   "avg": 931697888,
+   "ratio": 0.8
+  },
+  {
+   "code": "00715L",
+   "name": "期街口布蘭特正2",
+   "market": "上市",
+   "etf": true,
+   "close": 49.0,
+   "change": 5.0,
+   "pct": 11.36,
+   "volume": 15247074,
+   "value": 743636567,
+   "ind": "ETF",
+   "avg": 475134422,
+   "ratio": 1.57
+  },
+  {
+   "code": "00992A",
+   "name": "主動群益科技創新",
+   "market": "上市",
+   "etf": true,
+   "close": 14.87,
+   "change": -0.35,
+   "pct": -2.3,
+   "volume": 49228323,
+   "value": 730659690,
+   "ind": "ETF",
+   "avg": 903404716,
+   "ratio": 0.81
+  },
+  {
+   "code": "00679B",
+   "name": "元大美債20年",
+   "market": "上櫃",
+   "etf": true,
+   "close": 26.99,
+   "change": 0.04,
+   "pct": 0.15,
+   "volume": 26898000,
+   "value": 725533240,
+   "ind": "ETF",
+   "avg": 634928952,
+   "ratio": 1.14
+  },
+  {
+   "code": "00405A",
+   "name": "主動富邦台灣龍耀",
+   "market": "上市",
+   "etf": true,
+   "close": 7.56,
+   "change": -0.19,
+   "pct": -2.45,
+   "volume": 95573367,
+   "value": 724653149,
+   "ind": "ETF",
+   "avg": 1185036131,
+   "ratio": 0.61
+  },
+  {
+   "code": "00922",
+   "name": "國泰台灣領袖50",
+   "market": "上市",
+   "etf": true,
+   "close": 37.5,
+   "change": -0.41,
+   "pct": -1.08,
+   "volume": 19081386,
+   "value": 717712745,
+   "ind": "ETF",
+   "avg": 488312336,
+   "ratio": 1.47
+  },
+  {
+   "code": "4931",
+   "name": "新盛力",
+   "market": "上櫃",
+   "etf": false,
+   "close": 202.5,
+   "change": 3.5,
+   "pct": 1.76,
+   "volume": 3647000,
+   "value": 704634000,
+   "ind": "電腦及週邊",
+   "avg": 2312896277,
+   "ratio": 0.3
+  },
+  {
+   "code": "00406A",
+   "name": "主動中信台灣收益",
+   "market": "上市",
+   "etf": true,
+   "close": 8.72,
+   "change": -0.1,
+   "pct": -1.13,
+   "volume": 79687375,
+   "value": 697022284,
+   "ind": "ETF",
+   "avg": 414081902,
+   "ratio": 1.68
+  },
+  {
+   "code": "7828",
+   "name": "創新服務",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1780.0,
+   "change": -165.0,
+   "pct": -8.48,
+   "volume": 383000,
+   "value": 693650000,
+   "ind": "半導體",
+   "avg": 761354444,
+   "ratio": 0.91
+  },
+  {
+   "code": "4749",
+   "name": "新應材",
+   "market": "上櫃",
+   "etf": false,
+   "close": 811.0,
+   "change": 14.0,
+   "pct": 1.76,
+   "volume": 859000,
+   "value": 684037000,
+   "ind": "半導體",
+   "avg": 748836111,
+   "ratio": 0.91
+  },
+  {
+   "code": "00891",
+   "name": "中信關鍵半導體",
+   "market": "上市",
+   "etf": true,
+   "close": 32.67,
+   "change": -0.68,
+   "pct": -2.04,
+   "volume": 20385010,
+   "value": 668999211,
+   "ind": "ETF",
+   "avg": 627894153,
+   "ratio": 1.07
+  },
+  {
+   "code": "00937B",
+   "name": "群益ESG投等債20+",
+   "market": "上櫃",
+   "etf": true,
+   "close": 14.83,
+   "change": 0.02,
+   "pct": 0.14,
+   "volume": 44701000,
+   "value": 662737230,
+   "ind": "ETF",
+   "avg": 995235247,
+   "ratio": 0.67
+  },
+  {
+   "code": "00407A",
+   "name": "主動凱基台灣",
+   "market": "上市",
+   "etf": true,
+   "close": 8.4,
+   "change": -0.18,
+   "pct": -2.1,
+   "volume": 76992076,
+   "value": 648601001,
+   "ind": "ETF",
+   "avg": 1164719644,
+   "ratio": 0.56
+  },
+  {
+   "code": "5328",
+   "name": "華容",
+   "market": "上櫃",
+   "etf": false,
+   "close": 54.9,
+   "change": -5.4,
+   "pct": -8.96,
+   "volume": 11538000,
+   "value": 645234500,
+   "ind": "電子零組件",
+   "avg": 1948043600,
+   "ratio": 0.33
+  },
+  {
+   "code": "6517",
+   "name": "保勝光學",
+   "market": "上櫃",
+   "etf": false,
+   "close": 76.3,
+   "change": 2.4,
+   "pct": 3.25,
+   "volume": 8202000,
+   "value": 630821900,
+   "ind": "光電",
+   "avg": 98730022,
+   "ratio": 6.39
+  },
+  {
+   "code": "8042",
+   "name": "金山電",
+   "market": "上櫃",
+   "etf": false,
+   "close": 117.5,
+   "change": -12.0,
+   "pct": -9.27,
+   "volume": 5044000,
+   "value": 602761500,
+   "ind": "電子零組件",
+   "avg": 1372511555,
+   "ratio": 0.44
+  },
+  {
+   "code": "00400A",
+   "name": "主動國泰動能高息",
+   "market": "上市",
+   "etf": true,
+   "close": 12.72,
+   "change": -0.27,
+   "pct": -2.08,
+   "volume": 46471238,
+   "value": 592048012,
+   "ind": "ETF",
+   "avg": 867926523,
+   "ratio": 0.68
+  },
+  {
+   "code": "6207",
+   "name": "雷科",
+   "market": "上櫃",
+   "etf": false,
+   "close": 117.5,
+   "change": -13.0,
+   "pct": -9.96,
+   "volume": 4854000,
+   "value": 591124500,
+   "ind": "電子零組件",
+   "avg": 1574347833,
+   "ratio": 0.38
+  },
+  {
+   "code": "3707",
+   "name": "漢磊",
+   "market": "上櫃",
+   "etf": false,
+   "close": 64.8,
+   "change": -3.9,
+   "pct": -5.68,
+   "volume": 8957000,
+   "value": 586058200,
+   "ind": "半導體",
+   "avg": 1404782788,
+   "ratio": 0.42
+  },
+  {
+   "code": "00687B",
+   "name": "國泰20年美債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 28.07,
+   "change": 0.04,
+   "pct": 0.14,
+   "volume": 20557000,
+   "value": 576985000,
+   "ind": "ETF",
+   "avg": 557796446,
+   "ratio": 1.03
+  },
+  {
+   "code": "6548",
+   "name": "長科*",
+   "market": "上櫃",
+   "etf": false,
+   "close": 66.6,
+   "change": -6.9,
+   "pct": -9.39,
+   "volume": 8488000,
+   "value": 573526100,
+   "ind": "半導體",
+   "avg": 887615911,
+   "ratio": 0.65
+  },
+  {
+   "code": "8064",
+   "name": "東捷",
+   "market": "上櫃",
+   "etf": false,
+   "close": 108.0,
+   "change": -8.0,
+   "pct": -6.9,
+   "volume": 5289000,
+   "value": 568607500,
+   "ind": "光電",
+   "avg": 818941888,
+   "ratio": 0.69
+  },
+  {
+   "code": "8155",
+   "name": "博智",
+   "market": "上櫃",
+   "etf": false,
+   "close": 282.0,
+   "change": -20.0,
+   "pct": -6.62,
+   "volume": 1952000,
+   "value": 552132000,
+   "ind": "電子零組件",
+   "avg": 267005277,
+   "ratio": 2.07
+  },
+  {
+   "code": "6643",
+   "name": "M31",
+   "market": "上櫃",
+   "etf": false,
+   "close": 430.5,
+   "change": 39.0,
+   "pct": 9.96,
+   "volume": 1337000,
+   "value": 550538500,
+   "ind": "半導體",
+   "avg": 182108166,
+   "ratio": 3.02
+  },
+  {
+   "code": "3357",
+   "name": "臺慶科",
+   "market": "上櫃",
+   "etf": false,
+   "close": 207.5,
+   "change": -10.5,
+   "pct": -4.82,
+   "volume": 2636000,
+   "value": 546610000,
+   "ind": "電子零組件",
+   "avg": 752180111,
+   "ratio": 0.73
+  },
+  {
+   "code": "5475",
+   "name": "德宏",
+   "market": "上櫃",
+   "etf": false,
+   "close": 147.0,
+   "change": -11.0,
+   "pct": -6.96,
+   "volume": 3576000,
+   "value": 528984000,
+   "ind": "電子零組件",
+   "avg": 646326500,
+   "ratio": 0.82
+  },
+  {
+   "code": "5386",
+   "name": "青雲",
+   "market": "上櫃",
+   "etf": false,
+   "close": 235.0,
+   "change": null,
+   "pct": null,
+   "volume": 2032000,
+   "value": 496423000,
+   "ind": "電腦及週邊",
+   "avg": 700984111,
+   "ratio": 0.71
+  },
+  {
+   "code": "6121",
+   "name": "新普",
+   "market": "上櫃",
+   "etf": false,
+   "close": 362.5,
+   "change": -8.0,
+   "pct": -2.16,
+   "volume": 1351000,
+   "value": 491356000,
+   "ind": "電腦及週邊",
+   "avg": 677645944,
+   "ratio": 0.73
+  },
+  {
+   "code": "00725B",
+   "name": "國泰投資級公司債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 35.0,
+   "change": 0.05,
+   "pct": 0.14,
+   "volume": 13617000,
+   "value": 476616530,
+   "ind": "ETF",
+   "avg": 244745116,
+   "ratio": 1.95
+  },
+  {
+   "code": "3624",
+   "name": "光頡",
+   "market": "上櫃",
+   "etf": false,
+   "close": 89.5,
+   "change": -8.2,
+   "pct": -8.39,
+   "volume": 5065000,
+   "value": 456682100,
+   "ind": "電子零組件",
+   "avg": 550412800,
+   "ratio": 0.83
+  },
+  {
+   "code": "8091",
+   "name": "翔名",
+   "market": "上櫃",
+   "etf": false,
+   "close": 241.5,
+   "change": -26.5,
+   "pct": -9.89,
+   "volume": 1750000,
+   "value": 430833000,
+   "ind": "半導體",
+   "avg": 484588555,
+   "ratio": 0.89
+  },
+  {
+   "code": "3675",
+   "name": "德微",
+   "market": "上櫃",
+   "etf": false,
+   "close": 264.5,
+   "change": -21.0,
+   "pct": -7.36,
+   "volume": 1595000,
+   "value": 427894000,
+   "ind": "半導體",
+   "avg": 487137111,
+   "ratio": 0.88
+  },
+  {
+   "code": "6138",
+   "name": "茂達",
+   "market": "上櫃",
+   "etf": false,
+   "close": 289.5,
+   "change": -15.5,
+   "pct": -5.08,
+   "volume": 1441000,
+   "value": 417014500,
+   "ind": "半導體",
+   "avg": 882990444,
+   "ratio": 0.47
+  },
+  {
+   "code": "7402",
+   "name": "邑錡",
+   "market": "上櫃",
+   "etf": false,
+   "close": 113.5,
+   "change": -3.5,
+   "pct": -2.99,
+   "volume": 3481000,
+   "value": 412440500,
+   "ind": "光電",
+   "avg": 544955944,
+   "ratio": 0.76
+  },
+  {
+   "code": "00735",
+   "name": "國泰臺韓科技",
+   "market": "上市",
+   "etf": true,
+   "close": 93.65,
+   "change": 0.6,
+   "pct": 0.64,
+   "volume": 4369695,
+   "value": 411198652,
+   "ind": "ETF",
+   "avg": 451505950,
+   "ratio": 0.91
+  },
+  {
+   "code": "6739",
+   "name": "竹陞科技",
+   "market": "上櫃",
+   "etf": false,
+   "close": 1160.0,
+   "change": 40.0,
+   "pct": 3.57,
+   "volume": 361000,
+   "value": 410925000,
+   "ind": "其他電子",
+   "avg": 474549555,
+   "ratio": 0.87
+  },
+  {
+   "code": "00713",
+   "name": "元大台灣高息低波",
+   "market": "上市",
+   "etf": true,
+   "close": 60.2,
+   "change": -0.05,
+   "pct": -0.08,
+   "volume": 6373752,
+   "value": 384275232,
+   "ind": "ETF",
+   "avg": 452710281,
+   "ratio": 0.85
+  },
+  {
+   "code": "6829",
+   "name": "千附精密",
+   "market": "上櫃",
+   "etf": false,
+   "close": 194.5,
+   "change": -14.0,
+   "pct": -6.71,
+   "volume": 1883000,
+   "value": 378005500,
+   "ind": "半導體",
+   "avg": 646838000,
+   "ratio": 0.58
+  },
+  {
+   "code": "3441",
+   "name": "聯一光",
+   "market": "上櫃",
+   "etf": false,
+   "close": 63.7,
+   "change": -4.3,
+   "pct": -6.32,
+   "volume": 5608000,
+   "value": 376332700,
+   "ind": "光電",
+   "avg": 242093288,
+   "ratio": 1.55
+  },
+  {
+   "code": "3362",
+   "name": "先進光",
+   "market": "上櫃",
+   "etf": false,
+   "close": 148.5,
+   "change": -7.5,
+   "pct": -4.81,
+   "volume": 2490000,
+   "value": 372968000,
+   "ind": "光電",
+   "avg": 899231944,
+   "ratio": 0.41
+  },
+  {
+   "code": "5443",
+   "name": "均豪",
+   "market": "上櫃",
+   "etf": false,
+   "close": 94.3,
+   "change": -3.4,
+   "pct": -3.48,
+   "volume": 3958000,
+   "value": 365423200,
+   "ind": "半導體",
+   "avg": 270594700,
+   "ratio": 1.35
+  },
+  {
+   "code": "6291",
+   "name": "沛亨",
+   "market": "上櫃",
+   "etf": false,
+   "close": 355.0,
+   "change": -18.5,
+   "pct": -4.95,
+   "volume": 1014000,
+   "value": 360151500,
+   "ind": "半導體",
+   "avg": 306793000,
+   "ratio": 1.17
+  },
+  {
+   "code": "3227",
+   "name": "原相",
+   "market": "上櫃",
+   "etf": false,
+   "close": 182.5,
+   "change": 4.5,
+   "pct": 2.53,
+   "volume": 2002000,
+   "value": 359520000,
+   "ind": "半導體",
+   "avg": 842438333,
+   "ratio": 0.43
+  },
+  {
+   "code": "5314",
+   "name": "世紀*",
+   "market": "上櫃",
+   "etf": false,
+   "close": 57.7,
+   "change": -1.5,
+   "pct": -2.53,
+   "volume": 6065000,
+   "value": 358575400,
+   "ind": "其他",
+   "avg": 757395066,
+   "ratio": 0.47
+  },
+  {
+   "code": "00865B",
+   "name": "國泰US短期公債",
+   "market": "上市",
+   "etf": true,
+   "close": 49.45,
+   "change": 0.2,
+   "pct": 0.41,
+   "volume": 7246360,
+   "value": 357972735,
+   "ind": "ETF",
+   "avg": 200862172,
+   "ratio": 1.78
+  },
+  {
+   "code": "00692",
+   "name": "富邦公司治理",
+   "market": "上市",
+   "etf": true,
+   "close": 84.8,
+   "change": -0.3,
+   "pct": -0.35,
+   "volume": 3930095,
+   "value": 333390032,
+   "ind": "ETF",
+   "avg": 122994458,
+   "ratio": 2.71
+  },
+  {
+   "code": "00980A",
+   "name": "主動野村臺灣優選",
+   "market": "上市",
+   "etf": true,
+   "close": 21.13,
+   "change": -0.28,
+   "pct": -1.31,
+   "volume": 15557861,
+   "value": 328462803,
+   "ind": "ETF",
+   "avg": 233396231,
+   "ratio": 1.41
+  },
+  {
+   "code": "6175",
+   "name": "立敦",
+   "market": "上櫃",
+   "etf": false,
+   "close": 89.1,
+   "change": -9.9,
+   "pct": -10.0,
+   "volume": 3647000,
+   "value": 328124900,
+   "ind": "電子零組件",
+   "avg": 744775577,
+   "ratio": 0.44
+  },
+  {
+   "code": "00940",
+   "name": "元大台灣價值高息",
+   "market": "上市",
+   "etf": true,
+   "close": 11.75,
+   "change": -0.13,
+   "pct": -1.09,
+   "volume": 27436720,
+   "value": 323043913,
+   "ind": "ETF",
+   "avg": 200885387,
+   "ratio": 1.61
+  },
+  {
+   "code": "00662",
+   "name": "富邦NASDAQ",
+   "market": "上市",
+   "etf": true,
+   "close": 119.3,
+   "change": 0.45,
+   "pct": 0.38,
+   "volume": 2640942,
+   "value": 315314680,
+   "ind": "ETF",
+   "avg": 512000864,
+   "ratio": 0.62
+  },
+  {
+   "code": "4971",
+   "name": "IET-KY",
+   "market": "上櫃",
+   "etf": false,
+   "close": 367.0,
+   "change": -8.0,
+   "pct": -2.13,
+   "volume": 861000,
+   "value": 313559000,
+   "ind": "半導體",
+   "avg": 354436388,
+   "ratio": 0.88
+  },
+  {
+   "code": "3693",
+   "name": "營邦",
+   "market": "上櫃",
+   "etf": false,
+   "close": 451.5,
+   "change": 9.5,
+   "pct": 2.15,
+   "volume": 693000,
+   "value": 309692500,
+   "ind": "電腦及週邊",
+   "avg": 435349777,
+   "ratio": 0.71
+  },
+  {
+   "code": "00953B",
+   "name": "群益優選非投等債",
+   "market": "上市",
+   "etf": true,
+   "close": 9.8,
+   "change": 0.03,
+   "pct": 0.31,
+   "volume": 30786983,
+   "value": 301724112,
+   "ind": "ETF",
+   "avg": 334849814,
+   "ratio": 0.9
+  },
+  {
+   "code": "8086",
+   "name": "宏捷科",
+   "market": "上櫃",
+   "etf": false,
+   "close": 115.0,
+   "change": -3.5,
+   "pct": -2.95,
+   "volume": 2655000,
+   "value": 300561000,
+   "ind": "半導體",
+   "avg": 367864222,
+   "ratio": 0.82
+  },
+  {
+   "code": "6693",
+   "name": "廣閎科",
+   "market": "上櫃",
+   "etf": false,
+   "close": 179.5,
+   "change": -11.5,
+   "pct": -6.02,
+   "volume": 1668000,
+   "value": 298022500,
+   "ind": "半導體",
+   "avg": 245960277,
+   "ratio": 1.21
+  },
+  {
+   "code": "00892",
+   "name": "富邦台灣半導體",
+   "market": "上市",
+   "etf": true,
+   "close": 37.02,
+   "change": -0.56,
+   "pct": -1.49,
+   "volume": 7968177,
+   "value": 295353325,
+   "ind": "ETF",
+   "avg": 420862181,
+   "ratio": 0.7
+  },
+  {
+   "code": "3577",
+   "name": "泓格",
+   "market": "上櫃",
+   "etf": false,
+   "close": 143.0,
+   "change": 13.0,
+   "pct": 10.0,
+   "volume": 2092000,
+   "value": 294197500,
+   "ind": "電腦及週邊",
+   "avg": 92717500,
+   "ratio": 3.17
+  },
+  {
+   "code": "00665L",
+   "name": "富邦恒生國企正2",
+   "market": "上市",
+   "etf": true,
+   "close": 9.37,
+   "change": 0.69,
+   "pct": 7.95,
+   "volume": 30801331,
+   "value": 284082078,
+   "ind": "ETF",
+   "avg": 281386917,
+   "ratio": 1.01
+  },
+  {
+   "code": "6727",
+   "name": "亞泰金屬",
+   "market": "上櫃",
+   "etf": false,
+   "close": 331.0,
+   "change": -36.5,
+   "pct": -9.93,
+   "volume": 839000,
+   "value": 283118000,
+   "ind": "電子零組件",
+   "avg": 1066476000,
+   "ratio": 0.27
+  },
+  {
+   "code": "8383",
+   "name": "千附",
+   "market": "上櫃",
+   "etf": false,
+   "close": 80.2,
+   "change": -8.8,
+   "pct": -9.89,
+   "volume": 3390000,
+   "value": 279780100,
+   "ind": "半導體",
+   "avg": 726437033,
+   "ratio": 0.39
+  },
+  {
+   "code": "00751B",
+   "name": "元大AAA至A公司債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 31.49,
+   "change": 0.05,
+   "pct": 0.16,
+   "volume": 8821000,
+   "value": 277652910,
+   "ind": "ETF",
+   "avg": 182359898,
+   "ratio": 1.52
+  },
+  {
+   "code": "3455",
+   "name": "由田",
+   "market": "上櫃",
+   "etf": false,
+   "close": 190.5,
+   "change": -9.5,
+   "pct": -4.75,
+   "volume": 1433000,
+   "value": 273535500,
+   "ind": "光電",
+   "avg": 396275555,
+   "ratio": 0.69
+  },
+  {
+   "code": "6903",
+   "name": "巨漢",
+   "market": "上櫃",
+   "etf": false,
+   "close": 344.0,
+   "change": -18.5,
+   "pct": -5.1,
+   "volume": 785000,
+   "value": 273531000,
+   "ind": "其他電子",
+   "avg": 358496166,
+   "ratio": 0.76
+  },
+  {
+   "code": "00670L",
+   "name": "富邦NASDAQ正2",
+   "market": "上市",
+   "etf": true,
+   "close": 192.0,
+   "change": 0.45,
+   "pct": 0.23,
+   "volume": 1418862,
+   "value": 273387028,
+   "ind": "ETF",
+   "avg": 159565289,
+   "ratio": 1.71
+  },
+  {
+   "code": "6435",
+   "name": "大中",
+   "market": "上櫃",
+   "etf": false,
+   "close": 267.0,
+   "change": -23.0,
+   "pct": -7.93,
+   "volume": 1004000,
+   "value": 272105500,
+   "ind": "半導體",
+   "avg": 717485944,
+   "ratio": 0.38
+  },
+  {
+   "code": "00712",
+   "name": "復華富時不動產",
+   "market": "上市",
+   "etf": true,
+   "close": 9.03,
+   "change": -0.03,
+   "pct": -0.33,
+   "volume": 29687967,
+   "value": 268202445,
+   "ind": "ETF",
+   "avg": 357901547,
+   "ratio": 0.75
+  },
+  {
+   "code": "6538",
+   "name": "倉和",
+   "market": "上櫃",
+   "etf": false,
+   "close": 141.5,
+   "change": 4.5,
+   "pct": 3.28,
+   "volume": 1839000,
+   "value": 261154000,
+   "ind": "電子零組件",
+   "avg": 216993166,
+   "ratio": 1.2
+  },
+  {
+   "code": "00997A",
+   "name": "主動群益美國增長",
+   "market": "上市",
+   "etf": true,
+   "close": 11.22,
+   "change": 0.22,
+   "pct": 2.0,
+   "volume": 23119700,
+   "value": 258451020,
+   "ind": "ETF",
+   "avg": 386748701,
+   "ratio": 0.67
+  },
+  {
+   "code": "00633L",
+   "name": "富邦上証正2",
+   "market": "上市",
+   "etf": true,
+   "close": 48.2,
+   "change": 1.8,
+   "pct": 3.88,
+   "volume": 5347187,
+   "value": 257284216,
+   "ind": "ETF",
+   "avg": 199258301,
+   "ratio": 1.29
+  },
+  {
+   "code": "00882",
+   "name": "中信中國高股息",
+   "market": "上市",
+   "etf": true,
+   "close": 15.01,
+   "change": 0.45,
+   "pct": 3.09,
+   "volume": 17211652,
+   "value": 256499144,
+   "ind": "ETF",
+   "avg": 136342063,
+   "ratio": 1.88
+  },
+  {
+   "code": "00673R",
+   "name": "期元大S&P原油反1",
+   "market": "上市",
+   "etf": true,
+   "close": 13.03,
+   "change": -0.78,
+   "pct": -5.65,
+   "volume": 19482474,
+   "value": 253881818,
+   "ind": "ETF",
+   "avg": 217852949,
+   "ratio": 1.17
+  },
+  {
+   "code": "4973",
+   "name": "廣穎",
+   "market": "上櫃",
+   "etf": false,
+   "close": 135.5,
+   "change": -5.5,
+   "pct": -3.9,
+   "volume": 1841000,
+   "value": 249602000,
+   "ind": "半導體",
+   "avg": 304819222,
+   "ratio": 0.82
+  },
+  {
+   "code": "00753L",
+   "name": "中信中國50正2",
+   "market": "上市",
+   "etf": true,
+   "close": 9.52,
+   "change": 0.6,
+   "pct": 6.73,
+   "volume": 26320744,
+   "value": 247165141,
+   "ind": "ETF",
+   "avg": 163517996,
+   "ratio": 1.51
+  },
+  {
+   "code": "4760",
+   "name": "勤凱",
+   "market": "上櫃",
+   "etf": false,
+   "close": 234.0,
+   "change": -16.0,
+   "pct": -6.4,
+   "volume": 1042000,
+   "value": 246507000,
+   "ind": "其他電子",
+   "avg": 264463277,
+   "ratio": 0.93
+  },
+  {
+   "code": "6127",
+   "name": "九豪",
+   "market": "上櫃",
+   "etf": false,
+   "close": 55.1,
+   "change": -5.0,
+   "pct": -8.32,
+   "volume": 4395000,
+   "value": 244380100,
+   "ind": "電子零組件",
+   "avg": 532792377,
+   "ratio": 0.46
+  },
+  {
+   "code": "00764B",
+   "name": "群益25年美債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 28.01,
+   "change": 0.04,
+   "pct": 0.14,
+   "volume": 8709000,
+   "value": 243863090,
+   "ind": "ETF",
+   "avg": 190068547,
+   "ratio": 1.28
+  },
+  {
+   "code": "4772",
+   "name": "台特化",
+   "market": "上櫃",
+   "etf": false,
+   "close": 236.0,
+   "change": -9.5,
+   "pct": -3.87,
+   "volume": 1015000,
+   "value": 239771000,
+   "ind": "化學工業",
+   "avg": 187176166,
+   "ratio": 1.28
+  },
+  {
+   "code": "00877",
+   "name": "復華中國5G",
+   "market": "上櫃",
+   "etf": true,
+   "close": 37.5,
+   "change": -1.11,
+   "pct": -2.87,
+   "volume": 6207000,
+   "value": 237517810,
+   "ind": "ETF",
+   "avg": 218155175,
+   "ratio": 1.09
+  },
+  {
+   "code": "8096",
+   "name": "擎亞",
+   "market": "上櫃",
+   "etf": false,
+   "close": 128.0,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 1988000,
+   "value": 237333500,
+   "ind": "電子通路",
+   "avg": 1810069000,
+   "ratio": 0.13
+  },
+  {
+   "code": "00720B",
+   "name": "元大投資級公司債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 33.36,
+   "change": 0.03,
+   "pct": 0.09,
+   "volume": 7090000,
+   "value": 236466810,
+   "ind": "ETF",
+   "avg": 266461883,
+   "ratio": 0.89
+  },
+  {
+   "code": "6811",
+   "name": "宏碁資訊",
+   "market": "上櫃",
+   "etf": false,
+   "close": 230.5,
+   "change": -9.0,
+   "pct": -3.76,
+   "volume": 1006000,
+   "value": 236124500,
+   "ind": "數位雲端",
+   "avg": 74777111,
+   "ratio": 3.16
+  },
+  {
+   "code": "5904",
+   "name": "寶雅",
+   "market": "上櫃",
+   "etf": false,
+   "close": 611.0,
+   "change": -4.0,
+   "pct": -0.65,
+   "volume": 385000,
+   "value": 234300000,
+   "ind": "居家生活",
+   "avg": 482936111,
+   "ratio": 0.49
+  },
+  {
+   "code": "6664",
+   "name": "群翊",
+   "market": "上櫃",
+   "etf": false,
+   "close": 359.0,
+   "change": -3.5,
+   "pct": -0.97,
+   "volume": 657000,
+   "value": 231833500,
+   "ind": "電子零組件",
+   "avg": 177677388,
+   "ratio": 1.3
+  },
+  {
+   "code": "4908",
+   "name": "前鼎",
+   "market": "上櫃",
+   "etf": false,
+   "close": 135.0,
+   "change": -3.0,
+   "pct": -2.17,
+   "volume": 1590000,
+   "value": 211261500,
+   "ind": "通信網路",
+   "avg": 223168944,
+   "ratio": 0.95
+  },
+  {
+   "code": "6584",
+   "name": "南俊國際",
+   "market": "上櫃",
+   "etf": false,
+   "close": 540.0,
+   "change": -39.0,
+   "pct": -6.74,
+   "volume": 370000,
+   "value": 201069000,
+   "ind": "電子零組件",
+   "avg": 275284333,
+   "ratio": 0.73
+  },
+  {
+   "code": "3236",
+   "name": "千如",
+   "market": "上櫃",
+   "etf": false,
+   "close": 44.45,
+   "change": -3.9,
+   "pct": -8.07,
+   "volume": 4416000,
+   "value": 199891750,
+   "ind": "電子零組件",
+   "avg": 381948205,
+   "ratio": 0.52
+  },
+  {
+   "code": "3317",
+   "name": "尼克森",
+   "market": "上櫃",
+   "etf": false,
+   "close": 77.8,
+   "change": -6.5,
+   "pct": -7.71,
+   "volume": 2496000,
+   "value": 197919700,
+   "ind": "半導體",
+   "avg": 560811900,
+   "ratio": 0.35
+  },
+  {
+   "code": "3498",
+   "name": "陽程",
+   "market": "上櫃",
+   "etf": false,
+   "close": 109.5,
+   "change": -7.5,
+   "pct": -6.41,
+   "volume": 1784000,
+   "value": 195440500,
+   "ind": "其他電子",
+   "avg": 461592777,
+   "ratio": 0.42
+  },
+  {
+   "code": "00724B",
+   "name": "群益投資級金融債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 33.77,
+   "change": 0.08,
+   "pct": 0.24,
+   "volume": 5736000,
+   "value": 193697150,
+   "ind": "ETF",
+   "avg": 124465046,
+   "ratio": 1.56
+  },
+  {
+   "code": "3551",
+   "name": "世禾",
+   "market": "上櫃",
+   "etf": false,
+   "close": 185.0,
+   "change": -7.5,
+   "pct": -3.9,
+   "volume": 1026000,
+   "value": 191963500,
+   "ind": "綠能環保",
+   "avg": 390945222,
+   "ratio": 0.49
+  },
+  {
+   "code": "00933B",
+   "name": "國泰10Y+金融債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 16.09,
+   "change": 0.03,
+   "pct": 0.19,
+   "volume": 11272000,
+   "value": 181431440,
+   "ind": "ETF",
+   "avg": 176986225,
+   "ratio": 1.03
+  },
+  {
+   "code": "00981B",
+   "name": "第一金優選非投債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 9.38,
+   "change": 0.02,
+   "pct": 0.21,
+   "volume": 17493000,
+   "value": 163872710,
+   "ind": "ETF",
+   "avg": 126433185,
+   "ratio": 1.3
+  },
+  {
+   "code": "00887",
+   "name": "永豐中國科技50大",
+   "market": "上櫃",
+   "etf": true,
+   "close": 16.72,
+   "change": -0.06,
+   "pct": -0.36,
+   "volume": 9408000,
+   "value": 159078560,
+   "ind": "ETF",
+   "avg": 198480266,
+   "ratio": 0.8
+  },
+  {
+   "code": "00719B",
+   "name": "元大美債1-3",
+   "market": "上櫃",
+   "etf": true,
+   "close": 31.75,
+   "change": 0.07,
+   "pct": 0.22,
+   "volume": 4881000,
+   "value": 154975880,
+   "ind": "ETF",
+   "avg": 93339204,
+   "ratio": 1.66
+  },
+  {
+   "code": "00859B",
+   "name": "群益0-1年美債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 41.59,
+   "change": 0.09,
+   "pct": 0.22,
+   "volume": 3137000,
+   "value": 130545080,
+   "ind": "ETF",
+   "avg": 97106204,
+   "ratio": 1.34
+  },
+  {
+   "code": "00795B",
+   "name": "中信美國公債20年",
+   "market": "上櫃",
+   "etf": true,
+   "close": 27.16,
+   "change": 0.03,
+   "pct": 0.11,
+   "volume": 3952000,
+   "value": 107345050,
+   "ind": "ETF",
+   "avg": 150281693,
+   "ratio": 0.71
+  },
+  {
+   "code": "00772B",
+   "name": "中信高評級公司債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 33.68,
+   "change": 0.05,
+   "pct": 0.15,
+   "volume": 3106000,
+   "value": 104590180,
+   "ind": "ETF",
+   "avg": 83129494,
+   "ratio": 1.26
+  },
+  {
+   "code": "00928",
+   "name": "中信上櫃ESG 30",
+   "market": "上櫃",
+   "etf": true,
+   "close": 28.19,
+   "change": -0.77,
+   "pct": -2.66,
+   "volume": 3238000,
+   "value": 90977460,
+   "ind": "ETF",
+   "avg": 121738081,
+   "ratio": 0.75
+  },
+  {
+   "code": "00740B",
+   "name": "富邦全球投等債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 38.65,
+   "change": 0.04,
+   "pct": 0.1,
+   "volume": 2121000,
+   "value": 81948770,
+   "ind": "ETF",
+   "avg": 94256055,
+   "ratio": 0.87
+  },
+  {
+   "code": "00768B",
+   "name": "復華20年美債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 50.6,
+   "change": 0.1,
+   "pct": 0.2,
+   "volume": 1455000,
+   "value": 73620650,
+   "ind": "ETF",
+   "avg": 27957288,
+   "ratio": 2.63
+  },
+  {
+   "code": "00981D",
+   "name": "主動中信非投等債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 10.49,
+   "change": 0.02,
+   "pct": 0.19,
+   "volume": 5724000,
+   "value": 60008200,
+   "ind": "ETF",
+   "avg": 52169783,
+   "ratio": 1.15
+  },
+  {
+   "code": "009823",
+   "name": "群益S&P500",
+   "market": "上櫃",
+   "etf": true,
+   "close": 10.32,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 5523000,
+   "value": 57004000,
+   "ind": "ETF",
+   "avg": 80363181,
+   "ratio": 0.71
+  },
+  {
+   "code": "00955",
+   "name": "中信日本商社",
+   "market": "上櫃",
+   "etf": true,
+   "close": 14.3,
+   "change": 0.2,
+   "pct": 1.42,
+   "volume": 3657000,
+   "value": 52284290,
+   "ind": "ETF",
+   "avg": 88404833,
+   "ratio": 0.59
+  },
+  {
+   "code": "00931B",
+   "name": "統一美債20年",
+   "market": "上櫃",
+   "etf": true,
+   "close": 13.51,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 3861000,
+   "value": 52138180,
+   "ind": "ETF",
+   "avg": 30700480,
+   "ratio": 1.7
+  },
+  {
+   "code": "00988B",
+   "name": "玉山嚴選非投債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 19.96,
+   "change": 0.0,
+   "pct": 0.0,
+   "volume": 2493000,
+   "value": 49788500,
+   "ind": "ETF",
+   "avg": 113544588,
+   "ratio": 0.44
+  },
+  {
+   "code": "00722B",
+   "name": "群益投資級電信債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 35.48,
+   "change": 0.03,
+   "pct": 0.08,
+   "volume": 1249000,
+   "value": 44283140,
+   "ind": "ETF",
+   "avg": 130149916,
+   "ratio": 0.34
+  },
+  {
+   "code": "00948B",
+   "name": "中信優息投資級債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 9.47,
+   "change": 0.01,
+   "pct": 0.11,
+   "volume": 4409000,
+   "value": 41753200,
+   "ind": "ETF",
+   "avg": 72533260,
+   "ratio": 0.58
+  },
+  {
+   "code": "009815",
+   "name": "大華美國MAG7+",
+   "market": "上櫃",
+   "etf": true,
+   "close": 11.25,
+   "change": 0.03,
+   "pct": 0.27,
+   "volume": 3507000,
+   "value": 39424220,
+   "ind": "ETF",
+   "avg": 59643811,
+   "ratio": 0.66
+  },
+  {
+   "code": "00990B",
+   "name": "國泰收益非投等債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 10.05,
+   "change": 0.02,
+   "pct": 0.2,
+   "volume": 3856000,
+   "value": 38757210,
+   "ind": "ETF",
+   "avg": 102557403,
+   "ratio": 0.38
+  },
+  {
+   "code": "00864B",
+   "name": "中信美國公債0-1",
+   "market": "上櫃",
+   "etf": true,
+   "close": 47.22,
+   "change": 0.13,
+   "pct": 0.28,
+   "volume": 809000,
+   "value": 38169220,
+   "ind": "ETF",
+   "avg": 61886622,
+   "ratio": 0.62
+  },
+  {
+   "code": "00857B",
+   "name": "永豐20年美公債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 23.33,
+   "change": 0.04,
+   "pct": 0.17,
+   "volume": 1578000,
+   "value": 36806650,
+   "ind": "ETF",
+   "avg": 35436055,
+   "ratio": 1.04
+  },
+  {
+   "code": "00696B",
+   "name": "富邦美債20年",
+   "market": "上櫃",
+   "etf": true,
+   "close": 29.11,
+   "change": 0.04,
+   "pct": 0.14,
+   "volume": 1156000,
+   "value": 33642910,
+   "ind": "ETF",
+   "avg": 68089018,
+   "ratio": 0.49
+  },
+  {
+   "code": "00998A",
+   "name": "主動復華金融股息",
+   "market": "上櫃",
+   "etf": true,
+   "close": 17.13,
+   "change": -0.11,
+   "pct": -0.64,
+   "volume": 1733000,
+   "value": 29692830,
+   "ind": "ETF",
+   "avg": 54419164,
+   "ratio": 0.55
+  },
+  {
+   "code": "00950B",
+   "name": "凱基A級公司債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 14.17,
+   "change": 0.02,
+   "pct": 0.14,
+   "volume": 2089000,
+   "value": 29563330,
+   "ind": "ETF",
+   "avg": 71495635,
+   "ratio": 0.41
+  },
+  {
+   "code": "00853B",
+   "name": "統一美債10年Aa-A",
+   "market": "上櫃",
+   "etf": true,
+   "close": 27.74,
+   "change": 0.03,
+   "pct": 0.11,
+   "volume": 1011000,
+   "value": 28024920,
+   "ind": "ETF",
+   "avg": 26670874,
+   "ratio": 1.05
+  },
+  {
+   "code": "00695B",
+   "name": "富邦美債7-10",
+   "market": "上櫃",
+   "etf": true,
+   "close": 35.6,
+   "change": 0.01,
+   "pct": 0.03,
+   "volume": 755000,
+   "value": 26870300,
+   "ind": "ETF",
+   "avg": 11715288,
+   "ratio": 2.29
+  },
+  {
+   "code": "009825",
+   "name": "聯邦美國金融創新",
+   "market": "上櫃",
+   "etf": true,
+   "close": 9.74,
+   "change": 0.11,
+   "pct": 1.14,
+   "volume": 2733000,
+   "value": 26393780,
+   "ind": "ETF"
+  },
+  {
+   "code": "00942B",
+   "name": "台新美A公司債20+",
+   "market": "上櫃",
+   "etf": true,
+   "close": 14.29,
+   "change": 0.02,
+   "pct": 0.14,
+   "volume": 1779000,
+   "value": 25401690,
+   "ind": "ETF",
+   "avg": 24724296,
+   "ratio": 1.03
+  },
+  {
+   "code": "006201",
+   "name": "元大富櫃50",
+   "market": "上櫃",
+   "etf": true,
+   "close": 39.8,
+   "change": -1.5,
+   "pct": -3.63,
+   "volume": 622000,
+   "value": 24662720,
+   "ind": "ETF",
+   "avg": 10550984,
+   "ratio": 2.34
+  },
+  {
+   "code": "00773B",
+   "name": "中信優先金融債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 36.06,
+   "change": 0.08,
+   "pct": 0.22,
+   "volume": 659000,
+   "value": 23753100,
+   "ind": "ETF",
+   "avg": 40115295,
+   "ratio": 0.59
+  },
+  {
+   "code": "00746B",
+   "name": "富邦A級公司債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 35.52,
+   "change": 0.03,
+   "pct": 0.08,
+   "volume": 652000,
+   "value": 23165550,
+   "ind": "ETF",
+   "avg": 34630336,
+   "ratio": 0.67
+  },
+  {
+   "code": "00842B",
+   "name": "台新美元銀行債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 30.19,
+   "change": 0.07,
+   "pct": 0.23,
+   "volume": 698000,
+   "value": 21070730,
+   "ind": "ETF",
+   "avg": 7131908,
+   "ratio": 2.95
+  },
+  {
+   "code": "00986D",
+   "name": "主動復華金融債息",
+   "market": "上櫃",
+   "etf": true,
+   "close": 14.9,
+   "change": 0.06,
+   "pct": 0.4,
+   "volume": 1169000,
+   "value": 17395150,
+   "ind": "ETF",
+   "avg": 18995548,
+   "ratio": 0.92
+  },
+  {
+   "code": "00779B",
+   "name": "凱基美債25+",
+   "market": "上櫃",
+   "etf": true,
+   "close": 28.32,
+   "change": -0.04,
+   "pct": -0.14,
+   "volume": 531000,
+   "value": 15043210,
+   "ind": "ETF",
+   "avg": 13406752,
+   "ratio": 1.12
+  },
+  {
+   "code": "00726B",
+   "name": "國泰新興投等債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 33.49,
+   "change": 0.06,
+   "pct": 0.18,
+   "volume": 439000,
+   "value": 14692990,
+   "ind": "ETF",
+   "avg": 7143213,
+   "ratio": 2.06
+  },
+  {
+   "code": "009814",
+   "name": "富邦標普500",
+   "market": "上櫃",
+   "etf": true,
+   "close": 11.2,
+   "change": 0.01,
+   "pct": 0.09,
+   "volume": 1176000,
+   "value": 13182100,
+   "ind": "ETF",
+   "avg": 11215973,
+   "ratio": 1.18
+  },
+  {
+   "code": "00968B",
+   "name": "元大優息投等債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 9.32,
+   "change": 0.01,
+   "pct": 0.11,
+   "volume": 1344000,
+   "value": 12530190,
+   "ind": "ETF",
+   "avg": 26946287,
+   "ratio": 0.47
+  },
+  {
+   "code": "00780B",
+   "name": "國泰A級金融債",
+   "market": "上櫃",
+   "etf": true,
+   "close": 37.87,
+   "change": 0.13,
+   "pct": 0.34,
+   "volume": 320000,
+   "value": 12113710,
+   "ind": "ETF",
+   "avg": 7848602,
+   "ratio": 1.54
+  },
+  {
+   "code": "00858",
+   "name": "永豐美國500大",
+   "market": "上櫃",
+   "etf": true,
+   "close": 36.77,
+   "change": 0.08,
+   "pct": 0.22,
+   "volume": 317000,
+   "value": 11658510,
+   "ind": "ETF",
+   "avg": 17040094,
+   "ratio": 0.68
+  },
+  {
+   "code": "00959B",
+   "name": "大華投等美債15Y+",
+   "market": "上櫃",
+   "etf": true,
+   "close": 9.42,
+   "change": 0.01,
+   "pct": 0.11,
+   "volume": 1175000,
+   "value": 11075160,
+   "ind": "ETF",
+   "avg": 13888733,
+   "ratio": 0.8
+  }
+ ],
+ "industries": [
+  {
+   "name": "半導體",
+   "value": 496175340951,
+   "count": 206,
+   "pct": -2.67,
+   "top": [
+    [
+     "2330",
+     "台積電",
+     129815956839,
+     1.31
+    ],
+    [
+     "2303",
+     "聯電",
+     39091767011,
+     -9.72
+    ],
+    [
+     "2454",
+     "聯發科",
+     30849610283,
+     -0.89
+    ],
+    [
+     "2408",
+     "南亞科",
+     28824468384,
+     -3.67
+    ],
+    [
+     "3711",
+     "日月光投控",
+     18333992563,
+     -2.77
+    ],
+    [
+     "3189",
+     "景碩",
+     16462657909,
+     -2.02
+    ],
+    [
+     "2344",
+     "華邦電",
+     16338516837,
+     -2.58
+    ],
+    [
+     "6488",
+     "環球晶",
+     14781430000,
+     2.02
+    ],
+    [
+     "6182",
+     "合晶",
+     13135398500,
+     -9.7
+    ],
+    [
+     "6770",
+     "力積電",
+     11583911314,
+     -8.56
+    ],
+    [
+     "2337",
+     "旺宏",
+     8542824697,
+     -6.0
+    ],
+    [
+     "5483",
+     "中美晶",
+     8301377500,
+     -3.4
+    ],
+    [
+     "2449",
+     "京元電子",
+     8131545819,
+     -5.58
+    ],
+    [
+     "8299",
+     "群聯",
+     7815675000,
+     -2.8
+    ],
+    [
+     "3661",
+     "世芯-KY",
+     6926497805,
+     -3.3
+    ],
+    [
+     "3443",
+     "創意",
+     6700555410,
+     -2.35
+    ],
+    [
+     "3105",
+     "穩懋",
+     6170298000,
+     -5.71
+    ],
+    [
+     "5274",
+     "信驊",
+     5911305000,
+     -0.27
+    ],
+    [
+     "6239",
+     "力成",
+     5758783760,
+     -7.47
+    ],
+    [
+     "3532",
+     "台勝科",
+     5634281076,
+     9.91
+    ],
+    [
+     "5347",
+     "世界",
+     5450753500,
+     -9.76
+    ],
+    [
+     "8150",
+     "南茂",
+     5180565968,
+     -6.79
+    ],
+    [
+     "6147",
+     "頎邦",
+     5174837000,
+     -8.12
+    ],
+    [
+     "3374",
+     "精材",
+     5151440000,
+     -3.63
+    ],
+    [
+     "6223",
+     "旺矽",
+     5064975000,
+     -2.59
+    ]
+   ]
+  },
+  {
+   "name": "電子零組件",
+   "value": 223966498429,
+   "count": 210,
+   "pct": -4.24,
+   "top": [
+    [
+     "2327",
+     "國巨*",
+     25211432022,
+     -9.87
+    ],
+    [
+     "3037",
+     "欣興",
+     23514772172,
+     -5.54
+    ],
+    [
+     "8046",
+     "南電",
+     20383430745,
+     -3.91
+    ],
+    [
+     "2308",
+     "台達電",
+     19883325570,
+     -2.01
+    ],
+    [
+     "4958",
+     "臻鼎-KY",
+     17470514128,
+     -8.16
+    ],
+    [
+     "2383",
+     "台光電",
+     14161004110,
+     -2.22
+    ],
+    [
+     "6213",
+     "聯茂",
+     11849413356,
+     1.1
+    ],
+    [
+     "8039",
+     "台虹",
+     10408964427,
+     0.26
+    ],
+    [
+     "6274",
+     "台燿",
+     9940075000,
+     -3.85
+    ],
+    [
+     "2313",
+     "華通",
+     8319360274,
+     -6.13
+    ],
+    [
+     "2059",
+     "川湖",
+     6244304770,
+     -1.77
+    ],
+    [
+     "2368",
+     "金像電",
+     5400372163,
+     0.0
+    ],
+    [
+     "3653",
+     "健策",
+     4772558810,
+     -0.31
+    ],
+    [
+     "3026",
+     "禾伸堂",
+     3010195200,
+     -10.0
+    ],
+    [
+     "8358",
+     "金居",
+     2755064500,
+     -6.9
+    ],
+    [
+     "3533",
+     "嘉澤",
+     2145251430,
+     2.14
+    ],
+    [
+     "3042",
+     "晶技",
+     1947504436,
+     -6.82
+    ],
+    [
+     "4939",
+     "亞電",
+     1849596700,
+     9.97
+    ],
+    [
+     "2472",
+     "立隆電",
+     1598101026,
+     -7.81
+    ],
+    [
+     "1815",
+     "富喬",
+     1407718300,
+     -5.15
+    ],
+    [
+     "3044",
+     "健鼎",
+     1108049801,
+     -2.39
+    ],
+    [
+     "2493",
+     "揚博",
+     1089166318,
+     2.6
+    ],
+    [
+     "6781",
+     "AES-KY",
+     986320682,
+     -3.54
+    ],
+    [
+     "6805",
+     "富世達",
+     979925600,
+     -2.97
+    ],
+    [
+     "2467",
+     "志聖",
+     957311390,
+     -6.45
+    ]
+   ]
+  },
+  {
+   "name": "ETF",
+   "value": 128327294345,
+   "count": 344,
+   "pct": -0.84,
+   "top": [
+    [
+     "0050",
+     "元大台灣50",
+     37210773781,
+     -0.95
+    ],
+    [
+     "00631L",
+     "元大台灣50正2",
+     10631268811,
+     -0.34
+    ],
+    [
+     "0056",
+     "元大高股息",
+     8291600176,
+     -1.58
+    ],
+    [
+     "00981A",
+     "主動統一台股增長",
+     7052080689,
+     -2.01
+    ],
+    [
+     "00403A",
+     "主動統一升級50",
+     4309793572,
+     -2.52
+    ],
+    [
+     "00685L",
+     "群益臺灣加權正2",
+     3558961868,
+     -1.23
+    ],
+    [
+     "009816",
+     "凱基台灣TOP50",
+     3455059185,
+     -0.98
+    ],
+    [
+     "00919",
+     "群益台灣精選高息",
+     3099851926,
+     -1.31
+    ],
+    [
+     "00991A",
+     "主動復華未來50",
+     2819875155,
+     -1.9
+    ],
+    [
+     "0052",
+     "富邦科技",
+     2239800396,
+     -0.52
+    ],
+    [
+     "00929",
+     "復華台灣科技優息",
+     2157042988,
+     -2.03
+    ],
+    [
+     "00632R",
+     "元大台灣50反1",
+     2152751007,
+     0.65
+    ],
+    [
+     "00878",
+     "國泰永續高股息",
+     1973387603,
+     -1.41
+    ],
+    [
+     "006208",
+     "富邦台50",
+     1697529636,
+     -0.77
+    ],
+    [
+     "00927",
+     "群益半導體收益",
+     1611882618,
+     -3.31
+    ],
+    [
+     "00663L",
+     "國泰臺灣加權正2",
+     1361907460,
+     -1.14
+    ],
+    [
+     "00935",
+     "野村臺灣新科技50",
+     1185391055,
+     -2.25
+    ],
+    [
+     "00988A",
+     "主動統一全球創新",
+     1177861097,
+     1.97
+    ],
+    [
+     "00982A",
+     "主動群益台灣強棒",
+     1050286192,
+     -1.63
+    ],
+    [
+     "00830",
+     "國泰費城半導體",
+     1043848776,
+     1.87
+    ],
+    [
+     "00888",
+     "永豐台灣ESG",
+     921839250,
+     -3.6
+    ],
+    [
+     "00881",
+     "國泰台灣科技龍頭",
+     913354154,
+     -1.37
+    ],
+    [
+     "00675L",
+     "富邦臺灣加權正2",
+     902571970,
+     -1.33
+    ],
+    [
+     "00637L",
+     "元大滬深300正2",
+     841305238,
+     4.3
+    ],
+    [
+     "00918",
+     "大華優利高填息30",
+     800593650,
+     -0.29
+    ]
+   ]
+  },
+  {
+   "name": "電腦及週邊",
+   "value": 68866444681,
+   "count": 109,
+   "pct": -1.2,
+   "top": [
+    [
+     "2382",
+     "廣達",
+     11350929340,
+     -2.92
+    ],
+    [
+     "3017",
+     "奇鋐",
+     9356599417,
+     -2.95
+    ],
+    [
+     "3231",
+     "緯創",
+     7482595188,
+     3.24
+    ],
+    [
+     "6669",
+     "緯穎",
+     6703381695,
+     1.41
+    ],
+    [
+     "2301",
+     "光寶科",
+     3286276729,
+     -1.53
+    ],
+    [
+     "5289",
+     "宜鼎",
+     3026250000,
+     -4.71
+    ],
+    [
+     "2357",
+     "華碩",
+     2564729415,
+     -1.71
+    ],
+    [
+     "2376",
+     "技嘉",
+     2443968446,
+     1.85
+    ],
+    [
+     "3211",
+     "順達",
+     2196671000,
+     -8.17
+    ],
+    [
+     "2324",
+     "仁寶",
+     2024619549,
+     -4.44
+    ],
+    [
+     "2356",
+     "英業達",
+     1972412765,
+     -2.22
+    ],
+    [
+     "2395",
+     "研華",
+     1966262917,
+     0.58
+    ],
+    [
+     "2377",
+     "微星",
+     1856441170,
+     0.0
+    ],
+    [
+     "6414",
+     "樺漢",
+     1438860018,
+     2.53
+    ],
+    [
+     "8210",
+     "勤誠",
+     1164300920,
+     -1.37
+    ],
+    [
+     "4938",
+     "和碩",
+     953955996,
+     -2.68
+    ],
+    [
+     "3706",
+     "神達",
+     866934819,
+     0.11
+    ],
+    [
+     "2353",
+     "宏碁",
+     733539893,
+     -1.18
+    ],
+    [
+     "4931",
+     "新盛力",
+     704634000,
+     1.76
+    ],
+    [
+     "4916",
+     "事欣科",
+     546597044,
+     -4.22
+    ],
+    [
+     "5386",
+     "青雲",
+     496423000,
+     null
+    ],
+    [
+     "6121",
+     "新普",
+     491356000,
+     -2.16
+    ],
+    [
+     "3005",
+     "神基",
+     406362842,
+     -0.45
+    ],
+    [
+     "6277",
+     "宏正",
+     375392814,
+     0.0
+    ],
+    [
+     "3693",
+     "營邦",
+     309692500,
+     2.15
+    ]
+   ]
+  },
+  {
+   "name": "光電",
+   "value": 47983009778,
+   "count": 115,
+   "pct": -3.5,
+   "top": [
+    [
+     "3481",
+     "群創",
+     18647172011,
+     -4.18
+    ],
+    [
+     "3008",
+     "大立光",
+     6050596645,
+     -3.37
+    ],
+    [
+     "2409",
+     "友達",
+     6032277865,
+     -1.55
+    ],
+    [
+     "2486",
+     "一詮",
+     1967231921,
+     -8.07
+    ],
+    [
+     "8069",
+     "元太",
+     1084885000,
+     null
+    ],
+    [
+     "3406",
+     "玉晶光",
+     897802393,
+     -3.66
+    ],
+    [
+     "3576",
+     "聯合再生",
+     800477179,
+     3.36
+    ],
+    [
+     "6278",
+     "台表科",
+     763489951,
+     -4.26
+    ],
+    [
+     "3149",
+     "正達",
+     653184788,
+     -4.27
+    ],
+    [
+     "6517",
+     "保勝光學",
+     630821900,
+     3.25
+    ],
+    [
+     "8064",
+     "東捷",
+     568607500,
+     -6.9
+    ],
+    [
+     "6116",
+     "彩晶",
+     535380871,
+     -4.67
+    ],
+    [
+     "3673",
+     "TPK-KY",
+     516956146,
+     -4.73
+    ],
+    [
+     "3714",
+     "富采",
+     472652809,
+     -1.52
+    ],
+    [
+     "2426",
+     "鼎元",
+     471793524,
+     -3.95
+    ],
+    [
+     "3563",
+     "牧德",
+     465404166,
+     -3.33
+    ],
+    [
+     "3019",
+     "亞光",
+     424023015,
+     -1.53
+    ],
+    [
+     "7402",
+     "邑錡",
+     412440500,
+     -2.99
+    ],
+    [
+     "2489",
+     "瑞軒",
+     404793032,
+     -4.82
+    ],
+    [
+     "6209",
+     "今國光",
+     377404072,
+     -5.63
+    ],
+    [
+     "3441",
+     "聯一光",
+     376332700,
+     -6.32
+    ],
+    [
+     "3362",
+     "先進光",
+     372968000,
+     -4.81
+    ],
+    [
+     "6477",
+     "安集",
+     358490016,
+     7.61
+    ],
+    [
+     "2406",
+     "國碩",
+     306261698,
+     -1.63
+    ],
+    [
+     "2374",
+     "佳能",
+     304583125,
+     -3.69
+    ]
+   ]
+  },
+  {
+   "name": "其他電子",
+   "value": 43749279723,
+   "count": 93,
+   "pct": -1.19,
+   "top": [
+    [
+     "2317",
+     "鴻海",
+     11422510146,
+     0.21
+    ],
+    [
+     "3665",
+     "貿聯-KY",
+     6081515040,
+     3.12
+    ],
+    [
+     "2360",
+     "致茂",
+     4258810080,
+     -0.81
+    ],
+    [
+     "6139",
+     "亞翔",
+     2794882679,
+     -3.0
+    ],
+    [
+     "2404",
+     "漢唐",
+     2594730485,
+     -2.16
+    ],
+    [
+     "3324",
+     "雙鴻",
+     1961011000,
+     -6.02
+    ],
+    [
+     "8021",
+     "尖點",
+     1563050584,
+     -9.9
+    ],
+    [
+     "1785",
+     "光洋科",
+     1490074500,
+     -2.79
+    ],
+    [
+     "5536",
+     "聖暉*",
+     1127715000,
+     0.0
+    ],
+    [
+     "2474",
+     "可成",
+     1069493456,
+     1.88
+    ],
+    [
+     "6196",
+     "帆宣",
+     1040320475,
+     -4.43
+    ],
+    [
+     "2464",
+     "盟立",
+     894728943,
+     -5.94
+    ],
+    [
+     "3030",
+     "德律",
+     795204192,
+     -1.74
+    ],
+    [
+     "2359",
+     "所羅門",
+     706245524,
+     -4.61
+    ],
+    [
+     "2312",
+     "金寶",
+     583581168,
+     -3.83
+    ],
+    [
+     "6691",
+     "洋基工程",
+     561357635,
+     -1.56
+    ],
+    [
+     "6409",
+     "旭隼",
+     537394462,
+     2.17
+    ],
+    [
+     "6830",
+     "汎銓",
+     472479470,
+     -4.32
+    ],
+    [
+     "6739",
+     "竹陞科技",
+     410925000,
+     3.57
+    ],
+    [
+     "2354",
+     "鴻準",
+     316900563,
+     0.0
+    ],
+    [
+     "6903",
+     "巨漢",
+     273531000,
+     -5.1
+    ],
+    [
+     "3305",
+     "昇貿",
+     271854576,
+     -2.75
+    ],
+    [
+     "4760",
+     "勤凱",
+     246507000,
+     -6.4
+    ],
+    [
+     "3498",
+     "陽程",
+     195440500,
+     -6.41
+    ],
+    [
+     "3587",
+     "閎康",
+     180484500,
+     -2.19
+    ]
+   ]
+  },
+  {
+   "name": "通信網路",
+   "value": 39133886715,
+   "count": 90,
+   "pct": -2.08,
+   "top": [
+    [
+     "2345",
+     "智邦",
+     8248378455,
+     0.0
+    ],
+    [
+     "2412",
+     "中華電",
+     3630829854,
+     0.72
+    ],
+    [
+     "3081",
+     "聯亞",
+     3490820000,
+     -3.04
+    ],
+    [
+     "3491",
+     "昇達科",
+     3212125000,
+     -9.96
+    ],
+    [
+     "6442",
+     "光聖",
+     2964599575,
+     -6.15
+    ],
+    [
+     "4979",
+     "華星光",
+     2167650500,
+     -4.49
+    ],
+    [
+     "3163",
+     "波若威",
+     2139999000,
+     -4.6
+    ],
+    [
+     "3045",
+     "台灣大",
+     2092596735,
+     0.9
+    ],
+    [
+     "6285",
+     "啟碁",
+     2087053768,
+     0.21
+    ],
+    [
+     "4904",
+     "遠傳",
+     2007494610,
+     1.46
+    ],
+    [
+     "3363",
+     "上詮",
+     1559317000,
+     -0.2
+    ],
+    [
+     "2455",
+     "全新",
+     1403042012,
+     -1.77
+    ],
+    [
+     "2332",
+     "友訊",
+     562417051,
+     0.73
+    ],
+    [
+     "2485",
+     "兆赫",
+     262770884,
+     -5.65
+    ],
+    [
+     "5388",
+     "中磊",
+     250532918,
+     -0.6
+    ],
+    [
+     "4906",
+     "正文",
+     243554384,
+     -5.33
+    ],
+    [
+     "4977",
+     "眾達-KY",
+     243415913,
+     -1.92
+    ],
+    [
+     "2498",
+     "宏達電",
+     242382530,
+     1.34
+    ],
+    [
+     "3596",
+     "智易",
+     223315089,
+     -1.93
+    ],
+    [
+     "4908",
+     "前鼎",
+     211261500,
+     -2.17
+    ],
+    [
+     "6190",
+     "萬泰科",
+     183654300,
+     1.17
+    ],
+    [
+     "3704",
+     "合勤控",
+     173693604,
+     -1.86
+    ],
+    [
+     "3221",
+     "台嘉碩",
+     129671250,
+     -5.92
+    ],
+    [
+     "3234",
+     "光環",
+     125445500,
+     -4.18
+    ],
+    [
+     "2439",
+     "美律",
+     112143295,
+     0.12
+    ]
+   ]
+  },
+  {
+   "name": "金融保險",
+   "value": 37417100964,
+   "count": 40,
+   "pct": -0.66,
+   "top": [
+    [
+     "2887",
+     "台新新光金",
+     5116259375,
+     -1.13
+    ],
+    [
+     "2891",
+     "中信金",
+     4282479852,
+     -0.97
+    ],
+    [
+     "2885",
+     "元大金",
+     3495654839,
+     -3.23
+    ],
+    [
+     "2881",
+     "富邦金",
+     3292941355,
+     -0.8
+    ],
+    [
+     "2884",
+     "玉山金",
+     2859648480,
+     2.14
+    ],
+    [
+     "2882",
+     "國泰金",
+     2804700385,
+     -0.32
+    ],
+    [
+     "2886",
+     "兆豐金",
+     2183275344,
+     1.26
+    ],
+    [
+     "2890",
+     "永豐金",
+     2175086446,
+     -0.75
+    ],
+    [
+     "2883",
+     "凱基金",
+     2107155998,
+     -1.5
+    ],
+    [
+     "2880",
+     "華南金",
+     1828205009,
+     -0.62
+    ],
+    [
+     "2892",
+     "第一金",
+     1291023305,
+     -0.44
+    ],
+    [
+     "5876",
+     "上海商銀",
+     951337196,
+     0.77
+    ],
+    [
+     "2801",
+     "彰銀",
+     874766385,
+     -0.21
+    ],
+    [
+     "2834",
+     "臺企銀",
+     847235543,
+     -0.28
+    ],
+    [
+     "5880",
+     "合庫金",
+     787027592,
+     0.59
+    ],
+    [
+     "2812",
+     "台中銀",
+     502396269,
+     -0.97
+    ],
+    [
+     "6005",
+     "群益證",
+     415071323,
+     -0.61
+    ],
+    [
+     "2855",
+     "統一證",
+     377351768,
+     -2.72
+    ],
+    [
+     "2845",
+     "遠東銀",
+     236400025,
+     -0.75
+    ],
+    [
+     "5864",
+     "致和證",
+     175240300,
+     -3.92
+    ],
+    [
+     "6016",
+     "康和證",
+     118579450,
+     -0.42
+    ],
+    [
+     "6023",
+     "元大期",
+     105624000,
+     -2.62
+    ],
+    [
+     "2838",
+     "聯邦銀",
+     89686857,
+     -0.49
+    ],
+    [
+     "2851",
+     "中再保",
+     86578578,
+     -0.14
+    ],
+    [
+     "2897",
+     "王道銀行",
+     85744921,
+     0.0
+    ]
+   ]
+  },
+  {
+   "name": "塑膠工業",
+   "value": 28346354032,
+   "count": 24,
+   "pct": -5.47,
+   "top": [
+    [
+     "1303",
+     "南亞",
+     21137199791,
+     -6.28
+    ],
+    [
+     "1326",
+     "台化",
+     3423309741,
+     -2.87
+    ],
+    [
+     "1301",
+     "台塑",
+     2849523660,
+     -3.5
+    ],
+    [
+     "1314",
+     "中石化",
+     417997093,
+     -4.17
+    ],
+    [
+     "1312",
+     "國喬",
+     133596476,
+     -1.17
+    ],
+    [
+     "1304",
+     "台聚",
+     69122901,
+     -3.0
+    ],
+    [
+     "1313",
+     "聯成",
+     63809431,
+     -3.28
+    ],
+    [
+     "1307",
+     "三芳",
+     46335286,
+     -1.72
+    ],
+    [
+     "1310",
+     "台苯",
+     43244452,
+     -2.27
+    ],
+    [
+     "1309",
+     "台達化",
+     41071906,
+     1.04
+    ],
+    [
+     "1305",
+     "華夏",
+     33112539,
+     -2.37
+    ],
+    [
+     "1308",
+     "亞聚",
+     25054594,
+     -2.09
+    ],
+    [
+     "4306",
+     "炎洲",
+     21961847,
+     -2.71
+    ],
+    [
+     "4303",
+     "信立",
+     14955750,
+     -0.71
+    ],
+    [
+     "1325",
+     "恆大",
+     14519331,
+     1.99
+    ],
+    [
+     "1321",
+     "大洋",
+     3041374,
+     0.79
+    ],
+    [
+     "1337",
+     "再生-KY",
+     1868502,
+     -2.02
+    ],
+    [
+     "1340",
+     "勝悅-KY",
+     1838513,
+     -0.95
+    ],
+    [
+     "1315",
+     "達新",
+     1340993,
+     0.47
+    ],
+    [
+     "4304",
+     "勝昱",
+     964050,
+     -5.35
+    ],
+    [
+     "1323",
+     "永裕",
+     838484,
+     0.0
+    ],
+    [
+     "1324",
+     "地球",
+     791652,
+     0.0
+    ],
+    [
+     "9950",
+     "萬國通",
+     677850,
+     0.0
+    ],
+    [
+     "1341",
+     "富林-KY",
+     177816,
+     0.0
+    ]
+   ]
+  },
+  {
+   "name": "航運業",
+   "value": 17083720315,
+   "count": 34,
+   "pct": 1.5,
+   "top": [
+    [
+     "2634",
+     "漢翔",
+     5716906372,
+     6.21
+    ],
+    [
+     "2645",
+     "長榮航太",
+     2667632456,
+     -3.93
+    ],
+    [
+     "2603",
+     "長榮",
+     1996815195,
+     -1.01
+    ],
+    [
+     "2618",
+     "長榮航",
+     1534883900,
+     0.0
+    ],
+    [
+     "2615",
+     "萬海",
+     1040331639,
+     1.26
+    ],
+    [
+     "2609",
+     "陽明",
+     871627014,
+     -0.41
+    ],
+    [
+     "2610",
+     "華航",
+     765065424,
+     0.96
+    ],
+    [
+     "2630",
+     "亞航",
+     716572100,
+     0.37
+    ],
+    [
+     "6753",
+     "龍德造船",
+     515267307,
+     0.36
+    ],
+    [
+     "2606",
+     "裕民",
+     230853931,
+     1.32
+    ],
+    [
+     "2605",
+     "新興",
+     191347792,
+     -1.13
+    ],
+    [
+     "2208",
+     "台船",
+     166259795,
+     1.26
+    ],
+    [
+     "2637",
+     "慧洋-KY",
+     151376834,
+     -0.38
+    ],
+    [
+     "2646",
+     "星宇航空",
+     119740808,
+     0.47
+    ],
+    [
+     "2633",
+     "台灣高鐵",
+     107957755,
+     -0.39
+    ],
+    [
+     "6757",
+     "台灣虎航",
+     73264840,
+     1.96
+    ],
+    [
+     "2617",
+     "台航",
+     27508377,
+     0.7
+    ],
+    [
+     "5608",
+     "四維航",
+     26680865,
+     0.37
+    ],
+    [
+     "2601",
+     "益航",
+     25942113,
+     -1.94
+    ],
+    [
+     "5607",
+     "遠雄港",
+     25797546,
+     0.1
+    ],
+    [
+     "2641",
+     "正德",
+     20754950,
+     0.3
+    ],
+    [
+     "2607",
+     "榮運",
+     18649643,
+     0.43
+    ],
+    [
+     "2636",
+     "台驊控股",
+     17054897,
+     0.8
+    ],
+    [
+     "5609",
+     "中菲行",
+     14824700,
+     0.39
+    ],
+    [
+     "2612",
+     "中航",
+     12489036,
+     0.19
+    ]
+   ]
+  },
+  {
+   "name": "電機機械",
+   "value": 16748210581,
+   "count": 97,
+   "pct": -0.79,
+   "top": [
+    [
+     "8996",
+     "高力",
+     3576567028,
+     -4.33
+    ],
+    [
+     "3167",
+     "大量",
+     1908922628,
+     -4.31
+    ],
+    [
+     "1590",
+     "亞德客-KY",
+     1790879125,
+     5.53
+    ],
+    [
+     "1560",
+     "中砂",
+     1677643881,
+     -1.37
+    ],
+    [
+     "1519",
+     "華城",
+     1438383270,
+     1.98
+    ],
+    [
+     "2049",
+     "上銀",
+     685334230,
+     -1.96
+    ],
+    [
+     "1513",
+     "中興電",
+     683019836,
+     -0.63
+    ],
+    [
+     "7750",
+     "新代",
+     663151320,
+     7.44
+    ],
+    [
+     "1504",
+     "東元",
+     612784316,
+     -0.75
+    ],
+    [
+     "1503",
+     "士電",
+     434334737,
+     3.09
+    ],
+    [
+     "1514",
+     "亞力",
+     261595449,
+     1.46
+    ],
+    [
+     "2371",
+     "大同",
+     257685852,
+     -0.58
+    ],
+    [
+     "4576",
+     "大銀微系統",
+     254824017,
+     -3.35
+    ],
+    [
+     "1597",
+     "直得",
+     247752755,
+     -4.69
+    ],
+    [
+     "8255",
+     "朋程",
+     172787000,
+     -2.99
+    ],
+    [
+     "8027",
+     "鈦昇",
+     170776000,
+     -9.98
+    ],
+    [
+     "4566",
+     "時碩工業",
+     151309979,
+     9.9
+    ],
+    [
+     "3685",
+     "元創精密",
+     122287500,
+     -1.05
+    ],
+    [
+     "4564",
+     "元翎",
+     113994268,
+     -0.26
+    ],
+    [
+     "1515",
+     "力山",
+     109899365,
+     7.45
+    ],
+    [
+     "3162",
+     "精確",
+     105032100,
+     -4.39
+    ],
+    [
+     "8222",
+     "寶一",
+     101760392,
+     1.48
+    ],
+    [
+     "1526",
+     "日馳",
+     93964191,
+     0.58
+    ],
+    [
+     "6125",
+     "廣運",
+     82281800,
+     -1.19
+    ],
+    [
+     "4540",
+     "全球傳動",
+     69054876,
+     -3.2
+    ]
+   ]
+  },
+  {
+   "name": "其他",
+   "value": 16350203122,
+   "count": 95,
+   "pct": -2.11,
+   "top": [
+    [
+     "8033",
+     "雷虎",
+     5921446203,
+     -6.62
+    ],
+    [
+     "5371",
+     "中光電",
+     3227840600,
+     2.82
+    ],
+    [
+     "4541",
+     "晟田",
+     2092972200,
+     -5.1
+    ],
+    [
+     "5871",
+     "中租-KY",
+     2019448865,
+     2.51
+    ],
+    [
+     "5284",
+     "jpp-KY",
+     409276888,
+     3.78
+    ],
+    [
+     "5314",
+     "世紀*",
+     358575400,
+     -2.53
+    ],
+    [
+     "9939",
+     "宏全",
+     326547594,
+     2.39
+    ],
+    [
+     "2867",
+     "三商壽",
+     256053706,
+     2.78
+    ],
+    [
+     "9917",
+     "中保科",
+     212590516,
+     0.0
+    ],
+    [
+     "7777",
+     "能率亞洲",
+     146914050,
+     -9.33
+    ],
+    [
+     "9945",
+     "潤泰新",
+     134131467,
+     0.57
+    ],
+    [
+     "9933",
+     "中鼎",
+     109990277,
+     0.77
+    ],
+    [
+     "9938",
+     "百和",
+     86134550,
+     1.74
+    ],
+    [
+     "5450",
+     "南良",
+     84443700,
+     9.97
+    ],
+    [
+     "9941",
+     "裕融",
+     82998051,
+     0.24
+    ],
+    [
+     "9907",
+     "統一實",
+     74642684,
+     0.0
+    ],
+    [
+     "6957",
+     "裕慶-KY",
+     70924517,
+     1.22
+    ],
+    [
+     "8936",
+     "國統",
+     67292800,
+     -0.19
+    ],
+    [
+     "2348",
+     "海悅",
+     53241670,
+     -0.64
+    ],
+    [
+     "6901",
+     "鑽石投資",
+     53122581,
+     -3.54
+    ],
+    [
+     "1342",
+     "八貫",
+     53012965,
+     -3.91
+    ],
+    [
+     "6585",
+     "鼎基",
+     51115756,
+     -1.62
+    ],
+    [
+     "2221",
+     "大甲",
+     47618900,
+     -4.18
+    ],
+    [
+     "6179",
+     "亞通",
+     40395800,
+     -2.42
+    ],
+    [
+     "6592",
+     "和潤企業",
+     23768053,
+     0.0
+    ]
+   ]
+  },
+  {
+   "name": "電子通路",
+   "value": 9083564057,
+   "count": 38,
+   "pct": -1.77,
+   "top": [
+    [
+     "3036",
+     "文曄",
+     2975553791,
+     -0.8
+    ],
+    [
+     "3702",
+     "大聯大",
+     1238074078,
+     -2.74
+    ],
+    [
+     "5434",
+     "崇越",
+     1090650837,
+     -3.2
+    ],
+    [
+     "3033",
+     "威健",
+     770767369,
+     -1.84
+    ],
+    [
+     "2347",
+     "聯強",
+     743169252,
+     -1.52
+    ],
+    [
+     "8112",
+     "至上",
+     709034787,
+     -1.22
+    ],
+    [
+     "8096",
+     "擎亞",
+     237333500,
+     0.0
+    ],
+    [
+     "8070",
+     "長華*",
+     159664234,
+     -2.91
+    ],
+    [
+     "3048",
+     "益登",
+     158436151,
+     -2.76
+    ],
+    [
+     "3028",
+     "增你強",
+     143877680,
+     -3.24
+    ],
+    [
+     "6265",
+     "方土昶",
+     137804600,
+     -5.42
+    ],
+    [
+     "3055",
+     "蔚華科",
+     127470447,
+     -0.92
+    ],
+    [
+     "3010",
+     "華立",
+     102164107,
+     -0.44
+    ],
+    [
+     "3209",
+     "全科",
+     100639444,
+     -0.72
+    ],
+    [
+     "3312",
+     "弘憶股",
+     76414626,
+     -2.9
+    ],
+    [
+     "3360",
+     "尚立",
+     57192850,
+     -3.58
+    ],
+    [
+     "2414",
+     "精技",
+     50236622,
+     -6.17
+    ],
+    [
+     "6227",
+     "茂綸",
+     38282000,
+     -1.42
+    ],
+    [
+     "3528",
+     "安馳",
+     37538964,
+     -3.93
+    ],
+    [
+     "6189",
+     "豐藝",
+     27141156,
+     -0.84
+    ],
+    [
+     "6270",
+     "倍微",
+     21921050,
+     -1.94
+    ],
+    [
+     "8084",
+     "巨虹",
+     14625650,
+     2.0
+    ],
+    [
+     "3444",
+     "利機",
+     11693700,
+     -3.72
+    ],
+    [
+     "6776",
+     "展碁國際",
+     9402995,
+     0.56
+    ],
+    [
+     "8072",
+     "陞泰",
+     8303097,
+     -1.11
+    ]
+   ]
+  },
+  {
+   "name": "油電燃氣",
+   "value": 8177951321,
+   "count": 12,
+   "pct": -4.33,
+   "top": [
+    [
+     "6505",
+     "台塑化",
+     7839096557,
+     -4.43
+    ],
+    [
+     "8926",
+     "台汽電",
+     294576542,
+     -2.29
+    ],
+    [
+     "9908",
+     "大台北",
+     14263906,
+     -0.17
+    ],
+    [
+     "8908",
+     "欣雄",
+     6902350,
+     -1.02
+    ],
+    [
+     "9937",
+     "全國",
+     4776590,
+     1.64
+    ],
+    [
+     "8927",
+     "北基",
+     3276050,
+     2.01
+    ],
+    [
+     "2616",
+     "山隆",
+     3111536,
+     0.37
+    ],
+    [
+     "9931",
+     "欣高",
+     3054975,
+     -0.44
+    ],
+    [
+     "9926",
+     "新海",
+     2869890,
+     0.0
+    ],
+    [
+     "8931",
+     "大汽電",
+     2737950,
+     -0.6
+    ],
+    [
+     "9918",
+     "欣天然",
+     2599975,
+     -0.9
+    ],
+    [
+     "8917",
+     "欣泰",
+     685000,
+     -0.76
+    ]
+   ]
+  },
+  {
+   "name": "生技醫療",
+   "value": 7467394337,
+   "count": 155,
+   "pct": -0.79,
+   "top": [
+    [
+     "6446",
+     "藥華藥",
+     3516317815,
+     -1.67
+    ],
+    [
+     "6919",
+     "康霈*",
+     687247192,
+     2.9
+    ],
+    [
+     "6472",
+     "保瑞",
+     273387429,
+     -0.88
+    ],
+    [
+     "1795",
+     "美時",
+     263274303,
+     0.53
+    ],
+    [
+     "6949",
+     "沛爾生醫*-創",
+     261615423,
+     -3.79
+    ],
+    [
+     "7799",
+     "禾榮科",
+     259935027,
+     1.2
+    ],
+    [
+     "6861",
+     "睿生光電",
+     160603556,
+     -4.22
+    ],
+    [
+     "6491",
+     "晶碩",
+     110403329,
+     0.15
+    ],
+    [
+     "6547",
+     "高端疫苗",
+     110301000,
+     1.84
+    ],
+    [
+     "4133",
+     "亞諾法",
+     107508031,
+     0.22
+    ],
+    [
+     "4147",
+     "中裕",
+     91615900,
+     -1.67
+    ],
+    [
+     "4743",
+     "合一",
+     85525650,
+     -1.65
+    ],
+    [
+     "8436",
+     "大江",
+     78196000,
+     -0.87
+    ],
+    [
+     "4123",
+     "晟德",
+     70724750,
+     1.35
+    ],
+    [
+     "6712",
+     "長聖",
+     63956000,
+     -0.33
+    ],
+    [
+     "4105",
+     "東洋",
+     56726800,
+     0.39
+    ],
+    [
+     "6782",
+     "視陽",
+     53933502,
+     1.3
+    ],
+    [
+     "1707",
+     "葡萄王",
+     50214537,
+     1.98
+    ],
+    [
+     "4169",
+     "泰宗",
+     48308078,
+     0.0
+    ],
+    [
+     "1760",
+     "寶齡富錦",
+     46403529,
+     2.33
+    ],
+    [
+     "7827",
+     "漢康-KY創",
+     43702631,
+     -2.83
+    ],
+    [
+     "4114",
+     "健喬",
+     35974450,
+     -1.01
+    ],
+    [
+     "4771",
+     "望隼",
+     34845675,
+     0.51
+    ],
+    [
+     "6620",
+     "漢達",
+     32605600,
+     -0.81
+    ],
+    [
+     "6598",
+     "ABC-KY",
+     31925258,
+     -3.44
+    ]
+   ]
+  },
+  {
+   "name": "化學工業",
+   "value": 5951173939,
+   "count": 42,
+   "pct": -3.51,
+   "top": [
+    [
+     "4764",
+     "雙鍵",
+     1061399536,
+     -9.97
+    ],
+    [
+     "1717",
+     "長興",
+     814289344,
+     -3.72
+    ],
+    [
+     "4763",
+     "材料*-KY",
+     607199763,
+     7.17
+    ],
+    [
+     "1714",
+     "和桐",
+     309746620,
+     -1.96
+    ],
+    [
+     "1708",
+     "東鹼",
+     286141324,
+     0.0
+    ],
+    [
+     "4722",
+     "國精化",
+     277959427,
+     -4.17
+    ],
+    [
+     "1727",
+     "中華化",
+     273436320,
+     -6.55
+    ],
+    [
+     "1711",
+     "永光",
+     250779136,
+     -7.08
+    ],
+    [
+     "4739",
+     "康普",
+     248550162,
+     -4.52
+    ],
+    [
+     "4772",
+     "台特化",
+     239771000,
+     -3.87
+    ],
+    [
+     "1773",
+     "勝一",
+     189541022,
+     -4.01
+    ],
+    [
+     "4768",
+     "晶呈科技",
+     177835500,
+     -2.35
+    ],
+    [
+     "1710",
+     "東聯",
+     130727036,
+     -5.79
+    ],
+    [
+     "6509",
+     "聚和",
+     117571200,
+     -2.39
+    ],
+    [
+     "1709",
+     "和益",
+     114847588,
+     0.58
+    ],
+    [
+     "1718",
+     "中纖",
+     110248592,
+     -4.76
+    ],
+    [
+     "1722",
+     "台肥",
+     93826839,
+     -0.53
+    ],
+    [
+     "4766",
+     "南寶",
+     83031246,
+     -2.11
+    ],
+    [
+     "1723",
+     "中碳",
+     82107733,
+     -1.81
+    ],
+    [
+     "4755",
+     "三福化",
+     75855118,
+     -4.35
+    ],
+    [
+     "3430",
+     "奇鈦科",
+     74880500,
+     -6.15
+    ],
+    [
+     "4770",
+     "上品",
+     73806879,
+     2.8
+    ],
+    [
+     "1712",
+     "興農",
+     41495623,
+     0.89
+    ],
+    [
+     "4721",
+     "美琪瑪",
+     40295800,
+     -0.97
+    ],
+    [
+     "4707",
+     "磐亞",
+     38668950,
+     -10.0
+    ]
+   ]
+  },
+  {
+   "name": "食品工業",
+   "value": 3180760785,
+   "count": 32,
+   "pct": -0.13,
+   "top": [
+    [
+     "1216",
+     "統一",
+     2436736700,
+     0.38
+    ],
+    [
+     "1232",
+     "大統益",
+     183095268,
+     -5.34
+    ],
+    [
+     "1215",
+     "卜蜂",
+     138975706,
+     -0.9
+    ],
+    [
+     "1210",
+     "大成",
+     124839053,
+     -0.35
+    ],
+    [
+     "1229",
+     "聯華",
+     88911176,
+     -1.96
+    ],
+    [
+     "1231",
+     "聯華食",
+     41146104,
+     0.0
+    ],
+    [
+     "1227",
+     "佳格",
+     30515264,
+     0.67
+    ],
+    [
+     "7780",
+     "大研生醫*",
+     19266205,
+     0.0
+    ],
+    [
+     "1219",
+     "福壽",
+     19156072,
+     -3.29
+    ],
+    [
+     "1218",
+     "泰山",
+     14633557,
+     -0.3
+    ],
+    [
+     "1256",
+     "鮮活果汁-KY",
+     13618536,
+     0.54
+    ],
+    [
+     "1702",
+     "南僑",
+     12218258,
+     0.0
+    ],
+    [
+     "1201",
+     "味全",
+     6176303,
+     0.79
+    ],
+    [
+     "1234",
+     "黑松",
+     5804555,
+     1.04
+    ],
+    [
+     "4205",
+     "中華食",
+     5310900,
+     -0.98
+    ],
+    [
+     "1203",
+     "味王",
+     4139648,
+     2.5
+    ],
+    [
+     "1236",
+     "宏亞",
+     3953142,
+     0.0
+    ],
+    [
+     "1225",
+     "福懋油",
+     3887364,
+     0.74
+    ],
+    [
+     "1264",
+     "德麥",
+     3869000,
+     -0.19
+    ],
+    [
+     "4207",
+     "環泰",
+     3735700,
+     0.77
+    ],
+    [
+     "1737",
+     "臺鹽",
+     3298024,
+     0.31
+    ],
+    [
+     "1780",
+     "立弘",
+     2948350,
+     1.57
+    ],
+    [
+     "7791",
+     "皇家可口",
+     2704113,
+     -2.04
+    ],
+    [
+     "1217",
+     "愛之味",
+     2428145,
+     -0.1
+    ],
+    [
+     "1295",
+     "生合",
+     1920300,
+     -0.52
+    ]
+   ]
+  },
+  {
+   "name": "玻璃陶瓷",
+   "value": 3037003464,
+   "count": 5,
+   "pct": -2.11,
+   "top": [
+    [
+     "1802",
+     "台玻",
+     1815153673,
+     -5.83
+    ],
+    [
+     "1810",
+     "和成",
+     1132781174,
+     4.05
+    ],
+    [
+     "1809",
+     "中釉",
+     86235580,
+     -4.76
+    ],
+    [
+     "1806",
+     "冠軍",
+     1540655,
+     -0.12
+    ],
+    [
+     "1817",
+     "凱撒衛",
+     1292382,
+     -0.13
+    ]
+   ]
+  },
+  {
+   "name": "綠能環保",
+   "value": 2961208781,
+   "count": 45,
+   "pct": -5.43,
+   "top": [
+    [
+     "7610",
+     "聯友金屬-創",
+     1395227940,
+     -9.96
+    ],
+    [
+     "6944",
+     "兆聯實業",
+     469152160,
+     -1.64
+    ],
+    [
+     "8422",
+     "可寧衛*",
+     197533941,
+     -0.19
+    ],
+    [
+     "3551",
+     "世禾",
+     191963500,
+     -3.9
+    ],
+    [
+     "8438",
+     "昶昕",
+     157769345,
+     -8.26
+    ],
+    [
+     "6869",
+     "雲豹能源",
+     65127868,
+     1.81
+    ],
+    [
+     "6969",
+     "成信實業*-創",
+     43036199,
+     10.0
+    ],
+    [
+     "3708",
+     "上緯投控",
+     42091485,
+     1.47
+    ],
+    [
+     "2072",
+     "世紀風電",
+     39138195,
+     1.43
+    ],
+    [
+     "8390",
+     "金益鼎",
+     37779700,
+     -1.59
+    ],
+    [
+     "6873",
+     "泓德能源",
+     33773688,
+     1.35
+    ],
+    [
+     "8476",
+     "台境*",
+     30069896,
+     2.1
+    ],
+    [
+     "8473",
+     "山林水",
+     29063565,
+     -0.91
+    ],
+    [
+     "7740",
+     "熙特爾-創",
+     28912540,
+     4.25
+    ],
+    [
+     "6803",
+     "崑鼎",
+     21951000,
+     -0.74
+    ],
+    [
+     "7786",
+     "東方風能",
+     21913008,
+     1.18
+    ],
+    [
+     "6994",
+     "富威電力",
+     19770527,
+     2.15
+    ],
+    [
+     "5292",
+     "華懋",
+     18375852,
+     -1.8
+    ],
+    [
+     "8341",
+     "日友",
+     16408409,
+     -0.26
+    ],
+    [
+     "7715",
+     "裕山",
+     14879300,
+     -9.83
+    ],
+    [
+     "9930",
+     "中聯資源",
+     12713240,
+     0.32
+    ],
+    [
+     "7818",
+     "溢泰實業",
+     9896438,
+     0.0
+    ],
+    [
+     "6894",
+     "衛司特",
+     8710500,
+     0.47
+    ],
+    [
+     "5432",
+     "新門",
+     7767000,
+     -2.03
+    ],
+    [
+     "6923",
+     "中台",
+     7674751,
+     0.52
+    ]
+   ]
+  },
+  {
+   "name": "運動休閒",
+   "value": 2807697497,
+   "count": 27,
+   "pct": -1.74,
+   "top": [
+    [
+     "9914",
+     "美利達",
+     836561892,
+     -5.0
+    ],
+    [
+     "9904",
+     "寶成",
+     587565340,
+     -1.02
+    ],
+    [
+     "9921",
+     "巨大",
+     537720068,
+     -3.12
+    ],
+    [
+     "1736",
+     "喬山",
+     191715341,
+     7.14
+    ],
+    [
+     "9910",
+     "豐泰",
+     184244138,
+     2.1
+    ],
+    [
+     "6670",
+     "復盛應用",
+     146667367,
+     0.19
+    ],
+    [
+     "6890",
+     "來億-KY",
+     52927200,
+     -1.16
+    ],
+    [
+     "5306",
+     "桂盟",
+     52299868,
+     -3.13
+    ],
+    [
+     "4536",
+     "拓凱",
+     47208270,
+     -0.91
+    ],
+    [
+     "9802",
+     "鈺齊-KY",
+     46155487,
+     0.68
+    ],
+    [
+     "6768",
+     "志強-KY",
+     37594734,
+     0.14
+    ],
+    [
+     "8478",
+     "東哥遊艇",
+     24614084,
+     0.33
+    ],
+    [
+     "8462",
+     "柏文",
+     19476609,
+     -0.64
+    ],
+    [
+     "2762",
+     "世界健身-KY",
+     9416743,
+     1.91
+    ],
+    [
+     "8938",
+     "明安",
+     8991400,
+     0.91
+    ],
+    [
+     "6965",
+     "中傑-KY",
+     7041180,
+     0.25
+    ],
+    [
+     "8467",
+     "波力-KY",
+     4023145,
+     -0.49
+    ],
+    [
+     "1598",
+     "岱宇",
+     3565058,
+     0.25
+    ],
+    [
+     "8924",
+     "大田",
+     2607200,
+     0.0
+    ],
+    [
+     "1432",
+     "大魯閣",
+     2541673,
+     0.0
+    ],
+    [
+     "8928",
+     "鉅明",
+     1387450,
+     -1.93
+    ],
+    [
+     "6804",
+     "明係",
+     1360700,
+     -1.83
+    ],
+    [
+     "7811",
+     "民盛",
+     639400,
+     -0.42
+    ],
+    [
+     "8933",
+     "愛地雅",
+     533550,
+     0.9
+    ],
+    [
+     "9960",
+     "邁達康",
+     429100,
+     -0.6
+    ]
+   ]
+  },
+  {
+   "name": "汽車工業",
+   "value": 2578030869,
+   "count": 43,
+   "pct": -2.36,
+   "top": [
+    [
+     "2233",
+     "宇隆",
+     418397657,
+     -7.55
+    ],
+    [
+     "4551",
+     "智伸科",
+     277041991,
+     -4.52
+    ],
+    [
+     "2206",
+     "三陽工業",
+     272980337,
+     2.05
+    ],
+    [
+     "1319",
+     "東陽",
+     268980413,
+     -1.49
+    ],
+    [
+     "2207",
+     "和泰車",
+     238484754,
+     0.82
+    ],
+    [
+     "2231",
+     "為升",
+     152173661,
+     -2.28
+    ],
+    [
+     "2236",
+     "百達-KY",
+     142172152,
+     -4.97
+    ],
+    [
+     "1536",
+     "和大",
+     122093577,
+     -0.3
+    ],
+    [
+     "1563",
+     "巧新",
+     101779721,
+     -3.28
+    ],
+    [
+     "3717",
+     "聯嘉投控",
+     99160754,
+     -2.45
+    ],
+    [
+     "2201",
+     "裕隆",
+     84772331,
+     -1.74
+    ],
+    [
+     "2204",
+     "中華",
+     52159045,
+     0.36
+    ],
+    [
+     "2243",
+     "宏旭-KY",
+     41825807,
+     -0.38
+    ],
+    [
+     "6605",
+     "帝寶",
+     38644347,
+     1.16
+    ],
+    [
+     "2241",
+     "艾姆勒",
+     34375624,
+     -2.46
+    ],
+    [
+     "2248",
+     "華勝-KY",
+     29496266,
+     4.32
+    ],
+    [
+     "1568",
+     "倉佑",
+     28959383,
+     -4.79
+    ],
+    [
+     "2497",
+     "怡利電",
+     26028103,
+     -3.76
+    ],
+    [
+     "2258",
+     "鴻華先進-創",
+     19238265,
+     1.09
+    ],
+    [
+     "2250",
+     "IKKA-KY",
+     19056330,
+     -2.27
+    ],
+    [
+     "2247",
+     "汎德永業",
+     15175779,
+     -1.79
+    ],
+    [
+     "1524",
+     "耿鼎",
+     12404788,
+     -0.38
+    ],
+    [
+     "3346",
+     "麗清",
+     12339634,
+     -0.97
+    ],
+    [
+     "1522",
+     "堤維西",
+     12133298,
+     -0.86
+    ],
+    [
+     "2228",
+     "劍麟",
+     11744562,
+     -1.02
+    ]
+   ]
+  },
+  {
+   "name": "紡織纖維",
+   "value": 2574391311,
+   "count": 52,
+   "pct": -0.61,
+   "top": [
+    [
+     "1476",
+     "儒鴻",
+     931738176,
+     0.9
+    ],
+    [
+     "1402",
+     "遠東新",
+     517009557,
+     -1.44
+    ],
+    [
+     "1409",
+     "新纖",
+     503906323,
+     -2.47
+    ],
+    [
+     "1477",
+     "聚陽",
+     231711188,
+     0.0
+    ],
+    [
+     "1434",
+     "福懋",
+     130639214,
+     -3.39
+    ],
+    [
+     "1466",
+     "聚隆",
+     48394961,
+     1.17
+    ],
+    [
+     "1423",
+     "利華",
+     31885780,
+     -1.08
+    ],
+    [
+     "1444",
+     "力麗",
+     23458849,
+     -0.25
+    ],
+    [
+     "1440",
+     "南紡",
+     22858924,
+     -1.54
+    ],
+    [
+     "1447",
+     "力鵬",
+     19200968,
+     -5.02
+    ],
+    [
+     "4441",
+     "振大環球",
+     14867577,
+     0.29
+    ],
+    [
+     "1467",
+     "南緯",
+     10951772,
+     10.0
+    ],
+    [
+     "1455",
+     "集盛",
+     9177439,
+     -0.76
+    ],
+    [
+     "1419",
+     "新紡",
+     8497777,
+     1.21
+    ],
+    [
+     "1449",
+     "佳和",
+     8295858,
+     -2.68
+    ],
+    [
+     "4438",
+     "廣越",
+     5347348,
+     0.49
+    ],
+    [
+     "1414",
+     "東和",
+     5129515,
+     2.19
+    ],
+    [
+     "1410",
+     "南染",
+     4907112,
+     3.76
+    ],
+    [
+     "1464",
+     "得力",
+     4477594,
+     0.0
+    ],
+    [
+     "1460",
+     "宏遠",
+     3779333,
+     -0.85
+    ],
+    [
+     "4442",
+     "竣邦-KY",
+     3506750,
+     -2.08
+    ],
+    [
+     "1451",
+     "年興",
+     3271912,
+     0.58
+    ],
+    [
+     "1446",
+     "宏和",
+     3023883,
+     -0.71
+    ],
+    [
+     "4417",
+     "金洲",
+     2905350,
+     -0.46
+    ],
+    [
+     "1468",
+     "昶和",
+     2038998,
+     9.93
+    ]
+   ]
+  },
+  {
+   "name": "建材營造",
+   "value": 2336422903,
+   "count": 87,
+   "pct": 0.18,
+   "top": [
+    [
+     "2542",
+     "興富發",
+     621088687,
+     0.0
+    ],
+    [
+     "5522",
+     "遠雄",
+     214346240,
+     -1.47
+    ],
+    [
+     "2548",
+     "華固",
+     170230040,
+     0.5
+    ],
+    [
+     "2527",
+     "宏璟",
+     166732801,
+     4.78
+    ],
+    [
+     "2515",
+     "中工",
+     93156412,
+     -0.41
+    ],
+    [
+     "2520",
+     "冠德",
+     62014817,
+     0.14
+    ],
+    [
+     "2504",
+     "國產",
+     59889924,
+     -1.57
+    ],
+    [
+     "6177",
+     "達麗",
+     55656730,
+     -0.32
+    ],
+    [
+     "2543",
+     "皇昌",
+     50681033,
+     0.65
+    ],
+    [
+     "2539",
+     "櫻花建",
+     50118350,
+     -0.98
+    ],
+    [
+     "2597",
+     "潤弘",
+     48792989,
+     -1.52
+    ],
+    [
+     "5534",
+     "長虹",
+     44341675,
+     -0.74
+    ],
+    [
+     "5508",
+     "永信建",
+     38855200,
+     -2.56
+    ],
+    [
+     "1808",
+     "潤隆",
+     36328302,
+     -1.24
+    ],
+    [
+     "2501",
+     "國建",
+     33796550,
+     -0.45
+    ],
+    [
+     "5515",
+     "建國",
+     33264625,
+     2.76
+    ],
+    [
+     "5521",
+     "工信",
+     31678904,
+     0.0
+    ],
+    [
+     "2547",
+     "日勝生",
+     31534988,
+     -0.97
+    ],
+    [
+     "2540",
+     "愛山林",
+     29751039,
+     0.93
+    ],
+    [
+     "2530",
+     "華建",
+     28661918,
+     2.82
+    ],
+    [
+     "6186",
+     "新潤",
+     27590800,
+     0.12
+    ],
+    [
+     "2535",
+     "達欣工",
+     25556684,
+     -0.58
+    ],
+    [
+     "3703",
+     "欣陸",
+     24284889,
+     0.49
+    ],
+    [
+     "1436",
+     "華友聯",
+     23401717,
+     -0.89
+    ],
+    [
+     "2923",
+     "鼎固-KY",
+     23001093,
+     1.26
+    ]
+   ]
+  },
+  {
+   "name": "鋼鐵工業",
+   "value": 2224915711,
+   "count": 48,
+   "pct": -0.57,
+   "top": [
+    [
+     "2002",
+     "中鋼",
+     758170143,
+     -0.54
+    ],
+    [
+     "2027",
+     "大成鋼",
+     445274354,
+     -0.49
+    ],
+    [
+     "2006",
+     "東和鋼鐵",
+     218452814,
+     -0.28
+    ],
+    [
+     "9958",
+     "世紀鋼",
+     149401601,
+     1.8
+    ],
+    [
+     "3004",
+     "豐達科",
+     128240565,
+     -3.18
+    ],
+    [
+     "5009",
+     "榮剛",
+     100109050,
+     -2.09
+    ],
+    [
+     "2211",
+     "長榮鋼",
+     97435714,
+     0.0
+    ],
+    [
+     "2009",
+     "第一銅",
+     63543997,
+     -2.43
+    ],
+    [
+     "2014",
+     "中鴻",
+     44441030,
+     -0.88
+    ],
+    [
+     "2031",
+     "新光鋼",
+     28077089,
+     -0.76
+    ],
+    [
+     "2034",
+     "允強",
+     27348928,
+     -1.28
+    ],
+    [
+     "2010",
+     "春源",
+     21377233,
+     -0.24
+    ],
+    [
+     "8415",
+     "大國鋼",
+     20564050,
+     0.98
+    ],
+    [
+     "2023",
+     "燁輝",
+     16306266,
+     0.74
+    ],
+    [
+     "2015",
+     "豐興",
+     13530452,
+     0.0
+    ],
+    [
+     "5011",
+     "久陽",
+     10759850,
+     1.3
+    ],
+    [
+     "2030",
+     "彰源",
+     9762470,
+     -0.58
+    ],
+    [
+     "2069",
+     "運錩",
+     5787423,
+     -0.27
+    ],
+    [
+     "2020",
+     "美亞",
+     5681732,
+     -0.47
+    ],
+    [
+     "2038",
+     "海光",
+     5367367,
+     -1.98
+    ],
+    [
+     "2013",
+     "中鋼構",
+     5301129,
+     1.48
+    ],
+    [
+     "5007",
+     "三星",
+     4609923,
+     1.8
+    ],
+    [
+     "2029",
+     "盛餘",
+     4449886,
+     0.73
+    ],
+    [
+     "2022",
+     "聚亨",
+     4240599,
+     0.13
+    ],
+    [
+     "2032",
+     "新鋼",
+     4222113,
+     -0.95
+    ]
+   ]
+  },
+  {
+   "name": "數位雲端",
+   "value": 1600157436,
+   "count": 37,
+   "pct": -0.68,
+   "top": [
+    [
+     "8932",
+     "智通*",
+     744994500,
+     -0.43
+    ],
+    [
+     "6811",
+     "宏碁資訊",
+     236124500,
+     -3.76
+    ],
+    [
+     "8454",
+     "富邦媒",
+     203016304,
+     -0.2
+    ],
+    [
+     "7714",
+     "創泓科技",
+     65009500,
+     0.83
+    ],
+    [
+     "2640",
+     "大車隊",
+     41195000,
+     null
+    ],
+    [
+     "6870",
+     "騰雲",
+     35643500,
+     -0.16
+    ],
+    [
+     "7722",
+     "LINEPAY",
+     30109797,
+     2.5
+    ],
+    [
+     "5321",
+     "美而快",
+     28919300,
+     -0.37
+    ],
+    [
+     "7805",
+     "威聯通",
+     28466000,
+     -0.33
+    ],
+    [
+     "6165",
+     "浪凡",
+     26823641,
+     0.81
+    ],
+    [
+     "7765",
+     "中華資安",
+     23047318,
+     3.37
+    ],
+    [
+     "3130",
+     "一零四",
+     14412357,
+     -0.25
+    ],
+    [
+     "8044",
+     "網家",
+     13934550,
+     1.51
+    ],
+    [
+     "6690",
+     "安碁資訊",
+     13143500,
+     1.88
+    ],
+    [
+     "5287",
+     "數字",
+     12971500,
+     -0.68
+    ],
+    [
+     "6741",
+     "91APP*-KY",
+     12425600,
+     -0.71
+    ],
+    [
+     "6763",
+     "綠界科技*",
+     11367300,
+     1.08
+    ],
+    [
+     "6902",
+     "GOGOLOOK",
+     10682628,
+     -3.6
+    ],
+    [
+     "6689",
+     "伊雲谷",
+     10675293,
+     -1.15
+    ],
+    [
+     "3687",
+     "歐買尬",
+     7017500,
+     1.86
+    ],
+    [
+     "7721",
+     "微程式",
+     7016654,
+     -1.29
+    ],
+    [
+     "8487",
+     "愛爾達-創",
+     3785949,
+     -1.18
+    ],
+    [
+     "5278",
+     "尚凡*",
+     3458100,
+     1.23
+    ],
+    [
+     "6906",
+     "現觀科",
+     3235468,
+     -0.43
+    ],
+    [
+     "6614",
+     "資拓宏宇",
+     2508179,
+     0.92
+    ]
+   ]
+  },
+  {
+   "name": "貿易百貨",
+   "value": 1587337187,
+   "count": 17,
+   "pct": 0.16,
+   "top": [
+    [
+     "2912",
+     "統一超",
+     1345419298,
+     0.21
+    ],
+    [
+     "2915",
+     "潤泰全",
+     124406754,
+     0.39
+    ],
+    [
+     "2903",
+     "遠百",
+     45439306,
+     -0.67
+    ],
+    [
+     "2913",
+     "農林",
+     23050376,
+     0.45
+    ],
+    [
+     "4807",
+     "日成-KY",
+     16398610,
+     -5.67
+    ],
+    [
+     "2905",
+     "三商",
+     14570464,
+     1.32
+    ],
+    [
+     "2906",
+     "高林",
+     5565010,
+     -0.71
+    ],
+    [
+     "2908",
+     "特力",
+     3771863,
+     0.23
+    ],
+    [
+     "2910",
+     "統領",
+     2006407,
+     9.81
+    ],
+    [
+     "2911",
+     "麗嬰房",
+     1656308,
+     0.28
+    ],
+    [
+     "8429",
+     "金麗-KY",
+     1301267,
+     -0.49
+    ],
+    [
+     "2929",
+     "淘帝-KY",
+     1122950,
+     0.17
+    ],
+    [
+     "5907",
+     "大洋-KY",
+     966583,
+     -1.02
+    ],
+    [
+     "2945",
+     "三商家購",
+     811423,
+     3.12
+    ],
+    [
+     "2901",
+     "欣欣",
+     541905,
+     0.0
+    ],
+    [
+     "2939",
+     "永邑-KY",
+     210922,
+     1.31
+    ],
+    [
+     "8443",
+     "阿瘦",
+     97741,
+     0.44
+    ]
+   ]
+  },
+  {
+   "name": "水泥工業",
+   "value": 1532858220,
+   "count": 7,
+   "pct": 0.64,
+   "top": [
+    [
+     "1101",
+     "台泥",
+     1038948080,
+     1.28
+    ],
+    [
+     "1102",
+     "亞泥",
+     465933378,
+     -0.75
+    ],
+    [
+     "1104",
+     "環泥",
+     15790501,
+     -0.38
+    ],
+    [
+     "1108",
+     "幸福",
+     3866039,
+     -0.82
+    ],
+    [
+     "1103",
+     "嘉泥",
+     3610680,
+     0.37
+    ],
+    [
+     "1110",
+     "東泥",
+     3116867,
+     1.59
+    ],
+    [
+     "1109",
+     "信大",
+     1592675,
+     0.72
+    ]
+   ]
+  },
+  {
+   "name": "電器電纜",
+   "value": 1259899083,
+   "count": 17,
+   "pct": -2.71,
+   "top": [
+    [
+     "1605",
+     "華新",
+     688878797,
+     -2.45
+    ],
+    [
+     "1609",
+     "大亞",
+     157186517,
+     -1.22
+    ],
+    [
+     "1608",
+     "華榮",
+     123158059,
+     -2.48
+    ],
+    [
+     "2061",
+     "風青",
+     104001700,
+     -9.88
+    ],
+    [
+     "1623",
+     "大東電",
+     49152839,
+     1.15
+    ],
+    [
+     "1612",
+     "宏泰",
+     41441243,
+     -0.16
+    ],
+    [
+     "1617",
+     "榮星",
+     23471268,
+     -9.98
+    ],
+    [
+     "1618",
+     "合機",
+     19262409,
+     0.4
+    ],
+    [
+     "1615",
+     "大山",
+     14112898,
+     -1.59
+    ],
+    [
+     "1616",
+     "億泰",
+     11524196,
+     0.51
+    ],
+    [
+     "1611",
+     "中電",
+     9458828,
+     -0.41
+    ],
+    [
+     "1603",
+     "華電",
+     6157251,
+     0.18
+    ],
+    [
+     "1604",
+     "聲寶",
+     5952707,
+     0.43
+    ],
+    [
+     "1614",
+     "三洋電",
+     2626959,
+     -0.96
+    ],
+    [
+     "5283",
+     "禾聯碩",
+     2426802,
+     0.19
+    ],
+    [
+     "1626",
+     "艾美特-KY",
+     681033,
+     -0.5
+    ],
+    [
+     "4930",
+     "燦星網",
+     405577,
+     -0.6
+    ]
+   ]
+  },
+  {
+   "name": "文化創意",
+   "value": 1071157850,
+   "count": 24,
+   "pct": 2.34,
+   "top": [
+    [
+     "3293",
+     "鈊象",
+     903612000,
+     2.92
+    ],
+    [
+     "6180",
+     "橘子",
+     44190400,
+     0.23
+    ],
+    [
+     "6101",
+     "寬魚國際",
+     33880150,
+     -5.36
+    ],
+    [
+     "6111",
+     "光聚晶電",
+     15144650,
+     2.0
+    ],
+    [
+     "6596",
+     "寬宏藝術",
+     14042200,
+     1.51
+    ],
+    [
+     "3546",
+     "宇峻",
+     11578200,
+     -0.7
+    ],
+    [
+     "5263",
+     "智崴",
+     10887900,
+     1.19
+    ],
+    [
+     "8446",
+     "華研",
+     8918600,
+     0.12
+    ],
+    [
+     "3086",
+     "華義*",
+     7813300,
+     -2.28
+    ],
+    [
+     "5478",
+     "智冠",
+     6778200,
+     -0.1
+    ],
+    [
+     "4946",
+     "辣椒",
+     3198400,
+     -4.55
+    ],
+    [
+     "3083",
+     "網龍",
+     3136400,
+     -0.98
+    ],
+    [
+     "9949",
+     "琉園",
+     1903300,
+     0.85
+    ],
+    [
+     "6294",
+     "智基",
+     1756600,
+     -0.55
+    ],
+    [
+     "6856",
+     "鑫傳",
+     1130300,
+     8.42
+    ],
+    [
+     "6542",
+     "隆中",
+     879400,
+     6.74
+    ],
+    [
+     "6482",
+     "弘煜科",
+     515400,
+     0.0
+    ],
+    [
+     "2926",
+     "誠品生活",
+     440400,
+     1.28
+    ],
+    [
+     "8450",
+     "霹靂",
+     416450,
+     0.0
+    ],
+    [
+     "3064",
+     "泰偉",
+     414000,
+     0.56
+    ],
+    [
+     "6169",
+     "昱泉",
+     388900,
+     0.71
+    ],
+    [
+     "7584",
+     "樂意",
+     80150,
+     -7.58
+    ],
+    [
+     "6144",
+     "得利影",
+     42450,
+     2.94
+    ],
+    [
+     "4806",
+     "桂田文創",
+     10100,
+     0.0
+    ]
+   ]
+  },
+  {
+   "name": "資訊服務",
+   "value": 836695732,
+   "count": 45,
+   "pct": -0.8,
+   "top": [
+    [
+     "3029",
+     "零壹",
+     156498301,
+     0.98
+    ],
+    [
+     "6214",
+     "精誠",
+     128370395,
+     0.36
+    ],
+    [
+     "3147",
+     "大綜",
+     94548000,
+     -4.15
+    ],
+    [
+     "6163",
+     "華電網",
+     89336800,
+     -2.36
+    ],
+    [
+     "6231",
+     "系微",
+     77465000,
+     -0.22
+    ],
+    [
+     "4953",
+     "緯軟",
+     40023500,
+     0.0
+    ],
+    [
+     "5210",
+     "寶碩",
+     31814000,
+     -4.58
+    ],
+    [
+     "2480",
+     "敦陽科",
+     31033100,
+     -0.96
+    ],
+    [
+     "2453",
+     "凌群",
+     22920636,
+     -0.78
+    ],
+    [
+     "2427",
+     "三商電",
+     22162210,
+     0.63
+    ],
+    [
+     "6112",
+     "邁達特",
+     18369009,
+     -1.32
+    ],
+    [
+     "5410",
+     "國眾",
+     17650250,
+     -1.23
+    ],
+    [
+     "2468",
+     "華經",
+     15467254,
+     1.01
+    ],
+    [
+     "2471",
+     "資通",
+     15135229,
+     -0.39
+    ],
+    [
+     "5403",
+     "中菲",
+     9337700,
+     0.96
+    ],
+    [
+     "8099",
+     "大世科",
+     8445200,
+     -0.53
+    ],
+    [
+     "5203",
+     "訊連",
+     7384814,
+     -0.46
+    ],
+    [
+     "6148",
+     "驊宏資",
+     7242350,
+     -2.22
+    ],
+    [
+     "6791",
+     "虎門科技",
+     6681200,
+     -1.97
+    ],
+    [
+     "3570",
+     "大塚",
+     5294500,
+     0.62
+    ],
+    [
+     "6183",
+     "關貿",
+     3338887,
+     -1.09
+    ],
+    [
+     "6874",
+     "倍力",
+     2605000,
+     -2.6
+    ],
+    [
+     "6123",
+     "上奇",
+     2239350,
+     -1.2
+    ],
+    [
+     "4994",
+     "傳奇",
+     2197647,
+     0.33
+    ],
+    [
+     "5202",
+     "力新",
+     1940700,
+     -0.77
+    ]
+   ]
+  },
+  {
+   "name": "橡膠工業",
+   "value": 741526751,
+   "count": 11,
+   "pct": -1.3,
+   "top": [
+    [
+     "2105",
+     "正新",
+     425647534,
+     -1.19
+    ],
+    [
+     "2103",
+     "台橡",
+     146859466,
+     -1.91
+    ],
+    [
+     "2101",
+     "南港",
+     65927982,
+     -1.47
+    ],
+    [
+     "2104",
+     "國際中橡",
+     38006133,
+     -1.89
+    ],
+    [
+     "2108",
+     "南帝",
+     28859818,
+     -0.72
+    ],
+    [
+     "2106",
+     "建大",
+     17321969,
+     0.0
+    ],
+    [
+     "2107",
+     "厚生",
+     7010784,
+     0.39
+    ],
+    [
+     "2114",
+     "鑫永銓",
+     5215031,
+     0.23
+    ],
+    [
+     "2102",
+     "泰豐",
+     3703791,
+     1.89
+    ],
+    [
+     "6582",
+     "申豐",
+     1551081,
+     -1.24
+    ],
+    [
+     "2109",
+     "華豐",
+     1423162,
+     0.0
+    ]
+   ]
+  },
+  {
+   "name": "居家生活",
+   "value": 693321730,
+   "count": 34,
+   "pct": 0.02,
+   "top": [
+    [
+     "8464",
+     "億豐",
+     355249039,
+     0.28
+    ],
+    [
+     "5904",
+     "寶雅",
+     234300000,
+     -0.65
+    ],
+    [
+     "9911",
+     "櫻花",
+     33249868,
+     -0.72
+    ],
+    [
+     "9934",
+     "成霖",
+     18647384,
+     2.36
+    ],
+    [
+     "9935",
+     "慶豐富",
+     9102126,
+     1.9
+    ],
+    [
+     "9924",
+     "福興",
+     4601890,
+     0.5
+    ],
+    [
+     "6968",
+     "萬達寵物",
+     4572050,
+     2.57
+    ],
+    [
+     "2062",
+     "橋椿",
+     4289633,
+     0.27
+    ],
+    [
+     "5903",
+     "全家",
+     3763000,
+     0.27
+    ],
+    [
+     "2230",
+     "泰茂",
+     3499550,
+     1.37
+    ],
+    [
+     "2916",
+     "滿心",
+     3153700,
+     -0.25
+    ],
+    [
+     "3557",
+     "嘉威",
+     2480701,
+     1.17
+    ],
+    [
+     "6629",
+     "泰金-KY",
+     2480500,
+     0.0
+    ],
+    [
+     "3171",
+     "炎洲流通",
+     2036000,
+     1.26
+    ],
+    [
+     "6671",
+     "三能-KY",
+     1800696,
+     0.0
+    ],
+    [
+     "6728",
+     "上洋",
+     1620000,
+     0.46
+    ],
+    [
+     "5902",
+     "德記",
+     1428600,
+     0.74
+    ],
+    [
+     "8941",
+     "關中",
+     985950,
+     -0.69
+    ],
+    [
+     "8482",
+     "商億-KY",
+     820478,
+     1.99
+    ],
+    [
+     "4702",
+     "中美實",
+     786050,
+     -1.05
+    ],
+    [
+     "6754",
+     "匯僑設計",
+     781844,
+     -0.82
+    ],
+    [
+     "6195",
+     "詩肯",
+     744500,
+     0.57
+    ],
+    [
+     "3067",
+     "全域",
+     504000,
+     0.0
+    ],
+    [
+     "2947",
+     "振宇五金",
+     463400,
+     -2.52
+    ],
+    [
+     "6807",
+     "峰源-KY",
+     440361,
+     0.75
+    ]
+   ]
+  },
+  {
+   "name": "觀光餐旅",
+   "value": 409189674,
+   "count": 49,
+   "pct": 0.55,
+   "top": [
+    [
+     "2727",
+     "王品",
+     129699366,
+     1.37
+    ],
+    [
+     "2731",
+     "雄獅",
+     71378009,
+     0.0
+    ],
+    [
+     "2753",
+     "八方雲集",
+     35127256,
+     0.29
+    ],
+    [
+     "2745",
+     "五福",
+     22061000,
+     -0.98
+    ],
+    [
+     "1268",
+     "漢來美食",
+     20732500,
+     2.06
+    ],
+    [
+     "2707",
+     "晶華",
+     20681977,
+     0.56
+    ],
+    [
+     "2723",
+     "美食-KY",
+     15330179,
+     1.43
+    ],
+    [
+     "5706",
+     "鳳凰",
+     9486040,
+     -0.22
+    ],
+    [
+     "2755",
+     "揚秦",
+     7626000,
+     -1.9
+    ],
+    [
+     "2739",
+     "寒舍",
+     7452261,
+     3.38
+    ],
+    [
+     "2743",
+     "山富",
+     6777000,
+     -0.34
+    ],
+    [
+     "2704",
+     "國賓",
+     6221609,
+     -0.55
+    ],
+    [
+     "2706",
+     "第一店",
+     6008567,
+     0.39
+    ],
+    [
+     "2748",
+     "雲品",
+     4496330,
+     0.25
+    ],
+    [
+     "2719",
+     "燦星旅",
+     3983250,
+     -5.45
+    ],
+    [
+     "2732",
+     "六角",
+     3922600,
+     -0.61
+    ],
+    [
+     "9943",
+     "好樂迪",
+     3196815,
+     0.0
+    ],
+    [
+     "5905",
+     "南仁湖",
+     3196590,
+     -1.92
+    ],
+    [
+     "7760",
+     "享溫馨",
+     2711771,
+     0.88
+    ],
+    [
+     "2729",
+     "瓦城",
+     2647500,
+     1.29
+    ],
+    [
+     "2754",
+     "亞洲藏壽司",
+     2041900,
+     1.03
+    ],
+    [
+     "2701",
+     "萬企",
+     1884248,
+     0.92
+    ],
+    [
+     "2734",
+     "易飛網",
+     1844550,
+     -0.33
+    ],
+    [
+     "7757",
+     "金色三麥",
+     1810300,
+     -1.09
+    ],
+    [
+     "2751",
+     "王座",
+     1794900,
+     -1.92
+    ]
+   ]
+  },
+  {
+   "name": "存託憑證",
+   "value": 298906773,
+   "count": 4,
+   "pct": 0.25,
+   "top": [
+    [
+     "9105",
+     "泰金寶-DR",
+     274105439,
+     0.48
+    ],
+    [
+     "9103",
+     "美德醫療-DR",
+     20661072,
+     -1.89
+    ],
+    [
+     "9136",
+     "巨騰-DR",
+     4100292,
+     -4.13
+    ],
+    [
+     "9110",
+     "越南控-DR",
+     39970,
+     0.32
+    ]
+   ]
+  },
+  {
+   "name": "造紙工業",
+   "value": 179464251,
+   "count": 7,
+   "pct": -2.14,
+   "top": [
+    [
+     "1905",
+     "華紙",
+     47010703,
+     -3.48
+    ],
+    [
+     "1907",
+     "永豐餘",
+     40066113,
+     -1.42
+    ],
+    [
+     "1904",
+     "正隆",
+     38310696,
+     -2.51
+    ],
+    [
+     "1909",
+     "榮成",
+     35707406,
+     -1.98
+    ],
+    [
+     "6790",
+     "永豐實",
+     9876033,
+     0.51
+    ],
+    [
+     "1903",
+     "士紙",
+     5019808,
+     0.0
+    ],
+    [
+     "1906",
+     "寶隆",
+     3473492,
+     -0.46
+    ]
+   ]
+  },
+  {
+   "name": "農業科技",
+   "value": 72619500,
+   "count": 4,
+   "pct": 6.14,
+   "top": [
+    [
+     "4171",
+     "瑞基",
+     67947150,
+     6.52
+    ],
+    [
+     "6508",
+     "惠光",
+     2058450,
+     1.37
+    ],
+    [
+     "1240",
+     "茂生農經",
+     1816500,
+     0.55
+    ],
+    [
+     "6578",
+     "達邦蛋白",
+     797400,
+     -1.53
+    ]
+   ]
+  }
+ ],
+ "avg_days": 9,
+ "updated": "2026-10-07T22:44:29+08:00"
+}
