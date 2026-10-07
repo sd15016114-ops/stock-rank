@@ -1,4 +1,5 @@
 """離線測試解析邏輯：資料依各來源實際回傳的格式仿製。 python3 tests/test_parse.py"""
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -75,4 +76,16 @@ with tempfile.TemporaryDirectory() as tmp:
     assert len(dates) == ft.KEEP_DAYS and dates == sorted(dates, reverse=True)
     assert len(list((Path(tmp) / "history" / "tw").glob("*.json"))) == ft.KEEP_DAYS
     assert ft.save_history("tw", {"status": "failed", "rows": []}) == dates          # 失敗的結果不會存成歷史
+
+# 來源還沒同步時，不能用只有上市的排行蓋掉同一天的完整排行
+with tempfile.TemporaryDirectory() as tmp:
+    ft.DATA = Path(tmp)
+    full = {"date": "2026-10-06", "status": "ok", "updated": "x", "total_value": 100, "rows": [{"code": "2330", "value": 9}, {"code": "6488", "value": 5}]}
+    (Path(tmp) / "tw.json").write_text(json.dumps(full), encoding="utf-8")
+    part = lambda: {"date": "2026-10-06", "status": "partial", "error": "上櫃：還沒同步", "total_value": 60, "rows": [{"code": "2330", "name": "台積電", "value": 9}]}
+    assert ft.run("tw", "台股", part) is True
+    assert json.loads((Path(tmp) / "tw.json").read_text(encoding="utf-8")) == full
+    newer = lambda: dict(part(), date="2026-10-07")
+    assert ft.run("tw", "台股", newer) is False                      # 新的一天只有上市：照寫，但標記為不完整
+    assert json.loads((Path(tmp) / "tw.json").read_text(encoding="utf-8"))["date"] == "2026-10-07"
 print("全部通過")

@@ -256,6 +256,11 @@ def run(key, label, build):
     now = datetime.now(TPE).isoformat(timespec="seconds")
     try:
         new = build()
+        if new["status"] == "partial" and old and old.get("status") == "ok" and old.get("rows") and old.get("date", "") >= new["date"]:
+            # 兩個來源還沒同步（例如櫃買已公布今天、證交所還沒），手上已有同一天的完整排行就不要用不完整的蓋掉
+            print("SKIP  %s  %s；保留現有的 %s 完整排行，等下一次更新" % (label, new.get("error"), old["date"]))
+            save_history(key, None)
+            return True
         if not new["rows"] or new["rows"][0]["value"] <= 0:
             raise ValueError("排行是空的")
         bad = suspicious(new, old if old and old.get("rows") else None)
