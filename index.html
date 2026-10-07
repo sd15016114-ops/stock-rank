@@ -53,10 +53,16 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:16p
 .updated{font-size:13px;color:var(--muted);margin-top:6px}
 .stale{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;border:1px solid var(--seal);color:var(--seal);margin-left:6px}
 
-.modes{display:inline-flex;margin:22px 0 0;border:1px solid var(--fill);border-radius:999px;overflow:hidden;background:var(--sheet)}
-.modes button{font:inherit;font-size:15px;font-weight:500;color:var(--accent);background:transparent;border:0;padding:7px 24px;cursor:pointer}
-.modes button+button{border-left:1px solid var(--fill)}
-.modes button[aria-pressed=true]{background:var(--fill);color:var(--on-fill);font-weight:700}
+/* 分類按鈕：圓角滑軌，選取的底色會左右滑動；選項太多放不下時可以橫向捲動 */
+.seg{position:relative;display:inline-flex;max-width:100%;padding:4px;border-radius:999px;background:var(--tint);border:1px solid var(--rule);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.seg::-webkit-scrollbar{display:none}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:0;width:0;border-radius:999px;background:var(--fill);box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1)}
+.seg.still .thumb{transition:none}
+.seg button{position:relative;flex:none;font:inherit;font-size:15px;font-weight:500;line-height:1.4;color:var(--muted);background:transparent;border:0;border-radius:999px;padding:6px 16px;cursor:pointer;white-space:nowrap;transition:color .2s}
+.seg button[aria-pressed=true]{color:var(--on-fill);font-weight:700}
+.modes{margin:22px 0 0}
+.modes button{padding:7px 26px}
+@media (prefers-reduced-motion: reduce){ .seg .thumb,.seg button{transition:none} }
 
 /* 摘要 */
 .sums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:22px}
@@ -70,7 +76,8 @@ section.block{padding:36px 0 0}
 section.block h2{font-family:var(--serif);font-weight:900;font-size:24px;margin:0 0 4px}
 section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width:44em}
 .tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
-.tools select,.tools input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:7px 12px;max-width:100%}
+.tools select[hidden]{display:none}
+.tools select,.tools input[type=search]{font:inherit;font-size:15px;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:999px;padding:8px 16px;max-width:100%}
 .tools input[type=search]{flex:1 1 200px;min-width:0}
 .tools input::placeholder{color:var(--muted)}
 .tools label{display:flex;align-items:center;gap:6px;font-size:15px;cursor:pointer}
@@ -123,7 +130,7 @@ footer a{color:var(--accent)}
     <h1>今天的錢流向哪裡</h1>
     <p>每天收盤後整理台股與美股的成交值排行。成交值是當天實際換手的金額，比成交量更能看出資金集中在哪些股票。</p>
     <div class="updated" id="updated">資料載入中…</div>
-    <div class="modes" role="group" aria-label="市場">
+    <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
     <div class="sums" id="sums"></div>
@@ -134,8 +141,10 @@ footer a{color:var(--accent)}
     <p class="lead" id="lead"></p>
     <div class="tools">
       <select id="date" aria-label="交易日"></select>
-      <select id="market" aria-label="市場別"><option value="all">上市＋上櫃</option><option value="上市">只看上市</option><option value="上櫃">只看上櫃</option></select>
-      <select id="count" aria-label="顯示名次"><option value="20">前 20 名</option><option value="50" selected>前 50 名</option><option value="100">前 100 名</option></select>
+      <div class="seg" id="marketSeg" role="group" aria-label="市場別"></div>
+      <select id="market" aria-label="市場別" hidden><option value="all">上市＋上櫃</option><option value="上市">只看上市</option><option value="上櫃">只看上櫃</option></select>
+      <div class="seg" id="countSeg" role="group" aria-label="顯示名次"></div>
+      <select id="count" aria-label="顯示名次" hidden><option value="20">前 20 名</option><option value="50" selected>前 50 名</option><option value="100">前 100 名</option></select>
       <label id="etfWrap"><input type="checkbox" id="etf" checked> 含 ETF</label>
       <input type="search" id="q" placeholder="搜尋代號或名稱" aria-label="搜尋代號或名稱">
     </div>
@@ -299,21 +308,54 @@ $('theme').addEventListener('click',function(){
 });
 paintTheme();
 
+/* ===== 橫移式分類按鈕 ===== */
+/* 把選取的底色移到目前選中的按鈕底下；still 為 true 時不播動畫（剛載入或視窗大小改變時） */
+function syncSeg(seg, still){
+  var on = seg.querySelector('button[aria-pressed=true]'), thumb = seg.querySelector('.thumb');
+  if(!on || !thumb || !on.offsetWidth) return;
+  if(still) seg.classList.add('still');
+  thumb.style.width = on.offsetWidth+'px';
+  thumb.style.transform = 'translateX('+on.offsetLeft+'px)';
+  if(still){ void thumb.offsetWidth; seg.classList.remove('still'); }
+  /* 選項被捲到看不見時，自動捲回來 */
+  if(on.offsetLeft < seg.scrollLeft || on.offsetLeft+on.offsetWidth > seg.scrollLeft+seg.clientWidth)
+    seg.scrollTo({left:on.offsetLeft-24, behavior: still ? 'auto' : 'smooth'});
+}
+function syncSegs(still){ document.querySelectorAll('.seg').forEach(function(g){ syncSeg(g, still); }); }
+/* 用隱藏的下拉選單當資料來源，畫成一排可以滑動的按鈕 */
+function segFrom(id){
+  var sel = $(id), seg = $(id+'Seg');
+  seg.innerHTML = '<i class="thumb" aria-hidden="true"></i>' + Array.prototype.map.call(sel.options, function(o){
+    return '<button type="button" data-v="'+esc(o.value)+'" aria-pressed="'+(o.value===sel.value)+'">'+esc(o.textContent)+'</button>'; }).join('');
+  seg.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('button') : null;
+    if(!b || b.getAttribute('aria-pressed')==='true') return;
+    seg.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true' : 'false'); });
+    syncSeg(seg);
+    sel.value = b.dataset.v;
+    sel.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+}
+window.addEventListener('resize', function(){ syncSegs(true); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ syncSegs(true); });
+
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
 function remember(){
   try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
 }
+var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
-  $('market').hidden = $('etfWrap').hidden = MODE!=='tw';
-  $('market').style.display = $('etfWrap').style.display = MODE==='tw' ? '' : 'none';
+  $('marketSeg').hidden = $('etfWrap').hidden = MODE!=='tw';
+  $('marketSeg').style.display = $('etfWrap').style.display = MODE==='tw' ? '' : 'none';
   document.querySelectorAll('.modes button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.mode===MODE ? 'true' : 'false'); });
   var list = DATES[MODE];
   $('date').innerHTML = list.map(function(x,i){ return '<option value="'+x+'">'+tradeDay(x)+(i===0?'・最新':'')+'</option>'; }).join('');
   $('date').hidden = list.length<1; $('date').style.display = list.length<1 ? 'none' : '';
   DATA[MODE] = LATEST[MODE]; PREV[MODE] = null;
   render();
+  syncSeg(document.querySelector('.modes'), !BOOTED); syncSeg($('marketSeg'), true); syncSeg($('countSeg'), true); BOOTED = true;
   if(list.length) pickDate(list[0]);
 }
 $('date').addEventListener('input',function(){ pickDate($('date').value); });
@@ -324,6 +366,7 @@ document.querySelectorAll('.modes button').forEach(function(b){
 if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
+segFrom('market'); segFrom('count');
 
 function nul(){ return null; }
 Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_dates.json').catch(nul), load('us_dates.json').catch(nul)]).then(function(res){
