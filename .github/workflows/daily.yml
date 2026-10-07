@@ -16,6 +16,10 @@ on:
 permissions:
   contents: write
 
+concurrency:              # 同一時間只跑一個，避免兩次執行同時提交而衝突
+  group: fetch
+  cancel-in-progress: false
+
 jobs:
   fetch:
     runs-on: ubuntu-latest

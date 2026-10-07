@@ -246,7 +246,8 @@ def run(key, label, build):
         bad = suspicious(new, old if old and old.get("rows") else None)
         if bad:
             raise ValueError(bad)
-        new["updated"] = now
+        same = old and {k: v for k, v in old.items() if k != "updated"} == new
+        new["updated"] = old["updated"] if same else now      # 內容沒變就不改檔案，避免產生沒有意義的提交
         top = new["rows"][0]
         print("%-5s %s  %s  共 %d 檔  第一名 %s %s%s" % (
             "OK" if new["status"] == "ok" else "PART", label, new["date"], len(new["rows"]), top["code"], top["name"],
