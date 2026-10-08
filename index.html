@@ -119,7 +119,12 @@ footer a{color:var(--accent)}
   .val i{right:2px}
   .wrap{padding:0 16px}
 }
-@media (max-width:420px){ .rank .px{display:none} }
+.pxm,.rank th .pxh{display:none}
+@media (max-width:420px){
+  .rank .px{display:none}
+  .pxm{display:block;color:var(--ink);font-weight:700}
+  .rank th .pxh{display:inline}
+}
 </style>
 </head>
 <body>
@@ -238,9 +243,10 @@ function vsPrev(sum, n){
   return (p>=0?'比前一交易日多 ':'比前一交易日少 ')+fix(Math.abs(p),1)+'%';
 }
 function pctCell(r){
-  if(r.pct==null) return '<td>—</td>';
+  var pm = '<span class="pxm">'+price(r.close)+'</span>';      /* 手機窄螢幕沒有收盤欄，收盤價改顯示在漲跌幅上方 */
+  if(r.pct==null) return '<td>'+pm+'—</td>';
   var c = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '';
-  return '<td class="'+c+'">'+(r.pct>0?'▲ ':r.pct<0?'▼ ':'')+fix(Math.abs(r.pct),2)+'%</td>';
+  return '<td class="'+c+'">'+pm+(r.pct>0?'▲ ':r.pct<0?'▼ ':'')+fix(Math.abs(r.pct),2)+'%</td>';
 }
 function renderSums(d, rows){
   var M = MODES[MODE];
@@ -278,7 +284,7 @@ function render(){
   }else if(!rows.length){
     $('rank').innerHTML = '<div class="empty">'+(q?'前 '+all.length+' 名之中找不到符合的股票，可以把顯示名次調大再試。':'沒有符合條件的股票。')+'</div>';
   }else{
-    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th><th class="vol">成交量</th></tr>'
+    $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th><span class="pxh">收盤／</span>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th><th class="vol">成交量</th></tr>'
       + rows.map(function(r){
         var sub = MODE==='tw' ? r.market : (r.sector||'');
         return '<tr'+(r._no<=3?' class="top3"':'')+'><td class="no l">'+r._no+moveCell(r,map)+'</td>'
