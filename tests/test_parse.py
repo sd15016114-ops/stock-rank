@@ -224,4 +224,12 @@ real_day, ft.polygon_day = ft.polygon_day, fake_day
 got = ft.us_sessions(2, start=_date(2026, 10, 8))
 ft.polygon_day = real_day
 assert [d for d, _ in got] == ["2026-10-06", "2026-10-02"] and calls == ["2026-10-07", "2026-10-06", "2026-10-05", "2026-10-02"], (got and [d for d, _ in got], calls)
+
+# 台股當日走勢：富果歷史 K 線回傳是新到舊，要排回舊到新；不是指定日期的不收
+FK = {"symbol": "2330", "timeframe": "10", "data": [
+    {"date": "2026-10-07T13:30:00.000+08:00", "open": 2585, "close": 2585}, {"date": "2026-10-07T13:20:00.000+08:00", "open": 2575, "close": 2575},
+    {"date": "2026-10-07T09:10:00.000+08:00", "open": 2575, "close": 2580}, {"date": "2026-10-07T09:00:00.000+08:00", "open": 2565, "close": 2575},
+    {"date": "2026-10-06T13:30:00.000+08:00", "open": 1, "close": 1}]}
+assert ft.fugle_closes(FK, "2026-10-07") == [2565, 2575, 2580, 2575, 2585]
+assert ft.fugle_closes(FK, "2026-10-08") is None and ft.fugle_closes({}, "2026-10-07") is None
 print("全部通過")
