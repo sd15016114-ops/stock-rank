@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, probe, probe-polygon, backfill, backfill-us, intraday]
+        options: [update, probe, probe-polygon, probe-fugle, backfill, backfill-us, intraday, intraday-tw]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -47,6 +47,11 @@ jobs:
       - name: 實測資料來源
         if: inputs.task == 'probe'
         run: python scraper/probe.py
+      - name: 實測富果金鑰
+        if: inputs.task == 'probe-fugle'
+        run: python scraper/probe_fugle.py
+        env:
+          FUGLE_API_KEY: ${{ secrets.FUGLE_API_KEY }}
       - name: 實測 Polygon 金鑰
         if: inputs.task == 'probe-polygon'
         run: python scraper/probe_polygon.py
@@ -54,11 +59,18 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'backfill-us'
+        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'backfill-us'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
+      - name: 抓台股當日走勢
+        id: intradaytw
+        if: inputs.task == 'intraday-tw' || github.event.schedule == '30 10 * * 1-5' || github.event.schedule == '30 13 * * 1-5'
+        run: python scraper/fetch_turnover.py intraday-tw
+        env:
+          FUGLE_API_KEY: ${{ secrets.FUGLE_API_KEY }}
+        continue-on-error: true
       - name: 重建美股歷史排行
         id: backfillus
         if: inputs.task == 'backfill-us'
@@ -87,5 +99,5 @@ jobs:
           git pull --rebase origin ${{ github.ref_name }}   # 執行期間若有其他更新推上來，先接上再推
           git push origin HEAD:${{ github.ref_name }}
       - name: 有市場抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
-        if: steps.fetch.outcome == 'failure' || steps.backfill.outcome == 'failure' || steps.intraday.outcome == 'failure' || steps.backfillus.outcome == 'failure'
+        if: steps.fetch.outcome == 'failure' || steps.backfill.outcome == 'failure' || steps.intraday.outcome == 'failure' || steps.backfillus.outcome == 'failure' || steps.intradaytw.outcome == 'failure'
         run: exit 1

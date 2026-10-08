@@ -278,31 +278,6 @@ def save_full(date, trows, orows):
         (full_dir() / ("%s.json" % old)).unlink()
 
 
-TREND_DAYS = 60                                     # 個股展開時的收盤走勢要畫幾個交易日
-
-
-def save_trend():
-    """把最新排行裡每一檔的近 TREND_DAYS 日收盤價整理成 data/trend_tw.json，網頁點開個股時才讀。
-
-    來源是每天的全市場精簡檔，不另外連線。某天沒有成交的股票那一天是 null。
-    """
-    path = DATA / "tw.json"
-    if not path.exists():
-        return
-    codes = [r["code"] for r in json.loads(path.read_text(encoding="utf-8")).get("rows", [])]
-    dates = sorted(full_dates()[:TREND_DAYS])
-    if not codes or len(dates) < 2:
-        return
-    series = {c: [] for c in codes}
-    for d in dates:
-        day = json.loads((full_dir() / ("%s.json" % d)).read_text(encoding="utf-8"))
-        close = {c: p for m in ("上市", "上櫃") for c, p, _ in day.get(m, [])}
-        for c in codes:
-            series[c].append(close.get(c))
-    text = json.dumps({"dates": dates, "close": series}, ensure_ascii=False, separators=(",", ":"))
-    (DATA / "trend_tw.json").write_text(text + "\n", encoding="utf-8")
-
-
 def values_before(date, cache={}):
     """指定日期以前最近 AVG_DAYS 個交易日的 [{代號: 成交值}]（新到舊）。"""
     out = []
@@ -485,7 +460,6 @@ def backfill(want, force=False):
         newest = folder / ("%s.json" % dates[0]) if dates else None
         if newest and (not latest.get("rows") or latest.get("date", "") <= dates[0]):
             latest_path.write_text(newest.read_text(encoding="utf-8"), encoding="utf-8")
-        save_trend()
         print("回補完成：新增 %d 天，全市場存檔共 %d 天，歷史排行共 %d 天" % (added, len(full_dates()), len(dates)))
         return 0 if len(full_dates()) >= min(want, 5) else 1
     finally:
@@ -744,11 +718,6 @@ def run_inner(key, label, build):
         ok = False
     DATA.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(new, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    if key == "tw":
-        try:
-            save_trend()
-        except Exception as e:      # noqa: BLE001   走勢檔只是輔助，失敗不影響排行
-            print("      走勢檔沒有更新：%s" % e)
     return ok
 
 
@@ -822,7 +791,87 @@ def intraday_us():
         (DATA / "run_intraday_us.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
 
 
+# ---------------------------------------------------------------- 台股當日走勢（富果 Fugle）
+FUGLE_KEY = os.environ.get("FUGLE_API_KEY", "").strip()          # 放在 GitHub 的 Secrets；沒設定就略過
+FUGLE_BASE = "https://api.fugle.tw/marketdata/v1.0/stock"
+FUGLE_WAIT = 1.1                                                  # 免費方案每分鐘 60 次
+
+
+def fugle_closes(payload, date):
+    """富果 10 分鐘 K 線 → 當日價格序列：開盤價，之後每根 K 線的收盤價。只收指定日期的資料。"""
+    bars = [b for b in (payload or {}).get("data") or [] if str(b.get("date", "")).startswith(date) and b.get("close") is not None]
+    bars.sort(key=lambda b: b["date"])
+    if len(bars) < 4:
+        return None
+    return [bars[0].get("open", bars[0]["close"])] + [b["close"] for b in bars]
+
+
+def intraday_tw():
+    """抓台股最新排行那一天、榜上每一檔的當日走勢，存到 data/intraday/tw/<日期>.json。已抓過的不重抓。
+
+    用富果的歷史 K 線指定日期查詢，收盤後任何時間都拿得到；當天的資料若還沒進歷史 K 線，改查日內 K 線。
+    """
+    del LOG[:]
+    try:
+        if not FUGLE_KEY:
+            print("SKIP  台股當日走勢  未設定 FUGLE_API_KEY")
+            return 0
+        tw = json.loads((DATA / "tw.json").read_text(encoding="utf-8"))
+        date, codes = tw.get("date"), [r["code"] for r in tw.get("rows", [])]
+        folder = DATA / "intraday" / "tw"
+        folder.mkdir(parents=True, exist_ok=True)
+        path = folder / ("%s.json" % date)
+        out = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"date": date, "minutes": 10, "points": {}}
+        out["points"] = {c: v for c, v in out["points"].items() if c in set(codes)}
+        todo = [c for c in codes if c not in out["points"]]
+        s = requests.Session()
+        s.headers.update({"X-API-KEY": FUGLE_KEY, "User-Agent": BOT_UA})
+
+        def ask(url, params):
+            r = s.get(url, params=params, timeout=30)
+            if r.status_code == 429:        # 超過速率，等一分鐘再試一次
+                time.sleep(61)
+                r = s.get(url, params=params, timeout=30)
+            return r
+
+        got = miss = 0
+        for i, code in enumerate(todo):
+            try:
+                r = ask("%s/historical/candles/%s" % (FUGLE_BASE, code), {"timeframe": "10", "from": date, "to": date})
+                if r.status_code in (401, 403):
+                    print("FAIL  台股當日走勢  富果金鑰無效或沒有權限（HTTP %d）" % r.status_code)
+                    return 1
+                pts = fugle_closes(r.json(), date) if r.ok else None
+                if not pts:                 # 當天的還沒進歷史 K 線時，改查日內 K 線
+                    time.sleep(FUGLE_WAIT)
+                    r = ask("%s/intraday/candles/%s" % (FUGLE_BASE, code), {"timeframe": "10"})
+                    pts = fugle_closes(r.json(), date) if r.ok else None
+                if pts:
+                    out["points"][code] = pts
+                    got += 1
+                else:
+                    miss += 1
+            except Exception as e:          # noqa: BLE001   單一檔失敗不影響其他
+                miss += 1
+                print("      %s 讀取失敗：%s" % (code, str(e).replace(FUGLE_KEY, "***")[:80]))
+            if got and got % 50 == 0:       # 分批存檔，中途被中斷也不會白跑
+                path.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+            if i < len(todo) - 1:
+                time.sleep(FUGLE_WAIT)
+        if out["points"]:
+            path.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+        for old in sorted(folder.glob("*.json"), reverse=True)[KEEP_DAYS:]:
+            old.unlink()
+        done = len(out["points"]) >= len(codes) * 0.8
+        print("%s  台股當日走勢  %s  本次新增 %d 檔、沒資料 %d 檔，累計 %d/%d 檔" % ("OK   " if done else "PART ", date, got, miss, len(out["points"]), len(codes)))
+        return 0 if done else 1
+    finally:
+        (DATA / "run_intraday_tw.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
+
+
 def main(only):
+    if "intraday-tw" in only:
+        return intraday_tw()
     if "intraday" in only:
         return intraday_us()
     if "backfill-us" in only:

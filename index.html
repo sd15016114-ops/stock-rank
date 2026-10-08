@@ -313,12 +313,7 @@ function renderSums(d, rows){
   }).join('');
 }
 /* ===== 點一列展開：近期收盤走勢與明細 ===== */
-var OPEN = null, TREND = null, TRENDP = null;       /* OPEN 是「市場+代號」；走勢檔第一次展開時才讀 */
-function loadTrend(){
-  if(!TRENDP) TRENDP = load('trend_tw.json').then(function(t){ TREND = t && t.dates && t.close ? t : {dates:[], close:{}}; }, function(){ TREND = {dates:[], close:{}}; })
-    .then(function(){ if(OPEN) render(); });
-  return TRENDP;
-}
+var OPEN = null;       /* 目前展開的是哪一列：「市場+代號」 */
 function md(s){ return s ? s.slice(5).replace('-','/') : ''; }
 /* 當日走勢：每個市場每個交易日一個檔案（data/intraday/<市場>/<日期>.json），展開時才讀 */
 var INTRA = {};
@@ -338,7 +333,7 @@ function dayChart(r, d, pts){
   function y(v){ return (pad + (hi-v)/span*(H-pad*2)).toFixed(1); }
   var path = pts.map(function(v,i){ return (i?'L':'M')+(i/(pts.length-1)*W).toFixed(1)+' '+y(v); }).join(' ');
   var cls = last>base ? 'up' : last<base ? 'down' : '', hours = MODE==='us' ? ['09:30','16:00（美東）'] : ['09:00','13:30'];
-  return '<div class="cap"><span><b>'+tradeDay(d.date)+'</b> 當日走勢</span><span>開盤 <b>'+price(pts[0])+'</b>　最高 <b>'+price(Math.max.apply(null,pts))+'</b>　最低 <b>'+price(Math.min.apply(null,pts))+'</b>　昨收 <b>'+price(base)+'</b></span></div>'
+  return '<div class="cap"><span><b>'+tradeDay(d.date)+'</b> 當日走勢</span><span>開盤 <b>'+price(pts[0])+'</b>　收盤 <b>'+price(r.close)+'</b>　昨收 <b>'+price(base)+'</b></span></div>'
     + '<svg class="'+cls+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+esc(r.name)+' '+d.date+' 當日走勢">'
     + '<path class="ar" d="'+path+' L'+W+' '+y(base)+' L0 '+y(base)+' Z"/><line class="base" x1="0" x2="'+W+'" y1="'+y(base)+'" y2="'+y(base)+'"/><path class="ln" d="'+path+'"/></svg>'
     + '<div class="axis"><span>'+hours[0]+'</span><span>'+hours[1]+'</span></div>';
@@ -348,20 +343,11 @@ function trendChart(r, d){
   var day = intraday(MODE, d.date);
   if(day===null) return '<div class="none">走勢載入中…</div>';
   if(day && day.points[r.code] && day.points[r.code].length>1) return dayChart(r, d, day.points[r.code]);
-  if(MODE!=='tw') return '<div class="none">'+(day ? '這檔股票沒有當日走勢資料。' : '這一天的當日走勢還沒有產生。美股的走勢資料大約在台灣時間下午一點半之後才會更新。')+'</div>';
-  if(!TREND) return '<div class="none">走勢載入中…</div>';
-  var all = TREND.close[r.code], end = TREND.dates.indexOf(d.date), pts = [], dts = [];
-  if(all) for(var i=0;i<=(end<0?all.length-1:end);i++) if(all[i]!=null){ pts.push(all[i]); dts.push(TREND.dates[i]); }
-  if(pts.length<2) return '<div class="none">這檔股票在這個日期沒有足夠的走勢資料。</div>';
-  var W = 600, H = 150, pad = 6, base = pts[0], last = pts[pts.length-1], lo = Math.min.apply(null,pts), hi = Math.max.apply(null,pts), span = (hi-lo)||1;
-  function y(v){ return (pad + (hi-v)/span*(H-pad*2)).toFixed(1); }
-  var path = pts.map(function(v,i){ return (i?'L':'M')+(i/(pts.length-1)*W).toFixed(1)+' '+y(v); }).join(' ');
-  var chg = (last/base-1)*100, cls = chg>0 ? 'up' : chg<0 ? 'down' : '';
-  return '<div class="cap"><span>近 <b>'+pts.length+'</b> 個交易日收盤走勢</span><span>區間 <b class="'+cls+'">'+(chg>0?'+':chg<0?'−':'')+fix(Math.abs(chg),2)+'%</b>'
-    + '　最高 <b>'+price(hi)+'</b>　最低 <b>'+price(lo)+'</b></span></div>'
-    + '<svg class="'+cls+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+esc(r.name)+' 近 '+pts.length+' 個交易日收盤走勢，區間漲跌 '+fix(chg,2)+'%">'
-    + '<path class="ar" d="'+path+' L'+W+' '+y(base)+' L0 '+y(base)+' Z"/><line class="base" x1="0" x2="'+W+'" y1="'+y(base)+'" y2="'+y(base)+'"/><path class="ln" d="'+path+'"/></svg>'
-    + '<div class="axis"><span>'+md(dts[0])+'</span><span>'+md(dts[dts.length-1])+'</span></div>';
+  if(day) return '<div class="none">這檔股票沒有當日走勢資料。</div>';
+  var latest = LATEST[MODE] && d.date===LATEST[MODE].date;
+  return '<div class="none">'+(latest
+    ? (MODE==='us' ? '這一天的當日走勢還沒有產生，美股約在台灣時間下午一點半之後更新。' : '這一天的當日走勢還沒有產生，台股約在晚上六點半之後更新。')
+    : '這一天沒有當日走勢資料，當日走勢是從開始記錄那天起才有。')+'</div>';
 }
 function detail(r, d){
   var M = MODES[MODE], cls = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '', sign = r.change>0 ? '+' : r.change<0 ? '−' : '';
@@ -426,7 +412,6 @@ function render(){
           + '<td class="vol">'+M.vol(r.volume)+'</td></tr>'
           + (open ? '<tr class="det"><td colspan="9">'+detail(r, d)+'</td></tr>' : '');
       }).join('') + '</table>';
-    if(OPEN && MODE==='tw') loadTrend();
   }
   $('note').textContent = has && MODE==='us' ? '共統計 '+(d.count||0).toLocaleString('zh-TW')+' 檔在 NYSE、Nasdaq、NYSE American 掛牌的股票。交易日以美東時間為準，每個交易日結束後，約在台灣時間下午一點多更新。' : '';
   $('src').innerHTML = has && d.sources ? '資料來源：'+d.sources.map(function(u){

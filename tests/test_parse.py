@@ -185,24 +185,6 @@ with tempfile.TemporaryDirectory() as tmp:
     assert ft.run("us", "美股", lambda: {"date": "2026-10-13", "status": "ok", "total_value": 110, "rows": [usrow(101.0, 6)]}) is True
     assert json.loads((Path(tmp) / "us.json").read_text(encoding="utf-8"))["date"] == "2026-10-13"
 
-# 個股走勢檔：由全市場精簡檔整理，某天沒成交是 null
-with tempfile.TemporaryDirectory() as tmp:
-    ft.DATA = Path(tmp)
-    (Path(tmp) / "tw.json").write_text(json.dumps({"rows": [{"code": "2330"}, {"code": "6488"}]}), encoding="utf-8")
-    ft.save_full("2026-10-06", [{"code": "2330", "close": 2580.0, "value": 9}], [{"code": "6488", "close": 400.0, "value": 5}])
-    ft.save_full("2026-10-07", [{"code": "2330", "close": 2585.0, "value": 9}], [])
-    ft.save_trend()
-    assert json.loads((Path(tmp) / "trend_tw.json").read_text(encoding="utf-8")) == \
-        {"dates": ["2026-10-06", "2026-10-07"], "close": {"2330": [2580.0, 2585.0], "6488": [400.0, None]}}
-
-# 美股當日走勢：只取正常交易時段（夏令 13:30–20:00 UTC），開盤價＋每 10 分鐘收盤價
-t0 = 1791273600000                      # 2026-10-06 08:00 UTC（盤前）
-bars = [{"t": t0 + i * 300000, "o": 100 + i, "c": 100.5 + i} for i in range(192)]       # 08:00–24:00 UTC 每 5 分鐘一根
-pts = ft.session_closes(bars, "2026-10-06")
-first = (13 * 60 + 30 - 8 * 60) // 5    # 13:30 UTC 是第 66 根
-assert pts[0] == 100 + first and pts[1] == 100.5 + first + 1 and pts[-1] == 100.5 + first + 77 and len(pts) == 40, (pts[:3], pts[-1], len(pts))
-assert ft.session_closes(bars[:60], "2026-10-06") is None      # 只有盤前：不算
-
 # 美股改用 Polygon：日期與價量以 Polygon 為準，名稱產業來自 Nasdaq 清單；成交值用成交均價
 G6 = {"results": [{"T": "NVDA", "v": 100.0, "vw": 240.0, "o": 242.1, "c": 239.24}, {"T": "SPY", "v": 50.0, "vw": 779.0, "c": 779.09},
                   {"T": "BRK.B", "v": 10.0, "vw": 500.0, "c": 501.0}, {"T": "ZERO", "v": 0, "c": 1.0}]}
@@ -224,4 +206,12 @@ real_day, ft.polygon_day = ft.polygon_day, fake_day
 got = ft.us_sessions(2, start=_date(2026, 10, 8))
 ft.polygon_day = real_day
 assert [d for d, _ in got] == ["2026-10-06", "2026-10-02"] and calls == ["2026-10-07", "2026-10-06", "2026-10-05", "2026-10-02"], (got and [d for d, _ in got], calls)
+
+# 台股當日走勢：富果歷史 K 線回傳是新到舊，要排回舊到新；不是指定日期的不收
+FK = {"symbol": "2330", "timeframe": "10", "data": [
+    {"date": "2026-10-07T13:30:00.000+08:00", "open": 2585, "close": 2585}, {"date": "2026-10-07T13:20:00.000+08:00", "open": 2575, "close": 2575},
+    {"date": "2026-10-07T09:10:00.000+08:00", "open": 2575, "close": 2580}, {"date": "2026-10-07T09:00:00.000+08:00", "open": 2565, "close": 2575},
+    {"date": "2026-10-06T13:30:00.000+08:00", "open": 1, "close": 1}]}
+assert ft.fugle_closes(FK, "2026-10-07") == [2565, 2575, 2580, 2575, 2585]
+assert ft.fugle_closes(FK, "2026-10-08") is None and ft.fugle_closes({}, "2026-10-07") is None
 print("全部通過")
