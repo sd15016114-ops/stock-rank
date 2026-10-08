@@ -320,9 +320,35 @@ function loadTrend(){
   return TRENDP;
 }
 function md(s){ return s ? s.slice(5).replace('-','/') : ''; }
+/* 當日走勢：每個市場每個交易日一個檔案（data/intraday/<市場>/<日期>.json），展開時才讀 */
+var INTRA = {};
+function intraday(mode, date){
+  var k = mode+date;
+  if(INTRA[k]===undefined){
+    INTRA[k] = null;                                  /* null 代表讀取中，false 代表沒有這個檔案 */
+    load('intraday/'+mode+'/'+date+'.json').then(function(j){ INTRA[k] = j && j.points ? j : false; }, function(){ INTRA[k] = false; })
+      .then(function(){ if(OPEN) render(); });
+  }
+  return INTRA[k];
+}
+/* 單日走勢圖：虛線是昨日收盤價，線在虛線上方代表高於昨收 */
+function dayChart(r, d, pts){
+  var W = 600, H = 150, pad = 6, base = r.change!=null ? r.close-r.change : pts[0];
+  var lo = Math.min.apply(null,pts.concat(base)), hi = Math.max.apply(null,pts.concat(base)), span = (hi-lo)||1, last = pts[pts.length-1];
+  function y(v){ return (pad + (hi-v)/span*(H-pad*2)).toFixed(1); }
+  var path = pts.map(function(v,i){ return (i?'L':'M')+(i/(pts.length-1)*W).toFixed(1)+' '+y(v); }).join(' ');
+  var cls = last>base ? 'up' : last<base ? 'down' : '', hours = MODE==='us' ? ['09:30','16:00（美東）'] : ['09:00','13:30'];
+  return '<div class="cap"><span><b>'+tradeDay(d.date)+'</b> 當日走勢</span><span>開盤 <b>'+price(pts[0])+'</b>　最高 <b>'+price(Math.max.apply(null,pts))+'</b>　最低 <b>'+price(Math.min.apply(null,pts))+'</b>　昨收 <b>'+price(base)+'</b></span></div>'
+    + '<svg class="'+cls+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+esc(r.name)+' '+d.date+' 當日走勢">'
+    + '<path class="ar" d="'+path+' L'+W+' '+y(base)+' L0 '+y(base)+' Z"/><line class="base" x1="0" x2="'+W+'" y1="'+y(base)+'" y2="'+y(base)+'"/><path class="ln" d="'+path+'"/></svg>'
+    + '<div class="axis"><span>'+hours[0]+'</span><span>'+hours[1]+'</span></div>';
+}
 /* 走勢圖：畫到目前檢視的那個交易日為止；虛線是區間第一天的收盤價 */
 function trendChart(r, d){
-  if(MODE!=='tw') return '<div class="none">美股的歷史收盤資料還在累積，暫時沒有走勢圖。</div>';
+  var day = intraday(MODE, d.date);
+  if(day===null) return '<div class="none">走勢載入中…</div>';
+  if(day && day.points[r.code] && day.points[r.code].length>1) return dayChart(r, d, day.points[r.code]);
+  if(MODE!=='tw') return '<div class="none">'+(day ? '這檔股票沒有當日走勢資料。' : '這一天的當日走勢還沒有產生。美股的走勢資料大約在台灣時間下午一點半之後才會更新。')+'</div>';
   if(!TREND) return '<div class="none">走勢載入中…</div>';
   var all = TREND.close[r.code], end = TREND.dates.indexOf(d.date), pts = [], dts = [];
   if(all) for(var i=0;i<=(end<0?all.length-1:end);i++) if(all[i]!=null){ pts.push(all[i]); dts.push(TREND.dates[i]); }
