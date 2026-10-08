@@ -186,4 +186,14 @@ with tempfile.TemporaryDirectory() as tmp:
     assert json.loads((Path(tmp) / "us.json").read_text(encoding="utf-8")) == old and not (Path(tmp) / "history" / "us" / "2026-10-12.json").exists()
     assert ft.run("us", "美股", lambda: {"date": "2026-10-13", "status": "ok", "total_value": 110, "rows": [usrow(101.0, 6)]}) is True
     assert json.loads((Path(tmp) / "us.json").read_text(encoding="utf-8"))["date"] == "2026-10-13"
+
+# 個股走勢檔：由全市場精簡檔整理，某天沒成交是 null
+with tempfile.TemporaryDirectory() as tmp:
+    ft.DATA = Path(tmp)
+    (Path(tmp) / "tw.json").write_text(json.dumps({"rows": [{"code": "2330"}, {"code": "6488"}]}), encoding="utf-8")
+    ft.save_full("2026-10-06", [{"code": "2330", "close": 2580.0, "value": 9}], [{"code": "6488", "close": 400.0, "value": 5}])
+    ft.save_full("2026-10-07", [{"code": "2330", "close": 2585.0, "value": 9}], [])
+    ft.save_trend()
+    assert json.loads((Path(tmp) / "trend_tw.json").read_text(encoding="utf-8")) == \
+        {"dates": ["2026-10-06", "2026-10-07"], "close": {"2330": [2580.0, 2585.0], "6488": [400.0, None]}}
 print("全部通過")

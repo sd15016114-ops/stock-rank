@@ -134,8 +134,28 @@ footer a{color:var(--accent)}
   .wrap{padding:0 16px}
 }
 .pxm,.rank th .pxh{display:none}
+/* 點一列展開：走勢圖與明細 */
+.rank tr.row{cursor:pointer}
+.rank tr.row:hover td,.rank tr.row.open td{background:var(--tint)}
+.rank tr.row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.rank tr.det td{padding:0;text-align:left;white-space:normal;background:var(--tint)}
+.det .box{padding:6px 16px 18px}
+.det .cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 16px;font-size:13px;color:var(--muted);margin-bottom:6px}
+.det .cap b{color:var(--ink);font-weight:700}
+.det svg{display:block;width:100%;height:150px;overflow:visible}
+.det svg .base{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 4;opacity:.6;vector-effect:non-scaling-stroke}
+.det svg .ln{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.det svg .ar{fill:currentColor;opacity:.13}
+.det .axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.det .none{padding:22px 0;font-size:14px;color:var(--muted)}
+.det .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
+.det .stats small{display:block;font-size:12px;color:var(--muted)}
+.det .stats b{font-size:15px;font-weight:700}
 @media (max-width:420px){
   .rank .px{display:none}
+  .who .indx{display:none}      /* 手機太窄，產業別改在展開的明細裡看 */
+  .det .box{padding:6px 10px 16px}
+  .det svg{height:120px}
   .pxm{display:block;color:var(--ink);font-weight:700}
   .rank th .pxh{display:inline}
 }
@@ -292,6 +312,56 @@ function renderSums(d, rows){
     return '<div class="sum"><div class="k">'+c[0]+'</div><div class="v"'+(c[3]?' style="font-size:24px;line-height:1.55"':'')+'>'+c[1]+'</div><div class="n">'+c[2]+'</div></div>';
   }).join('');
 }
+/* ===== 點一列展開：近期收盤走勢與明細 ===== */
+var OPEN = null, TREND = null, TRENDP = null;       /* OPEN 是「市場+代號」；走勢檔第一次展開時才讀 */
+function loadTrend(){
+  if(!TRENDP) TRENDP = load('trend_tw.json').then(function(t){ TREND = t && t.dates && t.close ? t : {dates:[], close:{}}; }, function(){ TREND = {dates:[], close:{}}; })
+    .then(function(){ if(OPEN) render(); });
+  return TRENDP;
+}
+function md(s){ return s ? s.slice(5).replace('-','/') : ''; }
+/* 走勢圖：畫到目前檢視的那個交易日為止；虛線是區間第一天的收盤價 */
+function trendChart(r, d){
+  if(MODE!=='tw') return '<div class="none">美股的歷史收盤資料還在累積，暫時沒有走勢圖。</div>';
+  if(!TREND) return '<div class="none">走勢載入中…</div>';
+  var all = TREND.close[r.code], end = TREND.dates.indexOf(d.date), pts = [], dts = [];
+  if(all) for(var i=0;i<=(end<0?all.length-1:end);i++) if(all[i]!=null){ pts.push(all[i]); dts.push(TREND.dates[i]); }
+  if(pts.length<2) return '<div class="none">這檔股票在這個日期沒有足夠的走勢資料。</div>';
+  var W = 600, H = 150, pad = 6, base = pts[0], last = pts[pts.length-1], lo = Math.min.apply(null,pts), hi = Math.max.apply(null,pts), span = (hi-lo)||1;
+  function y(v){ return (pad + (hi-v)/span*(H-pad*2)).toFixed(1); }
+  var path = pts.map(function(v,i){ return (i?'L':'M')+(i/(pts.length-1)*W).toFixed(1)+' '+y(v); }).join(' ');
+  var chg = (last/base-1)*100, cls = chg>0 ? 'up' : chg<0 ? 'down' : '';
+  return '<div class="cap"><span>近 <b>'+pts.length+'</b> 個交易日收盤走勢</span><span>區間 <b class="'+cls+'">'+(chg>0?'+':chg<0?'−':'')+fix(Math.abs(chg),2)+'%</b>'
+    + '　最高 <b>'+price(hi)+'</b>　最低 <b>'+price(lo)+'</b></span></div>'
+    + '<svg class="'+cls+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+esc(r.name)+' 近 '+pts.length+' 個交易日收盤走勢，區間漲跌 '+fix(chg,2)+'%">'
+    + '<path class="ar" d="'+path+' L'+W+' '+y(base)+' L0 '+y(base)+' Z"/><line class="base" x1="0" x2="'+W+'" y1="'+y(base)+'" y2="'+y(base)+'"/><path class="ln" d="'+path+'"/></svg>'
+    + '<div class="axis"><span>'+md(dts[0])+'</span><span>'+md(dts[dts.length-1])+'</span></div>';
+}
+function detail(r, d){
+  var M = MODES[MODE], cls = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '', sign = r.change>0 ? '+' : r.change<0 ? '−' : '';
+  var cells = [['收盤', price(r.close)],
+    ['漲跌', r.change==null ? '—' : '<span class="'+cls+'">'+sign+fix(Math.abs(r.change),2)+(r.pct==null?'':'（'+sign+fix(Math.abs(r.pct),2)+'%）')+'</span>'],
+    ['成交值', yi(r.value)+' '+M.unit], ['成交量', M.vol(r.volume)]];
+  if(r.ratio!=null) cells.push(['放大倍數', fix(r.ratio, r.ratio>=10?1:2)+'×'], ['前 '+(d.avg_days||'')+' 日均值', yi(r.avg)+' '+M.unit]);
+  if(MODE==='tw') cells.push(['市場', r.market+(r.etf?' ETF':'')]);
+  var ind = MODE==='tw' ? (r.ind && r.ind!=='ETF' ? r.ind : '') : (r.sector||'');
+  if(ind) cells.push(['產業', esc(ind)]);
+  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div></div>';
+}
+function toggleRow(tr){
+  var k = MODE+tr.dataset.code;
+  OPEN = OPEN===k ? null : k;
+  render();
+  var again = document.querySelector('.rank tr.row[data-code="'+tr.dataset.code.replace(/"/g,'')+'"]');
+  if(again) again.focus({preventScroll:true});
+}
+document.addEventListener('click', function(e){
+  var tr = e.target.closest ? e.target.closest('.rank tr.row') : null;
+  if(tr) toggleRow(tr);
+});
+document.addEventListener('keydown', function(e){
+  if((e.key==='Enter' || e.key===' ') && e.target.matches && e.target.matches('.rank tr.row')){ e.preventDefault(); toggleRow(e.target); }
+});
 function render(){
   var M = MODES[MODE], d = DATA[MODE], all = ranked(), q = plain($('q').value);
   var has = d && d.rows && d.rows.length;
@@ -301,7 +371,7 @@ function render(){
     ? '交易日 '+tradeDay(d.date)+'，資料更新於 '+day(d.updated)+(d.status==='stale'&&isLatest?'<span class="stale">最近一次更新失敗，顯示的是前一次資料</span>':'')
       +(d.status==='partial'?'<span class="stale">上櫃資料尚未取得，目前只有上市</span>':'')
     : '';
-  $('lead').textContent = !has ? '' : '依當日成交值由高到低排列，橫條長度代表與第一名的相對大小。'
+  $('lead').textContent = !has ? '' : '依當日成交值由高到低排列，橫條長度代表與第一名的相對大小。點任一列可以展開走勢與明細。'
     + (MODE==='tw' && d.avg_days>=5 ? '放大倍數是當日成交值除以前 '+d.avg_days+' 個交易日的平均，2 倍以上會標示出來。' : '')
     + (map ? '名次下方是與前一個交易日（'+tradeDay(PREV[MODE].date)+'）相比的升降。' : '這是目前保存的最早一天，還沒有前一日可以比較。');
   renderSums(d||{}, all);
@@ -320,14 +390,17 @@ function render(){
   }else{
     $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th><span class="pxh">收盤／</span>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th>'+(hasRatio?'<th class="rtc">放大倍數</th>':'')+'<th class="vol">成交量</th></tr>'
       + rows.map(function(r){
-        var sub = MODE==='tw' ? r.market+(r.ind && r.ind!=='ETF' ? '・'+r.ind : '') : (r.sector||''), hot = r.ratio>=2 ? ' hot' : '';
-        return '<tr'+(r._no<=3?' class="top3"':'')+'><td class="no l">'+r._no+moveCell(r,map)+'</td>'
-          + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+'</small></td>'
+        var sub = MODE==='tw' ? r.market : (r.sector||''), indx = MODE==='tw' && r.ind && r.ind!=='ETF' ? '<span class="indx">・'+esc(r.ind)+'</span>' : '', hot = r.ratio>=2 ? ' hot' : '';
+        var open = OPEN===MODE+r.code;
+        return '<tr class="row'+(r._no<=3?' top3':'')+(open?' open':'')+'" data-code="'+esc(r.code)+'" tabindex="0" role="button" aria-expanded="'+open+'"><td class="no l">'+r._no+moveCell(r,map)+'</td>'
+          + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+indx+'</small></td>'
           + '<td class="px">'+price(r.close)+'</td>'+pctCell(r)
           + '<td class="val"><i style="width:calc('+(r.value/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(r.value)+'</span>'+(hasRatio?'<small class="'+hot+'">'+times(r)+'</small>':'')+'</td>'
           + (hasRatio?'<td class="rtc rt'+hot+'">'+times(r)+'</td>':'')
-          + '<td class="vol">'+M.vol(r.volume)+'</td></tr>';
+          + '<td class="vol">'+M.vol(r.volume)+'</td></tr>'
+          + (open ? '<tr class="det"><td colspan="9">'+detail(r, d)+'</td></tr>' : '');
       }).join('') + '</table>';
+    if(OPEN && MODE==='tw') loadTrend();
   }
   $('note').textContent = has && MODE==='us' ? '共統計 '+(d.count||0).toLocaleString('zh-TW')+' 檔在 NYSE、Nasdaq、NYSE American 掛牌的股票。交易日以美東時間為準。' : '';
   $('src').innerHTML = has && d.sources ? '資料來源：'+d.sources.map(function(u){

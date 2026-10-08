@@ -277,6 +277,31 @@ def save_full(date, trows, orows):
         (full_dir() / ("%s.json" % old)).unlink()
 
 
+TREND_DAYS = 60                                     # 個股展開時的收盤走勢要畫幾個交易日
+
+
+def save_trend():
+    """把最新排行裡每一檔的近 TREND_DAYS 日收盤價整理成 data/trend_tw.json，網頁點開個股時才讀。
+
+    來源是每天的全市場精簡檔，不另外連線。某天沒有成交的股票那一天是 null。
+    """
+    path = DATA / "tw.json"
+    if not path.exists():
+        return
+    codes = [r["code"] for r in json.loads(path.read_text(encoding="utf-8")).get("rows", [])]
+    dates = sorted(full_dates()[:TREND_DAYS])
+    if not codes or len(dates) < 2:
+        return
+    series = {c: [] for c in codes}
+    for d in dates:
+        day = json.loads((full_dir() / ("%s.json" % d)).read_text(encoding="utf-8"))
+        close = {c: p for m in ("上市", "上櫃") for c, p, _ in day.get(m, [])}
+        for c in codes:
+            series[c].append(close.get(c))
+    text = json.dumps({"dates": dates, "close": series}, ensure_ascii=False, separators=(",", ":"))
+    (DATA / "trend_tw.json").write_text(text + "\n", encoding="utf-8")
+
+
 def values_before(date, cache={}):
     """指定日期以前最近 AVG_DAYS 個交易日的 [{代號: 成交值}]（新到舊）。"""
     out = []
@@ -459,6 +484,7 @@ def backfill(want, force=False):
         newest = folder / ("%s.json" % dates[0]) if dates else None
         if newest and (not latest.get("rows") or latest.get("date", "") <= dates[0]):
             latest_path.write_text(newest.read_text(encoding="utf-8"), encoding="utf-8")
+        save_trend()
         print("回補完成：新增 %d 天，全市場存檔共 %d 天，歷史排行共 %d 天" % (added, len(full_dates()), len(dates)))
         return 0 if len(full_dates()) >= min(want, 5) else 1
     finally:
@@ -589,6 +615,11 @@ def run_inner(key, label, build):
         ok = False
     DATA.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(new, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    if key == "tw":
+        try:
+            save_trend()
+        except Exception as e:      # noqa: BLE001   走勢檔只是輔助，失敗不影響排行
+            print("      走勢檔沒有更新：%s" % e)
     return ok
 
 
