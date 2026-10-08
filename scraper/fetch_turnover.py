@@ -502,19 +502,6 @@ US_SUFFIX = re.compile(r"\s+(Common Stock|Common Shares|Ordinary Shares|Class [A
                        r"American Depositary Shares?|Depositary Shares?)\b.*$", re.I)
 
 
-def us_session_date(now=None):
-    """最近一個已收盤的美股交易日（以紐約時間 16:00 為準；不含假日判斷）。"""
-    try:
-        from zoneinfo import ZoneInfo
-        ny = (now or datetime.now(timezone.utc)).astimezone(ZoneInfo("America/New_York"))
-    except Exception:               # noqa: BLE001   沒有時區資料時用美東標準時間估算
-        ny = (now or datetime.now(timezone.utc)).astimezone(timezone(timedelta(hours=-5)))
-    d = ny.date() if ny.hour >= 16 else ny.date() - timedelta(days=1)
-    while d.weekday() >= 5:
-        d -= timedelta(days=1)
-    return d.isoformat()
-
-
 def parse_us(payload):
     data = (payload or {}).get("data") or {}
     recs = data.get("rows") or (data.get("table") or {}).get("rows") or []
@@ -535,13 +522,154 @@ def parse_us(payload):
     return rows, int(total)
 
 
-def build_us():
-    rows, total = parse_us(get_json(NASDAQ_URL, ua=BROWSER_UA))
-    if len(rows) < MIN_ROWS["us"]:
-        raise ValueError("Nasdaq 資料不完整（%d 檔）" % len(rows))
+POLYGON_KEY = os.environ.get("POLYGON_API_KEY", "").strip()      # 放在 GitHub 的 Secrets；沒設定就略過
+POLYGON_BARS = "https://api.polygon.io/v2/aggs/ticker/%s/range/5/minute/%s/%s"
+POLYGON_WAIT = 12.5                                               # 免費方案每分鐘 5 次
+POLYGON_GROUPED = "https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/%s"
+_polygon_last = [0.0]
+
+
+class NotYet(Exception):
+    """Polygon 免費方案還不給這一天的資料（要等美東時間過了當天）。"""
+
+
+def polygon_get(url, **params):
+    """呼叫 Polygon，自動間隔 12.5 秒（免費方案每分鐘 5 次）。回傳 (HTTP 狀態, JSON)。"""
+    wait = _polygon_last[0] + POLYGON_WAIT - time.time()
+    if wait > 0:
+        time.sleep(wait)
+    try:
+        r = requests.get(url, params=params, timeout=60, headers={"Authorization": "Bearer " + POLYGON_KEY, "User-Agent": BOT_UA})
+    finally:
+        _polygon_last[0] = time.time()
+    if r.status_code == 429:            # 超過速率，等一分鐘再試一次
+        time.sleep(60)
+        r = requests.get(url, params=params, timeout=60, headers={"Authorization": "Bearer " + POLYGON_KEY, "User-Agent": BOT_UA})
+        _polygon_last[0] = time.time()
+    try:
+        return r.status_code, r.json()
+    except Exception:                   # noqa: BLE001
+        return r.status_code, {}
+
+
+def parse_grouped(payload):
+    """Polygon 全市場日線 → {代號: (收盤, 成交股數, 成交值)}；成交值用成交均價 × 成交量。"""
+    out = {}
+    for r in (payload or {}).get("results") or []:
+        c, v = r.get("c"), r.get("v")
+        if r.get("T") and c and v:
+            out[r["T"]] = (c, v, (r.get("vw") or c) * v)
+    return out
+
+
+def polygon_day(date):
+    """某一天的全市場日線；休市日回傳 {}，資料還沒開放時丟 NotYet。"""
+    status, payload = polygon_get(POLYGON_GROUPED % date, adjusted="true")
+    if status == 403:
+        raise NotYet(str(payload.get("message", ""))[:80])
+    if status != 200:
+        raise ValueError("Polygon HTTP %d：%s" % (status, str(payload.get("message") or payload.get("error") or "")[:80]))
+    return parse_grouped(payload)
+
+
+def us_sessions(n, start=None, limit=None):
+    """由新到舊找出最近 n 個有資料的美股交易日：[(日期, 當日行情)]。日期完全以 Polygon 為準，週末與休市日自動跳過。"""
+    from zoneinfo import ZoneInfo
+    d = start or datetime.now(ZoneInfo("America/New_York")).date()
+    out, tries = [], 0
+    while len(out) < n and tries < (limit or n * 2 + 8):
+        d -= timedelta(days=1)
+        if d.weekday() >= 5:
+            continue
+        tries += 1
+        try:
+            day = polygon_day(d.isoformat())
+        except NotYet as e:
+            print("      %s Polygon 還沒開放（%s）" % (d, e))
+            continue
+        if len(day) < MIN_ROWS["us"]:
+            print("      %s 沒有資料，判定休市" % d)
+            continue
+        out.append((d.isoformat(), day))
+    return out
+
+
+def us_names():
+    """代號 → (公司名稱, 產業)。來源是 Nasdaq 的股票清單（只有個股，不含 ETF）；抓不到就用上次存的。"""
+    path = DATA / "us_names.json"
+    try:
+        rows, _ = parse_us(get_json(NASDAQ_URL, ua=BROWSER_UA))
+        if len(rows) < MIN_ROWS["us"]:
+            raise ValueError("Nasdaq 清單不完整（%d 檔）" % len(rows))
+        names = {r["code"]: [r["name"], r["sector"]] for r in rows}
+        DATA.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(names, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n", encoding="utf-8")
+        return names
+    except Exception as e:              # noqa: BLE001
+        if path.exists():
+            print("      Nasdaq 清單讀取失敗（%s），改用上次存的名稱" % e)
+            return json.loads(path.read_text(encoding="utf-8"))
+        raise
+
+
+def us_snapshot(date, day, prev, names):
+    """用 Polygon 的當日與前一交易日行情，排出清單內個股的成交值排行。"""
+    rows, total = [], 0
+    for code, (name, sector) in names.items():
+        q = day.get(code.replace("/", "."))
+        if not q:
+            continue
+        close, vol, value = q
+        total += value
+        p = (prev or {}).get(code.replace("/", "."))
+        change = round(close - p[0], 4) if p else None
+        rows.append({"code": code, "name": name, "sector": sector, "close": close, "change": change,
+                     "pct": round(change / p[0] * 100, 2) if p and p[0] else None, "volume": int(vol), "value": int(value)})
     rows.sort(key=lambda r: -r["value"])
-    return {"date": us_session_date(), "status": "ok", "count": len(rows), "total_value": total,
-            "sources": ["https://www.nasdaq.com/market-activity/stocks/screener"], "rows": rows[:KEEP_US]}
+    return {"date": date, "status": "ok", "count": len(rows), "total_value": int(total),
+            "sources": ["https://polygon.io/", "https://www.nasdaq.com/market-activity/stocks/screener"], "rows": rows[:KEEP_US]}
+
+
+def build_us():
+    if not POLYGON_KEY:
+        raise ValueError("未設定 POLYGON_API_KEY，無法抓美股")
+    names = us_names()
+    days = us_sessions(2)
+    if not days:
+        raise ValueError("Polygon 沒有可用的交易日資料")
+    return us_snapshot(days[0][0], days[0][1], days[1][1] if len(days) > 1 else None, names)
+
+
+def backfill_us(want):
+    """重建美股最近 want 個交易日的排行（日期與價量都以 Polygon 為準），舊的美股歷史檔會整個換掉。"""
+    del LOG[:]
+    try:
+        if not POLYGON_KEY:
+            print("FAIL  美股回補  未設定 POLYGON_API_KEY")
+            return 1
+        names = us_names()
+        days = us_sessions(want + 1)
+        if len(days) < 2:
+            print("FAIL  美股回補  Polygon 只回了 %d 天" % len(days))
+            return 1
+        folder = DATA / "history" / "us"
+        folder.mkdir(parents=True, exist_ok=True)
+        for f in folder.glob("*.json"):                 # 之前用 Nasdaq 推算日期的檔案日期不可靠，全部重建
+            f.unlink()
+        now = datetime.now(TPE).isoformat(timespec="seconds")
+        newest = None
+        for i in range(len(days) - 1):
+            snap = us_snapshot(days[i][0], days[i][1], days[i + 1][1], names)
+            snap["updated"] = now
+            (folder / ("%s.json" % snap["date"])).write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            newest = newest or snap
+            print("OK    %s  %d 檔，第一名 %s %s" % (snap["date"], snap["count"], snap["rows"][0]["code"], snap["rows"][0]["name"]))
+        dates = save_history("us", None)
+        (DATA / "us.json").write_text(json.dumps(newest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        print("美股回補完成：共 %d 天（%s 到 %s）" % (len(dates), dates[-1], dates[0]))
+        return 0
+    finally:
+        (DATA / "run_backfill_us.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
 
 
 # ---------------------------------------------------------------- 主程式
@@ -625,11 +753,6 @@ def run_inner(key, label, build):
 
 
 # ---------------------------------------------------------------- 美股當日走勢（Polygon）
-POLYGON_KEY = os.environ.get("POLYGON_API_KEY", "").strip()      # 放在 GitHub 的 Secrets；沒設定就略過
-POLYGON_BARS = "https://api.polygon.io/v2/aggs/ticker/%s/range/5/minute/%s/%s"
-POLYGON_WAIT = 12.5                                               # 免費方案每分鐘 5 次
-
-
 def session_closes(bars, date, every=2):
     """5 分鐘 K 線 → 正常交易時段（紐約 09:30–16:00）的價格序列：開盤價，之後每 every 根取一次收盤價。"""
     from zoneinfo import ZoneInfo
@@ -701,6 +824,9 @@ def intraday_us():
 def main(only):
     if "intraday" in only:
         return intraday_us()
+    if "backfill-us" in only:
+        n = [int(a) for a in sys.argv[1:] if a.isdigit()]
+        return backfill_us(n[0] if n else 10)
     if "backfill" in only:
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
         return backfill(n[0] if n else 60, force="force" in only)

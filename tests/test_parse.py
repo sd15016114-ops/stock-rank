@@ -4,7 +4,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scraper"))
-from fetch_turnover import parse_twse, parse_tpex, parse_us, top_of, roc_date, to_num, tw_kind, us_session_date, suspicious
+from fetch_turnover import parse_twse, parse_tpex, parse_us, top_of, roc_date, to_num, tw_kind, suspicious
 
 # 證交所 openapi：物件陣列
 OPENAPI = [
@@ -63,8 +63,6 @@ assert rows[0]["value"] == 30000000000 and rows[0]["pct"] == round(3 / 147 * 100
 
 assert roc_date("115/10/06") == "2026-10-06" and to_num("--") is None and to_num("1,234.5") == 1234.5
 assert tw_kind("0050") == "etf" and tw_kind("2330") == "stock" and tw_kind("2881A") is None
-assert us_session_date(datetime(2026, 10, 7, 22, 30, tzinfo=timezone.utc)) == "2026-10-07"     # 週三收盤後
-assert us_session_date(datetime(2026, 10, 12, 13, 0, tzinfo=timezone.utc)) == "2026-10-09"     # 週一開盤前 → 上週五
 assert suspicious({"total_value": 1}, {"total_value": 100}) and not suspicious({"total_value": 90}, {"total_value": 100})
 
 # 歷史檔：只留最近 KEEP_DAYS 天，日期清單由新到舊
@@ -204,4 +202,26 @@ pts = ft.session_closes(bars, "2026-10-06")
 first = (13 * 60 + 30 - 8 * 60) // 5    # 13:30 UTC 是第 66 根
 assert pts[0] == 100 + first and pts[1] == 100.5 + first + 1 and pts[-1] == 100.5 + first + 77 and len(pts) == 40, (pts[:3], pts[-1], len(pts))
 assert ft.session_closes(bars[:60], "2026-10-06") is None      # 只有盤前：不算
+
+# 美股改用 Polygon：日期與價量以 Polygon 為準，名稱產業來自 Nasdaq 清單；成交值用成交均價
+G6 = {"results": [{"T": "NVDA", "v": 100.0, "vw": 240.0, "o": 242.1, "c": 239.24}, {"T": "SPY", "v": 50.0, "vw": 779.0, "c": 779.09},
+                  {"T": "BRK.B", "v": 10.0, "vw": 500.0, "c": 501.0}, {"T": "ZERO", "v": 0, "c": 1.0}]}
+G5 = {"results": [{"T": "NVDA", "v": 127.0, "vw": 238.0, "c": 238.9}]}
+day, prev = ft.parse_grouped(G6), ft.parse_grouped(G5)
+assert "ZERO" not in day and day["NVDA"] == (239.24, 100.0, 24000.0)
+snap = ft.us_snapshot("2026-10-06", day, prev, {"NVDA": ["NVIDIA Corporation", "Technology"], "BRK/B": ["Berkshire", "Finance"], "GONE": ["x", ""]})
+assert snap["date"] == "2026-10-06" and [r["code"] for r in snap["rows"]] == ["NVDA", "BRK/B"] and snap["count"] == 2      # SPY 不在清單（ETF）不收
+assert snap["rows"][0]["change"] == 0.34 and snap["rows"][0]["pct"] == 0.14 and snap["rows"][0]["value"] == 24000 and snap["rows"][1]["pct"] is None
+# 找交易日：還沒開放的日子與休市日都跳過，日期完全照 Polygon
+from datetime import date as _date
+calls = []
+def fake_day(d):
+    calls.append(d)
+    if d == "2026-10-07":
+        raise ft.NotYet("before end of day")
+    return {} if d == "2026-10-05" else {"T%d" % i: (1.0, 1.0, 1.0) for i in range(ft.MIN_ROWS["us"])}
+real_day, ft.polygon_day = ft.polygon_day, fake_day
+got = ft.us_sessions(2, start=_date(2026, 10, 8))
+ft.polygon_day = real_day
+assert [d for d, _ in got] == ["2026-10-06", "2026-10-02"] and calls == ["2026-10-07", "2026-10-06", "2026-10-05", "2026-10-02"], (got and [d for d, _ in got], calls)
 print("全部通過")
