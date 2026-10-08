@@ -338,7 +338,7 @@ function dayChart(r, d, pts){
   function y(v){ return (pad + (hi-v)/span*(H-pad*2)).toFixed(1); }
   var path = pts.map(function(v,i){ return (i?'L':'M')+(i/(pts.length-1)*W).toFixed(1)+' '+y(v); }).join(' ');
   var cls = last>base ? 'up' : last<base ? 'down' : '', hours = MODE==='us' ? ['09:30','16:00（美東）'] : ['09:00','13:30'];
-  return '<div class="cap"><span><b>'+tradeDay(d.date)+'</b> 當日走勢</span><span>開盤 <b>'+price(pts[0])+'</b>　最高 <b>'+price(Math.max.apply(null,pts))+'</b>　最低 <b>'+price(Math.min.apply(null,pts))+'</b>　昨收 <b>'+price(base)+'</b></span></div>'
+  return '<div class="cap"><span><b>'+tradeDay(d.date)+'</b> 當日走勢</span><span>開盤 <b>'+price(pts[0])+'</b>　收盤 <b>'+price(r.close)+'</b>　昨收 <b>'+price(base)+'</b></span></div>'
     + '<svg class="'+cls+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+esc(r.name)+' '+d.date+' 當日走勢">'
     + '<path class="ar" d="'+path+' L'+W+' '+y(base)+' L0 '+y(base)+' Z"/><line class="base" x1="0" x2="'+W+'" y1="'+y(base)+'" y2="'+y(base)+'"/><path class="ln" d="'+path+'"/></svg>'
     + '<div class="axis"><span>'+hours[0]+'</span><span>'+hours[1]+'</span></div>';
