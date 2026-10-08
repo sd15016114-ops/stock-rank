@@ -1,0 +1,57 @@
+key set: True length 100 time 2026-10-08 02:49:24 UTC
+GET /intraday/candles/2330 {'timeframe': '5'} → HTTP 200 bytes 2747 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '59', 'X-RateLimit-Reset': '1791427824554'}
+   {'date': '2026-10-08', 'type': 'EQUITY', 'exchange': 'TWSE', 'market': 'TSE', 'symbol': '2330', 'timeframe': '5'}
+   bars 22
+     {"date": "2026-10-08T09:00:00.000+08:00", "open": 2550, "high": 2560, "low": 2550, "close": 2555, "volume": 3433, "average": 2551.34}
+     {"date": "2026-10-08T09:05:00.000+08:00", "open": 2555, "high": 2560, "low": 2555, "close": 2555, "volume": 245, "average": 2551.73}
+     {"date": "2026-10-08T10:40:00.000+08:00", "open": 2565, "high": 2565, "low": 2560, "close": 2565, "volume": 143, "average": 2557.64}
+     {"date": "2026-10-08T10:45:00.000+08:00", "open": 2565, "high": 2565, "low": 2560, "close": 2565, "volume": 40, "average": 2557.67}
+GET /intraday/candles/6488 {'timeframe': '5'} → HTTP 200 bytes 2751 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '58', 'X-RateLimit-Reset': '1791427824555'}
+   {'date': '2026-10-08', 'type': 'EQUITY', 'exchange': 'TPEx', 'market': 'OTC', 'symbol': '6488', 'timeframe': '5'}
+   bars 22
+     {"date": "2026-10-08T09:00:00.000+08:00", "open": 1180, "high": 1195, "low": 1170, "close": 1185, "volume": 1470, "average": 1181.46}
+     {"date": "2026-10-08T09:05:00.000+08:00", "open": 1185, "high": 1185, "low": 1140, "close": 1155, "volume": 1720, "average": 1169.82}
+     {"date": "2026-10-08T10:40:00.000+08:00", "open": 1115, "high": 1120, "low": 1110, "close": 1110, "volume": 108, "average": 1126.6}
+     {"date": "2026-10-08T10:45:00.000+08:00", "open": 1110, "high": 1115, "low": 1110, "close": 1115, "volume": 81, "average": 1126.52}
+GET /intraday/candles/0050 {'timeframe': '5'} → HTTP 200 bytes 2868 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '57', 'X-RateLimit-Reset': '1791427824555'}
+   {'date': '2026-10-08', 'type': 'EQUITY', 'exchange': 'TWSE', 'market': 'TSE', 'symbol': '0050', 'timeframe': '5'}
+   bars 22
+     {"date": "2026-10-08T09:00:00.000+08:00", "open": 115.35, "high": 115.35, "low": 114.95, "close": 115.1, "volume": 7205, "average": 115.22}
+     {"date": "2026-10-08T09:05:00.000+08:00", "open": 115.1, "high": 115.15, "low": 114.9, "close": 115, "volume": 4656, "average": 115.14}
+     {"date": "2026-10-08T10:40:00.000+08:00", "open": 115.3, "high": 115.3, "low": 115.2, "close": 115.25, "volume": 940, "average": 115.19}
+     {"date": "2026-10-08T10:45:00.000+08:00", "open": 115.25, "high": 115.3, "low": 115.2, "close": 115.2, "volume": 619, "average": 115.19}
+GET /intraday/candles/00679B {'timeframe': '5'} → HTTP 200 bytes 2795 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '56', 'X-RateLimit-Reset': '1791427824554'}
+   {'date': '2026-10-08', 'type': 'EQUITY', 'exchange': 'TPEx', 'market': 'OTC', 'symbol': '00679B', 'timeframe': '5'}
+   bars 22
+     {"date": "2026-10-08T09:00:00.000+08:00", "open": 24.31, "high": 24.35, "low": 24.31, "close": 24.34, "volume": 1839, "average": 24.33}
+     {"date": "2026-10-08T09:05:00.000+08:00", "open": 24.34, "high": 24.34, "low": 24.32, "close": 24.33, "volume": 462, "average": 24.33}
+     {"date": "2026-10-08T10:40:00.000+08:00", "open": 24.33, "high": 24.34, "low": 24.32, "close": 24.34, "volume": 309, "average": 24.33}
+     {"date": "2026-10-08T10:45:00.000+08:00", "open": 24.34, "high": 24.34, "low": 24.33, "close": 24.34, "volume": 69, "average": 24.33}
+GET /intraday/quote/2330 {} → HTTP 200 bytes 1122 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '55', 'X-RateLimit-Reset': '1791427824556'}
+   {'date': '2026-10-08', 'type': 'EQUITY', 'exchange': 'TWSE', 'market': 'TSE', 'symbol': '2330', 'name': '台積電', 'referencePrice': 2585, 'previousClose': 2585, 'openPrice': 2550, 'openTime': 1791421212802325, 'highPrice': 2575, 'highTime': 1791424372185169, 'lowPrice': 2550, 'lowTime': 1791421212802325, 'closePrice': 2560, 'closeTime': 1791427768019702, 'avgPrice': 2557.67, 'change': -25, 'changePercent': -0.97, 'amplitude': 0.97, 'lastPrice': 2560, 'lastSize': 1, 'bids': [{'price': 2560, 'size': 735}, {'price': 2555, 'size': 1268}, {'price': 2550, 'size': 1552}, {'price': 2545, 'size': 776}, {'price': 2540, 'size': 883}], 'asks': [{'price': 2565, 'size': 410}, {'price': 2570, 'size': 528}, {'price': 2575, 'size': 244}, {'price': 2580, 'size': 443}, {'price': 2585, 'size': 468}], 'total': {'tradeValue': 21157020000, 'tradeVolume': 8272, 'tradeVolumeAtBid': 2096, 'tradeVolumeAtAsk': 3619, 'transaction': 2557, 'time': 1791427768019702}, 'lastTrade': {'bid': 2560, 'ask': 2565, 'price': 2560, 'size': 1, 'time': 1791427768019702, 'serial': 8841130}, 'lastTrial': {'bid': 2550, 'ask': 2555, 'price': 2550, 'size': 2540, 'time': 1791421198557357, 'serial': 102397}, 'isContinuous': True, 'serial': 8841130, 'lastUpdated': 1791427768019702}
+GET /historical/candles/2330 {'timeframe': '5', 'from': '2026-10-07', 'to': '2026-10-07'} → HTTP 200 bytes 6560 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '59', 'X-RateLimit-Reset': '1791427831886'}
+   {'symbol': '2330', 'type': 'EQUITY', 'exchange': 'TWSE', 'market': 'TSE', 'timeframe': '5', 'sort': 'desc'}
+   bars 54
+     {"date": "2026-10-07T13:30:00.000+08:00", "open": 2585, "high": 2585, "low": 2585, "close": 2585, "volume": 2176, "average": 2575.32}
+     {"date": "2026-10-07T13:20:00.000+08:00", "open": 2575, "high": 2580, "low": 2570, "close": 2575, "volume": 287, "average": 2573.59}
+     {"date": "2026-10-07T09:05:00.000+08:00", "open": 2580, "high": 2580, "low": 2570, "close": 2575, "volume": 461, "average": 2567.73}
+     {"date": "2026-10-07T09:00:00.000+08:00", "open": 2565, "high": 2580, "low": 2560, "close": 2575, "volume": 3752, "average": 2566.96}
+GET /historical/candles/2330 {'timeframe': '10', 'from': '2026-10-07', 'to': '2026-10-07'} → HTTP 200 bytes 3465 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '58', 'X-RateLimit-Reset': '1791427831885'}
+   {'symbol': '2330', 'type': 'EQUITY', 'exchange': 'TWSE', 'market': 'TSE', 'timeframe': '10', 'sort': 'desc'}
+   bars 28
+     {"date": "2026-10-07T13:30:00.000+08:00", "open": 2585, "high": 2585, "low": 2585, "close": 2585, "volume": 2176, "average": 2575.32}
+     {"date": "2026-10-07T13:20:00.000+08:00", "open": 2575, "high": 2580, "low": 2570, "close": 2575, "volume": 287, "average": 2573.59}
+     {"date": "2026-10-07T09:10:00.000+08:00", "open": 2575, "high": 2580, "low": 2570, "close": 2580, "volume": 398, "average": 2568.38}
+     {"date": "2026-10-07T09:00:00.000+08:00", "open": 2565, "high": 2580, "low": 2560, "close": 2575, "volume": 4213, "average": 2567.73}
+GET /historical/candles/2330 {'timeframe': 'D', 'from': '2026-10-07', 'to': '2026-10-07'} → HTTP 200 bytes 193 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '57', 'X-RateLimit-Reset': '1791427831887'}
+   {'symbol': '2330', 'type': 'EQUITY', 'market': 'TSE', 'exchange': 'TWSE', 'timeframe': 'D', 'sort': 'desc'}
+   bars 1
+     {"date": "2026-10-07", "open": 2565, "high": 2585, "low": 2560, "close": 2585, "volume": 16941183}
+     {"date": "2026-10-07", "open": 2565, "high": 2585, "low": 2560, "close": 2585, "volume": 16941183}
+GET /historical/candles/2330 {'timeframe': '5', 'from': '2026-09-01', 'to': '2026-09-01'} → HTTP 200 bytes 6562 {'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '56', 'X-RateLimit-Reset': '1791427831886'}
+   {'symbol': '2330', 'type': 'EQUITY', 'exchange': 'TWSE', 'market': 'TSE', 'timeframe': '5', 'sort': 'desc'}
+   bars 54
+     {"date": "2026-09-01T13:30:00.000+08:00", "open": 2440, "high": 2440, "low": 2440, "close": 2440, "volume": 5004, "average": 2426.09}
+     {"date": "2026-09-01T13:20:00.000+08:00", "open": 2425, "high": 2430, "low": 2425, "close": 2425, "volume": 420, "average": 2420.26}
+     {"date": "2026-09-01T09:05:00.000+08:00", "open": 2410, "high": 2420, "low": 2405, "close": 2420, "volume": 555, "average": 2400.38}
+     {"date": "2026-09-01T09:00:00.000+08:00", "open": 2395, "high": 2410, "low": 2390, "close": 2410, "volume": 2007, "average": 2396.54}
