@@ -1,0 +1,9 @@
+key set: True length 32
+GET /v2/aggs/grouped/locale/us/market/stocks/2026-10-07 {'adjusted': 'true'} → HTTP 403 bytes 195
+  grouped: {'status': 'NOT_AUTHORIZED', 'resultsCount': None, 'queryCount': None, 'error': None, 'message': "Attempted to request today's data before end of day. Please upgrade your plan at https://polygon.io/pricing"} rows 0
+GET /v2/aggs/ticker/NVDA/range/5/minute/2026-10-07/2026-10-07 {'adjusted': 'true', 'sort': 'asc', 'limit': 5000} → HTTP 403 bytes 189
+  minute NVDA: {'status': 'NOT_AUTHORIZED', 'resultsCount': None, 'error': None, 'message': "Your plan doesn't include this data timeframe. Please upgrade your plan at https://polygon.io/pricing"} bars 0
+GET /v2/aggs/ticker/TSM/range/5/minute/2026-10-07/2026-10-07 {'adjusted': 'true', 'sort': 'asc', 'limit': 5000} → HTTP 403 bytes 189
+  minute TSM: {'status': 'NOT_AUTHORIZED', 'resultsCount': None, 'error': None, 'message': "Your plan doesn't include this data timeframe. Please upgrade your plan at https://polygon.io/pricing"} bars 0
+GET /v3/reference/tickers {'market': 'stocks', 'type': 'ETF', 'active': 'true', 'limit': 5} → HTTP 200 bytes 1795
+  tickers: {'status': 'OK', 'count': 5, 'error': None, 'message': None} ['AAA', 'AAAA', 'AAAC', 'AAAD', 'AAAP']
