@@ -196,4 +196,12 @@ with tempfile.TemporaryDirectory() as tmp:
     ft.save_trend()
     assert json.loads((Path(tmp) / "trend_tw.json").read_text(encoding="utf-8")) == \
         {"dates": ["2026-10-06", "2026-10-07"], "close": {"2330": [2580.0, 2585.0], "6488": [400.0, None]}}
+
+# 美股當日走勢：只取正常交易時段（夏令 13:30–20:00 UTC），開盤價＋每 10 分鐘收盤價
+t0 = 1791273600000                      # 2026-10-06 08:00 UTC（盤前）
+bars = [{"t": t0 + i * 300000, "o": 100 + i, "c": 100.5 + i} for i in range(192)]       # 08:00–24:00 UTC 每 5 分鐘一根
+pts = ft.session_closes(bars, "2026-10-06")
+first = (13 * 60 + 30 - 8 * 60) // 5    # 13:30 UTC 是第 66 根
+assert pts[0] == 100 + first and pts[1] == 100.5 + first + 1 and pts[-1] == 100.5 + first + 77 and len(pts) == 40, (pts[:3], pts[-1], len(pts))
+assert ft.session_closes(bars[:60], "2026-10-06") is None      # 只有盤前：不算
 print("全部通過")

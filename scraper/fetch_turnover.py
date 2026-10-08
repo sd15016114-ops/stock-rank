@@ -16,6 +16,7 @@ import builtins
 import csv
 import io
 import json
+import os
 import re
 import sys
 import time
@@ -623,7 +624,83 @@ def run_inner(key, label, build):
     return ok
 
 
+# ---------------------------------------------------------------- 美股當日走勢（Polygon）
+POLYGON_KEY = os.environ.get("POLYGON_API_KEY", "").strip()      # 放在 GitHub 的 Secrets；沒設定就略過
+POLYGON_BARS = "https://api.polygon.io/v2/aggs/ticker/%s/range/5/minute/%s/%s"
+POLYGON_WAIT = 12.5                                               # 免費方案每分鐘 5 次
+
+
+def session_closes(bars, date, every=2):
+    """5 分鐘 K 線 → 正常交易時段（紐約 09:30–16:00）的價格序列：開盤價，之後每 every 根取一次收盤價。"""
+    from zoneinfo import ZoneInfo
+    ny = ZoneInfo("America/New_York")
+    y, m, d = (int(x) for x in date.split("-"))
+    start = datetime(y, m, d, 9, 30, tzinfo=ny).timestamp() * 1000
+    end = datetime(y, m, d, 16, 0, tzinfo=ny).timestamp() * 1000
+    reg = [b for b in bars if start <= b.get("t", 0) < end and b.get("c") is not None]
+    if len(reg) < 6:
+        return None
+    pts = [reg[0].get("o", reg[0]["c"])] + [b["c"] for i, b in enumerate(reg) if i % every == every - 1 or i == len(reg) - 1]
+    return [round(v, 2) for v in pts]
+
+
+def intraday_us():
+    """抓美股最新排行那一天、榜上每一檔的當日走勢，存到 data/intraday/us/<日期>.json。已抓過的不重抓。
+
+    Polygon 免費方案要等美東時間過了當天才給資料，所以要在排行更新之後幾個小時再跑。
+    """
+    del LOG[:]
+    try:
+        if not POLYGON_KEY:
+            print("SKIP  美股當日走勢  未設定 POLYGON_API_KEY")
+            return 0
+        us = json.loads((DATA / "us.json").read_text(encoding="utf-8"))
+        date, codes = us.get("date"), [r["code"] for r in us.get("rows", [])]
+        folder = DATA / "intraday" / "us"
+        folder.mkdir(parents=True, exist_ok=True)
+        path = folder / ("%s.json" % date)
+        out = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"date": date, "minutes": 10, "points": {}}
+        todo = [c for c in codes if c not in out["points"]]
+        s = requests.Session()
+        s.headers.update({"Authorization": "Bearer " + POLYGON_KEY, "User-Agent": BOT_UA})
+        got = miss = 0
+        for i, code in enumerate(todo):
+            try:
+                r = s.get(POLYGON_BARS % (code.replace("/", "."), date, date), params={"adjusted": "true", "sort": "asc", "limit": 5000}, timeout=40)
+                if r.status_code == 429:
+                    time.sleep(60)
+                    r = s.get(POLYGON_BARS % (code.replace("/", "."), date, date), params={"adjusted": "true", "sort": "asc", "limit": 5000}, timeout=40)
+                if r.status_code == 403:
+                    msg = (r.json() or {}).get("message", "")
+                    print("WAIT  美股當日走勢  %s 的資料 Polygon 還不給（%s）" % (date, msg[:60]))
+                    break
+                pts = session_closes((r.json() or {}).get("results") or [], date) if r.ok else None
+                if pts:
+                    out["points"][code] = pts
+                    got += 1
+                else:
+                    miss += 1
+            except Exception as e:      # noqa: BLE001   單一檔失敗不影響其他
+                miss += 1
+                print("      %s 讀取失敗：%s" % (code, str(e).replace(POLYGON_KEY, "***")[:80]))
+            if got and got % 20 == 0:   # 分批存檔，中途被中斷也不會白跑
+                path.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+            if i < len(todo) - 1:
+                time.sleep(POLYGON_WAIT)
+        if out["points"]:
+            path.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+        for old in sorted(folder.glob("*.json"), reverse=True)[KEEP_DAYS:]:
+            old.unlink()
+        print("%s  美股當日走勢  %s  本次新增 %d 檔、沒資料 %d 檔，累計 %d/%d 檔" % (
+            "OK   " if len(out["points"]) >= len(codes) * 0.8 else "PART ", date, got, miss, len(out["points"]), len(codes)))
+        return 0
+    finally:
+        (DATA / "run_intraday_us.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
+
+
 def main(only):
+    if "intraday" in only:
+        return intraday_us()
     if "backfill" in only:
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
         return backfill(n[0] if n else 60, force="force" in only)

@@ -5,6 +5,7 @@ on:
     - cron: "30 10 * * 1-5"   # UTC 10:30 = 台灣時間 18:30，抓台股（證交所的收盤行情大約 17:40 之後才更新）
     - cron: "30 13 * * 1-5"   # UTC 13:30 = 台灣時間 21:30，再抓一次台股（補上較晚公布的資料）
     - cron: "30 22 * * 1-5"   # UTC 22:30 = 台灣時間隔天 06:30，美股收盤後抓美股
+    - cron: "15 5 * * 2-6"    # UTC 05:15 = 台灣時間 13:15，抓美股當日走勢（Polygon 免費方案要等美東過了當天才給）
   workflow_dispatch:           # 也可以在 GitHub 網頁上手動執行
     inputs:
       market:
@@ -16,7 +17,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, probe, probe-polygon, backfill]
+        options: [update, probe, probe-polygon, backfill, intraday]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -54,9 +55,16 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'backfill'
+        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'backfill' && inputs.task != 'intraday' && github.event.schedule != '15 5 * * 2-6'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
+      - name: 抓美股當日走勢
+        id: intraday
+        if: inputs.task == 'intraday' || github.event.schedule == '15 5 * * 2-6'
+        run: python scraper/fetch_turnover.py intraday
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        continue-on-error: true
       - name: 回補台股歷史資料
         id: backfill
         if: inputs.task == 'backfill'
@@ -71,5 +79,5 @@ jobs:
           git pull --rebase origin ${{ github.ref_name }}   # 執行期間若有其他更新推上來，先接上再推
           git push origin HEAD:${{ github.ref_name }}
       - name: 有市場抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
-        if: steps.fetch.outcome == 'failure' || steps.backfill.outcome == 'failure'
+        if: steps.fetch.outcome == 'failure' || steps.backfill.outcome == 'failure' || steps.intraday.outcome == 'failure'
         run: exit 1
