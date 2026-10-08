@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "30 10 * * 1-5"   # UTC 10:30 = 台灣時間 18:30，抓台股（證交所的收盤行情大約 17:40 之後才更新）
     - cron: "30 13 * * 1-5"   # UTC 13:30 = 台灣時間 21:30，再抓一次台股（補上較晚公布的資料）
-    - cron: "30 22 * * 1-5"   # UTC 22:30 = 台灣時間隔天 06:30，美股收盤後抓美股
+    - cron: "15 5 * * 2-6"    # UTC 05:15 = 台灣時間 13:15，抓美股排行與當日走勢（Polygon 免費方案要等美東時間過了當天才給資料）
   workflow_dispatch:           # 也可以在 GitHub 網頁上手動執行
     inputs:
       market:
@@ -12,6 +12,14 @@ on:
         type: choice
         default: 全部
         options: [全部, tw, us]
+      task:
+        description: 要做什麼（一般更新選 update）
+        type: choice
+        default: update
+        options: [update, probe, probe-polygon, backfill, backfill-us, intraday]
+      days:
+        description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
+        default: "60"
 
 permissions:
   contents: write
@@ -33,21 +41,51 @@ jobs:
         id: which
         run: |
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            if [ "${{ github.event.schedule }}" = "30 22 * * 1-5" ]; then echo "market=us" >> "$GITHUB_OUTPUT"; else echo "market=tw" >> "$GITHUB_OUTPUT"; fi
+            if [ "${{ github.event.schedule }}" = "15 5 * * 2-6" ]; then echo "market=us" >> "$GITHUB_OUTPUT"; else echo "market=tw" >> "$GITHUB_OUTPUT"; fi
           elif [ "${{ inputs.market }}" = "全部" ]; then echo "market=" >> "$GITHUB_OUTPUT"
           else echo "market=${{ inputs.market }}" >> "$GITHUB_OUTPUT"; fi
+      - name: 實測資料來源
+        if: inputs.task == 'probe'
+        run: python scraper/probe.py
+      - name: 實測 Polygon 金鑰
+        if: inputs.task == 'probe-polygon'
+        run: python scraper/probe_polygon.py
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
+        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'backfill-us'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
+      - name: 重建美股歷史排行
+        id: backfillus
+        if: inputs.task == 'backfill-us'
+        run: python scraper/fetch_turnover.py backfill-us ${{ inputs.days }}
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        continue-on-error: true
+      - name: 抓美股當日走勢
+        id: intraday
+        if: inputs.task == 'intraday' || github.event.schedule == '15 5 * * 2-6'
+        run: python scraper/fetch_turnover.py intraday
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        continue-on-error: true
+      - name: 回補台股歷史資料
+        id: backfill
+        if: inputs.task == 'backfill'
+        run: python scraper/fetch_turnover.py backfill ${{ inputs.days }}
+        continue-on-error: true
       - name: 提交變更
         run: |
           git config user.name "rank-bot"
           git config user.email "rank-bot@users.noreply.github.com"
           git add -A data
           git diff --cached --quiet || git commit -m "排行更新 $(date -u +%F)"
-          git pull --rebase origin main   # 執行期間若有其他更新推上來，先接上再推
-          git push
+          git pull --rebase origin ${{ github.ref_name }}   # 執行期間若有其他更新推上來，先接上再推
+          git push origin HEAD:${{ github.ref_name }}
       - name: 有市場抓取失敗時讓這次執行顯示為失敗（GitHub 會寄信通知）
-        if: steps.fetch.outcome == 'failure'
+        if: steps.fetch.outcome == 'failure' || steps.backfill.outcome == 'failure' || steps.intraday.outcome == 'failure' || steps.backfillus.outcome == 'failure'
         run: exit 1

@@ -1,0 +1,1013 @@
+{
+ "date": "2026-09-14",
+ "status": "ok",
+ "count": 6261,
+ "total_value": 702934531155,
+ "sources": [
+  "https://polygon.io/",
+  "https://www.nasdaq.com/market-activity/stocks/screener"
+ ],
+ "rows": [
+  {
+   "code": "NVDA",
+   "name": "NVIDIA Corporation",
+   "sector": "Technology",
+   "close": 210.96,
+   "change": -7.33,
+   "pct": -3.36,
+   "volume": 132267244,
+   "value": 27980222955
+  },
+  {
+   "code": "MU",
+   "name": "Micron Technology Inc.",
+   "sector": "Technology",
+   "close": 924.03,
+   "change": -51.23,
+   "pct": -5.25,
+   "volume": 27141901,
+   "value": 24933473561
+  },
+  {
+   "code": "SNDK",
+   "name": "Sandisk Corporation",
+   "sector": "Technology",
+   "close": 1551.99,
+   "change": -81.36,
+   "pct": -4.98,
+   "volume": 9586706,
+   "value": 14817972107
+  },
+  {
+   "code": "AAPL",
+   "name": "Apple Inc.",
+   "sector": "Technology",
+   "close": 333.08,
+   "change": 0.81,
+   "pct": 0.24,
+   "volume": 39269147,
+   "value": 13101786008
+  },
+  {
+   "code": "META",
+   "name": "Meta Platforms Inc.",
+   "sector": "Technology",
+   "close": 665.6,
+   "change": 17.57,
+   "pct": 2.71,
+   "volume": 19332324,
+   "value": 12790066737
+  },
+  {
+   "code": "GOOGL",
+   "name": "Alphabet Inc.",
+   "sector": "Technology",
+   "close": 349.39,
+   "change": 10.89,
+   "pct": 3.22,
+   "volume": 35905445,
+   "value": 12457017469
+  },
+  {
+   "code": "AMD",
+   "name": "Advanced Micro Devices Inc.",
+   "sector": "Technology",
+   "close": 493.41,
+   "change": -22.72,
+   "pct": -4.4,
+   "volume": 24810136,
+   "value": 12175934311
+  },
+  {
+   "code": "TSLA",
+   "name": "Tesla Inc.",
+   "sector": "Industrials",
+   "close": 358.97,
+   "change": -6.47,
+   "pct": -1.77,
+   "volume": 32477181,
+   "value": 11720355635
+  },
+  {
+   "code": "MSFT",
+   "name": "Microsoft Corporation",
+   "sector": "Technology",
+   "close": 505.41,
+   "change": 9.78,
+   "pct": 1.97,
+   "volume": 23091892,
+   "value": 11640909287
+  },
+  {
+   "code": "AVGO",
+   "name": "Broadcom Inc.",
+   "sector": "Technology",
+   "close": 344.72,
+   "change": -17.27,
+   "pct": -4.77,
+   "volume": 32662846,
+   "value": 11294074060
+  },
+  {
+   "code": "SPCX",
+   "name": "Space Exploration Technologies Corp.",
+   "sector": "Technology",
+   "close": 148.15,
+   "change": -3.06,
+   "pct": -2.02,
+   "volume": 67860995,
+   "value": 10155119805
+  },
+  {
+   "code": "INTC",
+   "name": "Intel Corporation",
+   "sector": "Technology",
+   "close": 97.19,
+   "change": -5.75,
+   "pct": -5.59,
+   "volume": 96459676,
+   "value": 9373256822
+  },
+  {
+   "code": "AMZN",
+   "name": "Amazon.com Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 253.54,
+   "change": -3.24,
+   "pct": -1.26,
+   "volume": 34352766,
+   "value": 8713843682
+  },
+  {
+   "code": "GOOG",
+   "name": "Alphabet Inc.",
+   "sector": "Technology",
+   "close": 345.71,
+   "change": 10.26,
+   "pct": 3.06,
+   "volume": 22484369,
+   "value": 7726960303
+  },
+  {
+   "code": "ORCL",
+   "name": "Oracle Corporation",
+   "sector": "Technology",
+   "close": 144.79,
+   "change": -5.49,
+   "pct": -3.65,
+   "volume": 42159749,
+   "value": 6059637723
+  },
+  {
+   "code": "TSM",
+   "name": "Taiwan Semiconductor Manufacturing Company Ltd.",
+   "sector": "Technology",
+   "close": 418.01,
+   "change": -15.23,
+   "pct": -3.52,
+   "volume": 14305935,
+   "value": 6004547252
+  },
+  {
+   "code": "CRWD",
+   "name": "CrowdStrike Holdings Inc.",
+   "sector": "Technology",
+   "close": 235.38,
+   "change": 28.64,
+   "pct": 13.85,
+   "volume": 25381464,
+   "value": 5906880955
+  },
+  {
+   "code": "PLTR",
+   "name": "Palantir Technologies Inc.",
+   "sector": "Technology",
+   "close": 173.31,
+   "change": 6.08,
+   "pct": 3.64,
+   "volume": 29149533,
+   "value": 4998745638
+  },
+  {
+   "code": "DELL",
+   "name": "Dell Technologies Inc.",
+   "sector": "Technology",
+   "close": 534.28,
+   "change": -33.01,
+   "pct": -5.82,
+   "volume": 9173770,
+   "value": 4920486746
+  },
+  {
+   "code": "MRVL",
+   "name": "Marvell Technology Inc.",
+   "sector": "Technology",
+   "close": 218.82,
+   "change": -17.28,
+   "pct": -7.32,
+   "volume": 22196834,
+   "value": 4876731157
+  },
+  {
+   "code": "PANW",
+   "name": "Palo Alto Networks Inc.",
+   "sector": "Technology",
+   "close": 373.94,
+   "change": 43.29,
+   "pct": 13.09,
+   "volume": 12027306,
+   "value": 4425424690
+  },
+  {
+   "code": "LITE",
+   "name": "Lumentum Holdings Inc.",
+   "sector": "Telecommunications",
+   "close": 835.03,
+   "change": -92.0,
+   "pct": -9.92,
+   "volume": 4919181,
+   "value": 4170976291
+  },
+  {
+   "code": "BAC",
+   "name": "Bank of America Corporation",
+   "sector": "Finance",
+   "close": 59.47,
+   "change": -3.22,
+   "pct": -5.14,
+   "volume": 64773953,
+   "value": 3898893237
+  },
+  {
+   "code": "BE",
+   "name": "Bloom Energy Corporation",
+   "sector": "Energy",
+   "close": 257.05,
+   "change": -18.7,
+   "pct": -6.78,
+   "volume": 14842372,
+   "value": 3809769800
+  },
+  {
+   "code": "LRCX",
+   "name": "Lam Research Corporation",
+   "sector": "Technology",
+   "close": 273.49,
+   "change": -24.73,
+   "pct": -8.29,
+   "volume": 13682889,
+   "value": 3772785867
+  },
+  {
+   "code": "SKHY",
+   "name": "SK hynix Inc.",
+   "sector": "Technology",
+   "close": 175.63,
+   "change": -14.44,
+   "pct": -7.6,
+   "volume": 20965177,
+   "value": 3700444051
+  },
+  {
+   "code": "AMAT",
+   "name": "Applied Materials Inc.",
+   "sector": "Technology",
+   "close": 424.21,
+   "change": -32.28,
+   "pct": -7.07,
+   "volume": 8064762,
+   "value": 3434434751
+  },
+  {
+   "code": "JPM",
+   "name": "JP Morgan Chase & Co.",
+   "sector": "Finance",
+   "close": 350.13,
+   "change": -6.1,
+   "pct": -1.71,
+   "volume": 9612162,
+   "value": 3369202191
+  },
+  {
+   "code": "CRM",
+   "name": "Salesforce Inc.",
+   "sector": "Technology",
+   "close": 259.43,
+   "change": 11.71,
+   "pct": 4.73,
+   "volume": 12966104,
+   "value": 3337301449
+  },
+  {
+   "code": "STX",
+   "name": "Seagate Technology Holdings PLC",
+   "sector": "Technology",
+   "close": 805.55,
+   "change": -24.62,
+   "pct": -2.97,
+   "volume": 4150751,
+   "value": 3335468145
+  },
+  {
+   "code": "ASML",
+   "name": "ASML Holding N.V. New York Registry Shares",
+   "sector": "Technology",
+   "close": 1575.15,
+   "change": -123.15,
+   "pct": -7.25,
+   "volume": 1974471,
+   "value": 3140346033
+  },
+  {
+   "code": "WDC",
+   "name": "Western Digital Corporation",
+   "sector": "Technology",
+   "close": 426.94,
+   "change": -20.24,
+   "pct": -4.53,
+   "volume": 7302523,
+   "value": 3124697301
+  },
+  {
+   "code": "NBIS",
+   "name": "Nebius Group N.V.",
+   "sector": "Technology",
+   "close": 212.19,
+   "change": -12.36,
+   "pct": -5.5,
+   "volume": 13725144,
+   "value": 2920887873
+  },
+  {
+   "code": "GEV",
+   "name": "GE Vernova Inc.",
+   "sector": "Technology",
+   "close": 874.76,
+   "change": -82.51,
+   "pct": -8.62,
+   "volume": 3308811,
+   "value": 2904683133
+  },
+  {
+   "code": "COHR",
+   "name": "Coherent Corp.",
+   "sector": "Technology",
+   "close": 266.5,
+   "change": -38.87,
+   "pct": -12.73,
+   "volume": 9939628,
+   "value": 2709625121
+  },
+  {
+   "code": "WMT",
+   "name": "Walmart Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 109.08,
+   "change": 1.93,
+   "pct": 1.8,
+   "volume": 23884512,
+   "value": 2606571746
+  },
+  {
+   "code": "GLW",
+   "name": "Corning Incorporated",
+   "sector": "Industrials",
+   "close": 143.6,
+   "change": -22.8,
+   "pct": -13.7,
+   "volume": 17757376,
+   "value": 2600784381
+  },
+  {
+   "code": "VRT",
+   "name": "Vertiv Holdings LLC",
+   "sector": "Technology",
+   "close": 237.39,
+   "change": -19.67,
+   "pct": -7.65,
+   "volume": 10904955,
+   "value": 2576030744
+  },
+  {
+   "code": "MSTR",
+   "name": "Strategy Inc",
+   "sector": "Technology",
+   "close": 136.94,
+   "change": 5.97,
+   "pct": 4.56,
+   "volume": 18712936,
+   "value": 2534760789
+  },
+  {
+   "code": "COIN",
+   "name": "Coinbase Global Inc.",
+   "sector": "Finance",
+   "close": 191.45,
+   "change": 16.19,
+   "pct": 9.24,
+   "volume": 13252007,
+   "value": 2500318627
+  },
+  {
+   "code": "NFLX",
+   "name": "Netflix Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 80.32,
+   "change": 2.92,
+   "pct": 3.77,
+   "volume": 30945111,
+   "value": 2480631312
+  },
+  {
+   "code": "QCOM",
+   "name": "QUALCOMM Incorporated",
+   "sector": "Technology",
+   "close": 180.15,
+   "change": -1.82,
+   "pct": -1.0,
+   "volume": 13784762,
+   "value": 2469088079
+  },
+  {
+   "code": "NOW",
+   "name": "ServiceNow Inc.",
+   "sector": "Technology",
+   "close": 142.35,
+   "change": 9.82,
+   "pct": 7.41,
+   "volume": 17501784,
+   "value": 2466146736
+  },
+  {
+   "code": "LLY",
+   "name": "Eli Lilly and Company",
+   "sector": "Health Care",
+   "close": 1138.28,
+   "change": 22.58,
+   "pct": 2.02,
+   "volume": 2131112,
+   "value": 2431259829
+  },
+  {
+   "code": "V",
+   "name": "Visa Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 375.28,
+   "change": 4.83,
+   "pct": 1.3,
+   "volume": 6198991,
+   "value": 2325424053
+  },
+  {
+   "code": "XOM",
+   "name": "ExxonMobil Holdings Corporation",
+   "sector": "Energy",
+   "close": 165.08,
+   "change": -0.91,
+   "pct": -0.55,
+   "volume": 13945702,
+   "value": 2314933668
+  },
+  {
+   "code": "CRWV",
+   "name": "CoreWeave Inc.",
+   "sector": "Technology",
+   "close": 82.98,
+   "change": -6.01,
+   "pct": -6.75,
+   "volume": 26522624,
+   "value": 2218649385
+  },
+  {
+   "code": "GS",
+   "name": "Goldman Sachs Group Inc. (The)",
+   "sector": "Finance",
+   "close": 988.45,
+   "change": -40.73,
+   "pct": -3.96,
+   "volume": 2209520,
+   "value": 2195099944
+  },
+  {
+   "code": "C",
+   "name": "Citigroup Inc.",
+   "sector": "Finance",
+   "close": 136.18,
+   "change": -2.64,
+   "pct": -1.9,
+   "volume": 15656278,
+   "value": 2120251547
+  },
+  {
+   "code": "KLAC",
+   "name": "KLA Corporation",
+   "sector": "Technology",
+   "close": 169.09,
+   "change": -11.55,
+   "pct": -6.39,
+   "volume": 12055375,
+   "value": 2045652502
+  },
+  {
+   "code": "CVX",
+   "name": "Chevron Corporation",
+   "sector": "Energy",
+   "close": 212.17,
+   "change": -1.89,
+   "pct": -0.88,
+   "volume": 9375725,
+   "value": 2002567795
+  },
+  {
+   "code": "HOOD",
+   "name": "Robinhood Markets Inc.",
+   "sector": "Finance",
+   "close": 114.33,
+   "change": 1.76,
+   "pct": 1.56,
+   "volume": 17093006,
+   "value": 1953062358
+  },
+  {
+   "code": "CAT",
+   "name": "Caterpillar Inc.",
+   "sector": "Industrials",
+   "close": 784,
+   "change": -34.57,
+   "pct": -4.22,
+   "volume": 2429135,
+   "value": 1907455282
+  },
+  {
+   "code": "VLO",
+   "name": "Valero Energy Corporation",
+   "sector": "Energy",
+   "close": 382.95,
+   "change": -7.47,
+   "pct": -1.91,
+   "volume": 4834665,
+   "value": 1860224717
+  },
+  {
+   "code": "COST",
+   "name": "Costco Wholesale Corporation",
+   "sector": "Consumer Discretionary",
+   "close": 918.91,
+   "change": 14.14,
+   "pct": 1.56,
+   "volume": 2014224,
+   "value": 1848868772
+  },
+  {
+   "code": "TXN",
+   "name": "Texas Instruments Incorporated",
+   "sector": "Technology",
+   "close": 263.42,
+   "change": -5.28,
+   "pct": -1.97,
+   "volume": 6861901,
+   "value": 1806918442
+  },
+  {
+   "code": "HPE",
+   "name": "Hewlett Packard Enterprise Company",
+   "sector": "Technology",
+   "close": 55.41,
+   "change": -6.68,
+   "pct": -10.76,
+   "volume": 31211281,
+   "value": 1753690123
+  },
+  {
+   "code": "UNH",
+   "name": "UnitedHealth Group Incorporated",
+   "sector": "Health Care",
+   "close": 383.55,
+   "change": 4.46,
+   "pct": 1.18,
+   "volume": 4475735,
+   "value": 1717909527
+  },
+  {
+   "code": "ADI",
+   "name": "Analog Devices Inc.",
+   "sector": "Technology",
+   "close": 361.02,
+   "change": -17.76,
+   "pct": -4.69,
+   "volume": 4731568,
+   "value": 1713047818
+  },
+  {
+   "code": "IBM",
+   "name": "International Business Machines Corporation",
+   "sector": "Technology",
+   "close": 249.09,
+   "change": 5.8,
+   "pct": 2.38,
+   "volume": 6817275,
+   "value": 1692998139
+  },
+  {
+   "code": "ALAB",
+   "name": "Astera Labs Inc.",
+   "sector": "Technology",
+   "close": 257.04,
+   "change": -34.18,
+   "pct": -11.74,
+   "volume": 6454355,
+   "value": 1689010535
+  },
+  {
+   "code": "APP",
+   "name": "Applovin Corporation",
+   "sector": "Technology",
+   "close": 334.24,
+   "change": 10.28,
+   "pct": 3.17,
+   "volume": 5063815,
+   "value": 1681350859
+  },
+  {
+   "code": "TER",
+   "name": "Teradyne Inc.",
+   "sector": "Industrials",
+   "close": 329.2,
+   "change": -50.52,
+   "pct": -13.3,
+   "volume": 4889699,
+   "value": 1639401932
+  },
+  {
+   "code": "GE",
+   "name": "GE Aerospace",
+   "sector": "Technology",
+   "close": 317.56,
+   "change": -6.1,
+   "pct": -1.88,
+   "volume": 5146701,
+   "value": 1629229551
+  },
+  {
+   "code": "CRDO",
+   "name": "Credo Technology Group Holding Ltd",
+   "sector": "Technology",
+   "close": 150.09,
+   "change": -12.86,
+   "pct": -7.89,
+   "volume": 10698773,
+   "value": 1619632765
+  },
+  {
+   "code": "CRCL",
+   "name": "Circle Internet Group Inc.",
+   "sector": "Finance",
+   "close": 97.42,
+   "change": 6.82,
+   "pct": 7.53,
+   "volume": 16955550,
+   "value": 1608844329
+  },
+  {
+   "code": "MRNA",
+   "name": "Moderna Inc.",
+   "sector": "Health Care",
+   "close": 146.69,
+   "change": 2.72,
+   "pct": 1.89,
+   "volume": 10963012,
+   "value": 1586799633
+  },
+  {
+   "code": "SNOW",
+   "name": "Snowflake Inc.",
+   "sector": "Technology",
+   "close": 332.35,
+   "change": 3.36,
+   "pct": 1.02,
+   "volume": 4780859,
+   "value": 1586768703
+  },
+  {
+   "code": "ARM",
+   "name": "Arm Holdings plc",
+   "sector": "Technology",
+   "close": 239.01,
+   "change": -25.78,
+   "pct": -9.74,
+   "volume": 6490510,
+   "value": 1570407469
+  },
+  {
+   "code": "MS",
+   "name": "Morgan Stanley",
+   "sector": "Finance",
+   "close": 206.58,
+   "change": -7.8,
+   "pct": -3.64,
+   "volume": 7502308,
+   "value": 1559109401
+  },
+  {
+   "code": "IREN",
+   "name": "IREN Limited",
+   "sector": "Finance",
+   "close": 43.17,
+   "change": -0.66,
+   "pct": -1.51,
+   "volume": 35150162,
+   "value": 1520638193
+  },
+  {
+   "code": "ADBE",
+   "name": "Adobe Inc.",
+   "sector": "Technology",
+   "close": 265.6,
+   "change": 13.37,
+   "pct": 5.3,
+   "volume": 5723344,
+   "value": 1505120096
+  },
+  {
+   "code": "SMCI",
+   "name": "Super Micro Computer Inc.",
+   "sector": "Technology",
+   "close": 36.74,
+   "change": -3.36,
+   "pct": -8.38,
+   "volume": 39892522,
+   "value": 1491014926
+  },
+  {
+   "code": "PEP",
+   "name": "PepsiCo Inc.",
+   "sector": "Consumer Staples",
+   "close": 136.34,
+   "change": 0.02,
+   "pct": 0.01,
+   "volume": 10764768,
+   "value": 1471323225
+  },
+  {
+   "code": "BKNG",
+   "name": "Booking Holdings Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 175.35,
+   "change": 1.43,
+   "pct": 0.82,
+   "volume": 8334138,
+   "value": 1467211787
+  },
+  {
+   "code": "NET",
+   "name": "Cloudflare Inc.",
+   "sector": "Technology",
+   "close": 330.36,
+   "change": 23.83,
+   "pct": 7.77,
+   "volume": 4404971,
+   "value": 1442370886
+  },
+  {
+   "code": "MA",
+   "name": "Mastercard Incorporated",
+   "sector": "Consumer Discretionary",
+   "close": 574.42,
+   "change": 5.23,
+   "pct": 0.92,
+   "volume": 2506429,
+   "value": 1438301888
+  },
+  {
+   "code": "MPC",
+   "name": "Marathon Petroleum Corporation",
+   "sector": "Energy",
+   "close": 396.45,
+   "change": 0.52,
+   "pct": 0.13,
+   "volume": 3572623,
+   "value": 1415402553
+  },
+  {
+   "code": "ZS",
+   "name": "Zscaler Inc.",
+   "sector": "Technology",
+   "close": 191.73,
+   "change": 27.19,
+   "pct": 16.52,
+   "volume": 7559282,
+   "value": 1411977180
+  },
+  {
+   "code": "WFC",
+   "name": "Wells Fargo & Company",
+   "sector": "Finance",
+   "close": 88.71,
+   "change": -1.58,
+   "pct": -1.75,
+   "volume": 15726297,
+   "value": 1394045100
+  },
+  {
+   "code": "CSCO",
+   "name": "Cisco Systems Inc.",
+   "sector": "Telecommunications",
+   "close": 110.06,
+   "change": -2.07,
+   "pct": -1.85,
+   "volume": 12547117,
+   "value": 1385443889
+  },
+  {
+   "code": "UBER",
+   "name": "Uber Technologies Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 72.63,
+   "change": 0.96,
+   "pct": 1.34,
+   "volume": 19054990,
+   "value": 1376416266
+  },
+  {
+   "code": "HD",
+   "name": "Home Depot Inc. (The)",
+   "sector": "Consumer Discretionary",
+   "close": 310.87,
+   "change": 2.13,
+   "pct": 0.69,
+   "volume": 4179165,
+   "value": 1299146711
+  },
+  {
+   "code": "PG",
+   "name": "Procter & Gamble Company (The)",
+   "sector": "Consumer Discretionary",
+   "close": 146.13,
+   "change": 0.86,
+   "pct": 0.59,
+   "volume": 8704946,
+   "value": 1273429279
+  },
+  {
+   "code": "JNJ",
+   "name": "Johnson & Johnson",
+   "sector": "Health Care",
+   "close": 266.32,
+   "change": 0.74,
+   "pct": 0.28,
+   "volume": 4742712,
+   "value": 1268240221
+  },
+  {
+   "code": "KO",
+   "name": "Coca-Cola Company (The)",
+   "sector": "Consumer Staples",
+   "close": 89.35,
+   "change": 1.06,
+   "pct": 1.2,
+   "volume": 14071444,
+   "value": 1256335167
+  },
+  {
+   "code": "ETN",
+   "name": "Eaton Corporation PLC",
+   "sector": "Technology",
+   "close": 393.16,
+   "change": -32.21,
+   "pct": -7.57,
+   "volume": 3189321,
+   "value": 1256267520
+  },
+  {
+   "code": "NOK",
+   "name": "Nokia Corporation Sponsored",
+   "sector": "Technology",
+   "close": 9.65,
+   "change": -1.48,
+   "pct": -13.3,
+   "volume": 125716561,
+   "value": 1243085360
+  },
+  {
+   "code": "OKTA",
+   "name": "Okta Inc.",
+   "sector": "Technology",
+   "close": 186.45,
+   "change": 19.95,
+   "pct": 11.98,
+   "volume": 6675273,
+   "value": 1229071343
+  },
+  {
+   "code": "INTU",
+   "name": "Intuit Inc.",
+   "sector": "Technology",
+   "close": 339.15,
+   "change": 17.58,
+   "pct": 5.47,
+   "volume": 3633230,
+   "value": 1228074400
+  },
+  {
+   "code": "AZO",
+   "name": "AutoZone Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 2965.52,
+   "change": 88.77,
+   "pct": 3.09,
+   "volume": 406212,
+   "value": 1197825563
+  },
+  {
+   "code": "ABBV",
+   "name": "AbbVie Inc.",
+   "sector": "Health Care",
+   "close": 261.77,
+   "change": 4.65,
+   "pct": 1.81,
+   "volume": 4512420,
+   "value": 1181079685
+  },
+  {
+   "code": "MPWR",
+   "name": "Monolithic Power Systems Inc.",
+   "sector": "Technology",
+   "close": 1143.24,
+   "change": -91.22,
+   "pct": -7.39,
+   "volume": 984700,
+   "value": 1133406986
+  },
+  {
+   "code": "NKE",
+   "name": "Nike Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 37.05,
+   "change": 0.25,
+   "pct": 0.68,
+   "volume": 30513462,
+   "value": 1132797038
+  },
+  {
+   "code": "BMNR",
+   "name": "BitMine Immersion Technologies Inc.",
+   "sector": "Finance",
+   "close": 25.76,
+   "change": 0.73,
+   "pct": 2.92,
+   "volume": 44382760,
+   "value": 1128156503
+  },
+  {
+   "code": "MRK",
+   "name": "Merck & Company Inc.",
+   "sector": "Health Care",
+   "close": 144.85,
+   "change": 0.92,
+   "pct": 0.64,
+   "volume": 7414159,
+   "value": 1074492653
+  },
+  {
+   "code": "MCD",
+   "name": "McDonald's Corporation",
+   "sector": "Consumer Discretionary",
+   "close": 257.49,
+   "change": 4.96,
+   "pct": 1.96,
+   "volume": 4172171,
+   "value": 1073844694
+  },
+  {
+   "code": "ANET",
+   "name": "Arista Networks Inc.",
+   "sector": "Telecommunications",
+   "close": 187.81,
+   "change": -11.78,
+   "pct": -5.9,
+   "volume": 5677637,
+   "value": 1070470219
+  },
+  {
+   "code": "NXPI",
+   "name": "NXP Semiconductors N.V.",
+   "sector": "Technology",
+   "close": 224.23,
+   "change": -12.39,
+   "pct": -5.24,
+   "volume": 4658083,
+   "value": 1050083951
+  },
+  {
+   "code": "AAL",
+   "name": "American Airlines Group Inc.",
+   "sector": "Consumer Discretionary",
+   "close": 13.1,
+   "change": 0.09,
+   "pct": 0.69,
+   "volume": 79763049,
+   "value": 1042367454
+  }
+ ],
+ "updated": "2026-10-08T10:20:12+08:00"
+}
