@@ -2,7 +2,6 @@
 """實測 Polygon 金鑰能做什麼（結果寫到 data/probe_polygon.log，不會印出金鑰）。只在分支上手動執行。"""
 import json
 import os
-import sys
 import time
 from pathlib import Path
 
@@ -15,6 +14,25 @@ OUT = []
 def say(*a):
     line = " ".join(str(x) for x in a)
     if KEY:
+        line = line.replace(KEY, "***")
+    OUT.append(line)
+    print(line)
+
+
+def get(path, **params):
+    r = requests.get("https://api.polygon.io" + path, params=params, headers={"Authorization": "Bearer " + KEY}, timeout=40)
+    say("GET", path, "→ HTTP", r.status_code, "bytes", len(r.content))
+    try:
+        return r.json()
+    except Exception as e:      # noqa: BLE001
+        say("  not json:", e, r.text[:200])
+        return {}
+
+
+def main():
+    say("key set:", bool(KEY), "length", len(KEY))
+    if not KEY:
+        return
     for day in ("2026-10-06", "2026-10-02"):
         p = get("/v2/aggs/grouped/locale/us/market/stocks/%s" % day, adjusted="true")
         res = p.get("results") or []
@@ -29,4 +47,9 @@ def say(*a):
             for r in res[:1] + res[-1:]:
                 say("   ", json.dumps(r))
             time.sleep(13)
-Path(__file__).resolve().parent.parent.joinpath("data", "probe_polygon.log").write_text("\n".join(OUT) + "\n", encoding="utf-8")
+
+
+try:
+    main()
+finally:
+    Path(__file__).resolve().parent.parent.joinpath("data", "probe_polygon.log").write_text("\n".join(OUT) + "\n", encoding="utf-8")
