@@ -783,6 +783,7 @@ def intraday_us():
         folder.mkdir(parents=True, exist_ok=True)
         path = folder / ("%s.json" % date)
         out = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"date": date, "minutes": 10, "points": {}}
+        out["points"] = {c: v for c, v in out["points"].items() if c in set(codes)}     # 排行重排後已不在榜上的不留
         todo = [c for c in codes if c not in out["points"]]
         s = requests.Session()
         s.headers.update({"Authorization": "Bearer " + POLYGON_KEY, "User-Agent": BOT_UA})
