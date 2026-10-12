@@ -148,6 +148,14 @@ footer a{color:var(--accent)}
 .det svg .ar{fill:currentColor;opacity:.13}
 .det .axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
 .det .none{padding:22px 0;font-size:14px;color:var(--muted)}
+.det .chips{margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
+.det .chips h4{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--muted)}
+.det .chips h4 small{font-size:12px;margin-left:6px}
+.det .cg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 16px}
+.det .cg+.cg{margin-top:10px}
+.det .cg small{display:block;font-size:12px;color:var(--muted)}
+.det .cg b{font-size:15px;font-weight:700;white-space:nowrap}
+.det .cg i{font-style:normal;font-size:12px;margin-left:4px}
 .det .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
 .det .stats small{display:block;font-size:12px;color:var(--muted)}
 .det .stats b{font-size:15px;font-weight:700}
@@ -156,6 +164,7 @@ footer a{color:var(--accent)}
   .who .indx{display:none}      /* 手機太窄，產業別改在展開的明細裡看 */
   .det .box{padding:6px 10px 16px}
   .det svg{height:120px}
+  .det .cg{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pxm{display:block;color:var(--ink);font-weight:700}
   .rank th .pxh{display:inline}
 }
@@ -349,6 +358,27 @@ function trendChart(r, d){
     ? (MODE==='us' ? '這一天的當日走勢還沒有產生，美股約在台灣時間下午一點半之後更新。' : '這一天的當日走勢還沒有產生，台股約在晚上六點半之後更新。')
     : '這一天沒有當日走勢資料，當日走勢是從開始記錄那天起才有。')+'</div>';
 }
+/* 籌碼：三大法人買賣超與融資融券（張）。買超、增加是紅色，賣超、減少是綠色 */
+function lotsTxt(n){ return n==null ? '—' : (n>0?'+':n<0?'−':'')+Math.abs(n).toLocaleString('zh-TW'); }
+function lotsCls(n){ return n>0 ? 'up' : n<0 ? 'down' : ''; }
+function chipBlock(r, d){
+  if(MODE!=='tw') return '';
+  if(!r.inst && !r.mg){
+    var c = d.chips || {};
+    return '<div class="chips"><h4>籌碼</h4><div class="none" style="padding:4px 0">'+(c.inst||c.mg ? '這檔股票沒有籌碼資料。' : '這一天的籌碼資料還沒有取得，證交所與櫃買中心通常在收盤後的傍晚到晚上陸續公布，之後的更新會補上。')+'</div></div>';
+  }
+  var h = '<div class="chips"><h4>籌碼<small>單位：張</small></h4>';
+  if(r.inst){
+    h += '<div class="cg">'+[['外資',r.inst[0]],['投信',r.inst[1]],['自營商',r.inst[2]],['三大法人合計',r.inst[3]]].map(function(c){
+      return '<div><small>'+c[0]+'</small><b class="'+lotsCls(c[1])+'">'+lotsTxt(c[1])+'</b></div>'; }).join('')+'</div>';
+  }
+  if(r.mg){
+    h += '<div class="cg">'+[['融資餘額',r.mg[0],r.mg[1]],['融券餘額',r.mg[2],r.mg[3]]].map(function(c){
+      return '<div><small>'+c[0]+'</small><b>'+c[1].toLocaleString('zh-TW')+'</b><i class="'+lotsCls(c[2])+'">'+lotsTxt(c[2])+'</i></div>'; }).join('')
+      + '<div><small>券資比</small><b>'+(r.mg[0] ? fix(r.mg[2]/r.mg[0]*100,1)+'%' : '—')+'</b></div></div>';
+  }
+  return h+'</div>';
+}
 function detail(r, d){
   var M = MODES[MODE], cls = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '', sign = r.change>0 ? '+' : r.change<0 ? '−' : '';
   var cells = [['收盤', price(r.close)],
@@ -358,7 +388,7 @@ function detail(r, d){
   if(MODE==='tw') cells.push(['市場', r.market+(r.etf?' ETF':'')]);
   var ind = MODE==='tw' ? (r.ind && r.ind!=='ETF' ? r.ind : '') : (r.sector||'');
   if(ind) cells.push(['產業', esc(ind)]);
-  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div></div>';
+  return '<div class="box">'+trendChart(r, d)+chipBlock(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div></div>';
 }
 function toggleRow(tr){
   var k = MODE+tr.dataset.code;

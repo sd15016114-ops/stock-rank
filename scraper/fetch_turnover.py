@@ -508,6 +508,21 @@ def attach_chips(snap, inst, mg):
     return snap
 
 
+def patch_recent_chips(days=3):
+    """最近幾個交易日裡籌碼還不齊的（例如融資融券比排程晚公布），每次更新時順便補上。最新一天由排行本身處理。"""
+    folder = DATA / "history" / "tw"
+    for f in sorted(folder.glob("*.json"), reverse=True)[1:days + 1]:
+        snap = json.loads(f.read_text(encoding="utf-8"))
+        have = snap.get("chips") or {}
+        if have.get("inst") and have.get("mg"):
+            continue
+        inst, mg = fetch_chips(snap["date"])
+        if inst or mg:
+            attach_chips(snap, inst, mg)
+            f.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            print("      %s 補上籌碼" % snap["date"])
+
+
 def backfill_chips(force=False):
     """幫歷史排行（data/history/tw）補上籌碼；已經有的跳過（force 則全部重抓）。最新一天也同步寫回 tw.json。"""
     del LOG[:]
@@ -855,6 +870,11 @@ def run_inner(key, label, build):
             "  （%s）" % new["error"] if new.get("error") else ""))
         ok = new["status"] == "ok"
         save_history(key, new)
+        if key == "tw":
+            try:
+                patch_recent_chips()
+            except Exception as e:  # noqa: BLE001   補籌碼失敗不影響排行
+                print("      補前幾天籌碼失敗：%s" % e)
     except Exception as e:          # noqa: BLE001
         print("FAIL  %s  %s" % (label, e))
         new = dict(old, status="stale", error=str(e), checked=now) if old and old.get("rows") else \
