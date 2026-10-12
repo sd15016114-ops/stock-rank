@@ -232,4 +232,18 @@ assert ft.parse_tpex_margin(TM) == {"6488": [17036, -933, 500, -65]}
 assert ft.parse_t86({"stat": "很抱歉，沒有符合條件的資料!", "total": 0}) == {} and ft.parse_tpex_margin({"tables": [{"fields": TM["tables"][0]["fields"], "data": []}]}) == {}
 snap = ft.attach_chips({"rows": [{"code": "2330"}, {"code": "9999"}]}, {"2330": [1, 2, 3, 6]}, {})
 assert snap["rows"][0]["inst"] == [1, 2, 3, 6] and "mg" not in snap["rows"][0] and "inst" not in snap["rows"][1] and snap["chips"] == {"inst": True, "mg": False}
+
+# 籌碼排行：全市場依「張數 × 收盤價」排序，買超、賣超分開；沒有成交的、權證不收
+with tempfile.TemporaryDirectory() as tmp:
+    ft.DATA = Path(tmp)
+    ft.save_full("2026-10-07", [{"code": "2330", "close": 2585.0, "value": 9}, {"code": "1101", "close": 25.0, "value": 1}], [{"code": "6488", "close": 1150.0, "value": 5}])
+    ft.save_full("2026-10-08", [{"code": "2330", "close": 2550.0, "value": 9}, {"code": "1101", "close": 25.5, "value": 1}, {"code": "0050", "close": 115.0, "value": 3}],
+                 [{"code": "6488", "close": 1130.0, "value": 5}])
+    inst = {"2330": [-12303, 793, 510, -11000], "1101": [50000, 0, -10, 49990], "6488": [-1301, -989, 4, -2286], "0050": [100, 0, 0, 100], "712345": [999999, 0, 0, 999999], "9999": [5, 5, 5, 15]}
+    rk = ft.chip_rank("2026-10-08", inst, {"2330": "台積電", "1101": "台泥", "6488": "環球晶", "0050": "元大台灣50"})
+    assert rk["lists"]["f"]["buy"] == ["1101", "0050"], rk["lists"]["f"]        # 1101：5 萬張 × 25.5 = 12.75 億，0050：100 張 × 115
+    assert rk["lists"]["f"]["sell"] == ["2330", "6488"]                          # 2330：1.2 萬張 × 2550 ≈ 313 億，賣超最多
+    assert rk["lists"]["all"]["buy"][0] == "1101" and "712345" not in rk["pool"] and "9999" not in rk["pool"]
+    e = rk["pool"]["2330"]
+    assert e["name"] == "台積電" and e["market"] == "上市" and e["pct"] == round((2550 / 2585 - 1) * 100, 2) and e["inst"] == inst["2330"] and rk["pool"]["0050"]["etf"]
 print("全部通過")

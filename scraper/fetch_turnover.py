@@ -482,10 +482,14 @@ def fetch_chips(date):
     y, m, d = date.split("-")
     keys = {"ymd": y + m + d, "roc": "%d/%s/%s" % (int(y) - 1911, m, d)}
     parsers = {"上市法人": parse_t86, "上櫃法人": parse_tpex_inst, "上市融資券": parse_twse_margin, "上櫃融資券": parse_tpex_margin}
-    got = {}
+    got, names = {}, {}
     for name, url in CHIP_URLS.items():
         try:
-            got[name] = parsers[name](json.loads(get_text(url % keys, ua=BROWSER_UA)))
+            payload = json.loads(get_text(url % keys, ua=BROWSER_UA))
+            got[name] = parsers[name](payload)
+            if name.endswith("法人"):          # 籌碼排行需要全市場的股票名稱
+                _, data = raw_table(payload, "證券代號") if name == "上市法人" else raw_table(payload, "代號")
+                names.update({str(r[0]).strip(): str(r[1]).strip() for r in data if len(r) > 1})
         except Exception as e:      # noqa: BLE001   某一份失敗不影響其他
             got[name] = {}
             print("      %s %s 讀取失敗：%s" % (date, name, e))
@@ -494,10 +498,54 @@ def fetch_chips(date):
         date, len(got["上市法人"]), len(got["上櫃法人"]), len(got["上市融資券"]), len(got["上櫃融資券"])))
     inst = dict(got["上市法人"], **got["上櫃法人"])
     mg = dict(got["上市融資券"], **got["上櫃融資券"])
-    return inst, mg
+    return inst, mg, names
 
 
-def attach_chips(snap, inst, mg):
+CHIP_RANK_N = 50                                    # 籌碼排行每一種保留幾名
+CHIP_KINDS = ("f", "t", "d", "all")                 # 外資、投信、自營商、三大法人合計（對應 inst 的四個位置）
+
+
+def full_day(date):
+    """全市場精簡檔 → {代號: (市場, 收盤, 成交值)}；沒有這一天的檔案回傳 {}。"""
+    path = full_dir() / ("%s.json" % date)
+    if not path.exists():
+        return {}
+    day = json.loads(path.read_text(encoding="utf-8"))
+    return {c: (m, p, v) for m in ("上市", "上櫃") for c, p, v in day.get(m, [])}
+
+
+def chip_rank(date, inst, names):
+    """全市場的法人買賣超排行：外資、投信、自營商、三大法人各取買超、賣超前 CHIP_RANK_N 名，依「張數 × 收盤價」的金額排序。
+
+    回傳 {"pool": {代號: 股票資料}, "lists": {種類: {"buy": [代號], "sell": [代號]}}}，同一檔只存一次。
+    """
+    today = full_day(date)
+    before = [d for d in full_dates() if d < date]
+    prev = full_day(before[0]) if before else {}
+    if not today or not inst:
+        return None
+    pool, lists = {}, {}
+    for k, kind in enumerate(CHIP_KINDS):
+        amt = []
+        for code, v in inst.items():
+            q = today.get(code)
+            if not q or v[k] is None or not tw_kind(code):
+                continue
+            amt.append((v[k] * 1000 * q[1], code))
+        buy = [c for a, c in sorted(amt, reverse=True) if a > 0][:CHIP_RANK_N]
+        sell = [c for a, c in sorted(amt) if a < 0][:CHIP_RANK_N]
+        lists[kind] = {"buy": buy, "sell": sell}
+        for code in buy + sell:
+            if code in pool:
+                continue
+            market, close, value = today[code]
+            p0 = (prev.get(code) or (None, None))[1]
+            pool[code] = {"code": code, "name": names.get(code, code), "market": market, "etf": tw_kind(code) == "etf",
+                          "close": close, "pct": round((close / p0 - 1) * 100, 2) if p0 else None, "value": value, "inst": inst[code]}
+    return {"pool": pool, "lists": lists}
+
+
+def attach_chips(snap, inst, mg, names=None):
     """把籌碼寫進排行的每一列：inst = [外資, 投信, 自營商, 合計]、mg = [融資餘額, 增減, 融券餘額, 增減]，單位都是張。"""
     for r in snap.get("rows", []):
         if r["code"] in inst:
@@ -505,6 +553,9 @@ def attach_chips(snap, inst, mg):
         if r["code"] in mg:
             r["mg"] = mg[r["code"]]
     snap["chips"] = {"inst": bool(inst), "mg": bool(mg)}
+    rank = chip_rank(snap.get("date"), inst, names or {}) if snap.get("date") else None
+    if rank:
+        snap["chip_rank"] = rank
     return snap
 
 
@@ -516,9 +567,9 @@ def patch_recent_chips(days=3):
         have = snap.get("chips") or {}
         if have.get("inst") and have.get("mg"):
             continue
-        inst, mg = fetch_chips(snap["date"])
+        inst, mg, names = fetch_chips(snap["date"])
         if inst or mg:
-            attach_chips(snap, inst, mg)
+            attach_chips(snap, inst, mg, names)
             f.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
             print("      %s 補上籌碼" % snap["date"])
 
@@ -534,13 +585,13 @@ def backfill_chips(force=False):
         for f in sorted(folder.glob("*.json"), reverse=True):
             snap = json.loads(f.read_text(encoding="utf-8"))
             have = snap.get("chips") or {}
-            if not force and have.get("inst") and have.get("mg"):
+            if not force and have.get("inst") and have.get("mg") and snap.get("chip_rank"):
                 continue
-            inst, mg = fetch_chips(snap["date"])
+            inst, mg, names = fetch_chips(snap["date"])
             if not inst and not mg:
                 print("----  %s  沒有籌碼資料" % snap["date"])
                 continue
-            attach_chips(snap, inst, mg)
+            attach_chips(snap, inst, mg, names)
             f.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
             if latest.get("date") == snap["date"]:
                 latest_path.write_text(json.dumps(dict(snap, updated=latest.get("updated", snap.get("updated"))), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
