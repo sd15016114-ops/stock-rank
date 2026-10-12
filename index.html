@@ -222,7 +222,7 @@ footer a{color:var(--accent)}
 
   <footer>
     <p id="src"></p>
-    <p>漲跌顏色採台灣慣例：紅色上漲、綠色下跌。美股的日期與價量以 Polygon 為準，成交值用當日成交均價 × 成交量計算，不含 ETF。</p>
+    <p>漲跌顏色採台灣慣例：紅色上漲、綠色下跌。美股的日期與價量以 Polygon 為準，成交值用當日成交均價 × 成交量計算。</p>
     <p>本站僅整理公開資訊供參考，不構成任何投資建議。</p>
   </footer>
 </div>
@@ -279,7 +279,7 @@ function pickDate(date){
 /* ===== 依目前的篩選條件排出名次 ===== */
 function order(d, n){
   var rows = (d && d.rows) || [], mk = $('market').value, etf = $('etf').checked;
-  if(MODE==='tw') rows = rows.filter(function(r){ return (mk==='all' || r.market===mk) && (etf || !r.etf); });
+  rows = rows.filter(function(r){ return (MODE!=='tw' || mk==='all' || r.market===mk) && (etf || !r.etf); });
   rows = rows.slice().sort(function(a,b){ return b.value-a.value; });
   return n ? rows.slice(0,n) : rows;
 }
@@ -317,7 +317,7 @@ function renderSums(d, rows){
   var sum = rows.reduce(function(s,r){ return s+r.value; },0), top10 = rows.slice(0,10).reduce(function(s,r){ return s+r.value; },0);
   var up = rows.filter(function(r){ return r.pct>0; }).length, down = rows.filter(function(r){ return r.pct<0; }).length;
   var whole = MODE==='tw' && $('market').value!=='all' ? ((d.markets||{})[$('market').value]||{}).total_value : d.total_value;
-  var all = whole && (MODE!=='tw' || $('etf').checked);       /* 全市場合計含 ETF，排除 ETF 時不拿來算占比 */
+  var all = whole && $('etf').checked;       /* 全市場合計含 ETF，排除 ETF 時不拿來算占比 */       /* 全市場合計含 ETF，排除 ETF 時不拿來算占比 */
   var cards = [
     ['成交值第一名', esc(rows[0].name), esc(rows[0].code)+'，'+yi(rows[0].value)+' '+M.unit, true],
     ['前 '+rows.length+' 名合計', yi(sum)+'<small>'+M.unit+'</small>', [all ? '占全市場 '+fix(sum/whole*100,1)+'%' : '', vsPrev(sum, rows.length)].filter(Boolean).join('，'), false],
@@ -481,7 +481,7 @@ function render(){
   }else{
     $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th><span class="pxh">收盤／</span>漲跌幅</th><th><span class="u">成交值（'+M.unit+'）</span><span class="us">'+M.unit+'</span></th>'+(hasRatio?'<th class="rtc">放大倍數</th>':'')+'<th class="vol">成交量</th></tr>'
       + rows.map(function(r){
-        var sub = MODE==='tw' ? r.market : (r.sector||''), indx = MODE==='tw' && r.ind && r.ind!=='ETF' ? '<span class="indx">・'+esc(r.ind)+'</span>' : '', hot = r.ratio>=2 ? ' hot' : '';
+        var sub = MODE==='tw' ? r.market : (r.etf ? '' : r.sector||''), indx = MODE==='tw' && r.ind && r.ind!=='ETF' ? '<span class="indx">・'+esc(r.ind)+'</span>' : '', hot = r.ratio>=2 ? ' hot' : '';
         var open = OPEN===MODE+r.code;
         return '<tr class="row'+(r._no<=3?' top3':'')+(open?' open':'')+'" data-code="'+esc(r.code)+'" tabindex="0" role="button" aria-expanded="'+open+'"><td class="no l">'+r._no+moveCell(r,map)+'</td>'
           + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+indx+'</small></td>'
@@ -492,7 +492,7 @@ function render(){
           + (open ? '<tr class="det"><td colspan="9">'+detail(r, d)+'</td></tr>' : '');
       }).join('') + '</table>';
   }
-  $('note').textContent = has && MODE==='us' ? '共統計 '+(d.count||0).toLocaleString('zh-TW')+' 檔在 NYSE、Nasdaq、NYSE American 掛牌的股票。交易日以美東時間為準，每個交易日結束後，約在台灣時間下午一點多更新。' : '';
+  $('note').textContent = has && MODE==='us' ? '共統計 '+(d.count||0).toLocaleString('zh-TW')+' 檔在 NYSE、Nasdaq、NYSE American 掛牌的股票'+(d.etf_count?'與 '+d.etf_count.toLocaleString('zh-TW')+' 檔 ETF':'')+'。交易日以美東時間為準，每個交易日結束後，約在台灣時間下午一點多更新。' : '';
   $('src').innerHTML = has && d.sources ? '資料來源：'+d.sources.map(function(u){
     var n = /twse/.test(u)?'臺灣證券交易所':/tpex/.test(u)?'證券櫃檯買賣中心':/polygon/.test(u)?'Polygon':/nasdaq/.test(u)?'Nasdaq（公司名稱與產業）':u;
     return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+n+'</a>'; }).join('、')+'，每個交易日收盤後自動擷取。' : '';
@@ -622,8 +622,8 @@ function remember(){
 var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
-  $('marketSeg').hidden = $('etfWrap').hidden = MODE!=='tw';
-  $('marketSeg').style.display = $('etfWrap').style.display = MODE==='tw' ? '' : 'none';
+  $('marketSeg').hidden = MODE!=='tw';
+  $('marketSeg').style.display = MODE==='tw' ? '' : 'none';
   document.querySelectorAll('.modes button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.mode===MODE ? 'true' : 'false'); });
   var list = DATES[MODE];
   $('date').innerHTML = list.map(function(x,i){ return '<option value="'+x+'">'+tradeDay(x)+(i===0?'・最新':'')+'</option>'; }).join('');
