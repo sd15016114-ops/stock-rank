@@ -398,6 +398,211 @@ SRC_TWSE = "https://www.twse.com.tw/zh/trading/historical/mi-index.html"
 SRC_TPEX = "https://www.tpex.org.tw/zh-tw/mainboard/trading/info/pricing.html"
 
 
+# ---------------------------------------------------------------- 台股籌碼（三大法人、融資融券）
+CHIP_URLS = {
+    "上市法人": "https://www.twse.com.tw/rwd/zh/fund/T86?date=%(ymd)s&selectType=ALLBUT0999&response=json",
+    "上櫃法人": "https://www.tpex.org.tw/web/stock/3insti/daily_trade/3itrade_hedge_result.php?l=zh-tw&o=json&se=EW&t=D&d=%(roc)s",
+    "上市融資券": "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date=%(ymd)s&selectType=ALL&response=json",
+    "上櫃融資券": "https://www.tpex.org.tw/web/stock/margin_trading/margin_balance/margin_bal_result.php?l=zh-tw&o=json&d=%(roc)s",
+}
+
+
+def raw_table(payload, *need):
+    """找出欄位包含指定名稱的那張表，回傳 (欄位, 資料列)。欄位名稱會重複的表（例如融資、融券都有「買進」）要用位置讀。"""
+    tables = (payload or {}).get("tables")
+    if tables is None and (payload or {}).get("fields"):
+        tables = [payload]
+    for t in tables or []:
+        fields = [clean_field(f) for f in (t or {}).get("fields") or []]
+        if all(n in fields for n in need):
+            return fields, t.get("data") or []
+    return None, []
+
+
+def lots(v):
+    """股數 → 張（四捨五入）；讀不到回傳 None。"""
+    n = to_num(v)
+    return None if n is None else int(round(n / 1000.0))
+
+
+def parse_t86(payload):
+    """證交所三大法人買賣超日報 → {代號: [外資, 投信, 自營商, 三大法人合計]}（張）。外資含外資自營商。"""
+    fields, data = raw_table(payload, "證券代號", "三大法人買賣超股數")
+    if not fields:
+        return {}
+    i = {f: k for k, f in enumerate(fields)}
+    out = {}
+    for r in data:
+        g = lambda name: to_num(r[i[name]]) if name in i else 0
+        f = (g("外陸資買賣超股數(不含外資自營商)") or 0) + (g("外資自營商買賣超股數") or 0)
+        out[str(r[i["證券代號"]]).strip()] = [lots(f), lots(g("投信買賣超股數")), lots(g("自營商買賣超股數")), lots(g("三大法人買賣超股數"))]
+    return out
+
+
+def parse_tpex_inst(payload):
+    """櫃買中心三大法人買賣明細 → 同上。欄位名稱重複，依序是：外資(不含外資自營商)、外資自營商、外資合計、
+    投信、自營商(自行買賣)、自營商(避險)、自營商合計，每組買進、賣出、買賣超；最後一欄是三大法人合計。"""
+    fields, data = raw_table(payload, "代號", "三大法人買賣超股數合計")
+    if not fields or len(fields) != 24:
+        return {}
+    return {str(r[0]).strip(): [lots(r[10]), lots(r[13]), lots(r[22]), lots(r[23])] for r in data if len(r) >= 24}
+
+
+def parse_twse_margin(payload):
+    """證交所融資融券彙總 → {代號: [融資餘額, 融資增減, 融券餘額, 融券增減]}（張）。
+    欄位依序：代號、名稱、融資（買進、賣出、現金償還、前日餘額、今日餘額、限額）、融券（同上六欄）、資券互抵、註記。"""
+    fields, data = raw_table(payload, "代號", "今日餘額")
+    if not fields or len(fields) < 14 or fields[5] != "前日餘額" or fields[6] != "今日餘額" or fields[11] != "前日餘額" or fields[12] != "今日餘額":
+        return {}
+    out = {}
+    for r in data:
+        m0, m1, s0, s1 = (to_num(r[k]) for k in (5, 6, 11, 12))
+        if m1 is not None and s1 is not None:
+            out[str(r[0]).strip()] = [int(m1), int(m1 - (m0 or 0)), int(s1), int(s1 - (s0 or 0))]
+    return out
+
+
+def parse_tpex_margin(payload):
+    """櫃買中心融資融券餘額 → 同上（張）。"""
+    fields, data = raw_table(payload, "代號", "資餘額", "券餘額")
+    if not fields:
+        return {}
+    i = {f: k for k, f in enumerate(fields)}
+    out = {}
+    for r in data:
+        m0, m1 = to_num(r[i["前資餘額(張)"]]), to_num(r[i["資餘額"]])
+        s0, s1 = to_num(r[i["前券餘額(張)"]]), to_num(r[i["券餘額"]])
+        if m1 is not None and s1 is not None:
+            out[str(r[0]).strip()] = [int(m1), int(m1 - (m0 or 0)), int(s1), int(s1 - (s0 or 0))]
+    return out
+
+
+def fetch_chips(date):
+    """抓指定日期的籌碼，回傳 ({代號: 三大法人}, {代號: 融資融券})。哪一份還沒公布就是空的。"""
+    y, m, d = date.split("-")
+    keys = {"ymd": y + m + d, "roc": "%d/%s/%s" % (int(y) - 1911, m, d)}
+    parsers = {"上市法人": parse_t86, "上櫃法人": parse_tpex_inst, "上市融資券": parse_twse_margin, "上櫃融資券": parse_tpex_margin}
+    got, names = {}, {}
+    for name, url in CHIP_URLS.items():
+        try:
+            payload = json.loads(get_text(url % keys, ua=BROWSER_UA))
+            got[name] = parsers[name](payload)
+            if name.endswith("法人"):          # 籌碼排行需要全市場的股票名稱
+                _, data = raw_table(payload, "證券代號") if name == "上市法人" else raw_table(payload, "代號")
+                names.update({str(r[0]).strip(): str(r[1]).strip() for r in data if len(r) > 1})
+        except Exception as e:      # noqa: BLE001   某一份失敗不影響其他
+            got[name] = {}
+            print("      %s %s 讀取失敗：%s" % (date, name, e))
+        time.sleep(3)               # 證交所、櫃買對連續請求有限制，放慢一點
+    print("      籌碼 %s：上市法人 %d、上櫃法人 %d、上市融資券 %d、上櫃融資券 %d 檔" % (
+        date, len(got["上市法人"]), len(got["上櫃法人"]), len(got["上市融資券"]), len(got["上櫃融資券"])))
+    inst = dict(got["上市法人"], **got["上櫃法人"])
+    mg = dict(got["上市融資券"], **got["上櫃融資券"])
+    return inst, mg, names
+
+
+CHIP_RANK_N = 50                                    # 籌碼排行每一種保留幾名
+CHIP_KINDS = ("f", "t", "d", "all")                 # 外資、投信、自營商、三大法人合計（對應 inst 的四個位置）
+
+
+def full_day(date):
+    """全市場精簡檔 → {代號: (市場, 收盤, 成交值)}；沒有這一天的檔案回傳 {}。"""
+    path = full_dir() / ("%s.json" % date)
+    if not path.exists():
+        return {}
+    day = json.loads(path.read_text(encoding="utf-8"))
+    return {c: (m, p, v) for m in ("上市", "上櫃") for c, p, v in day.get(m, [])}
+
+
+def chip_rank(date, inst, names):
+    """全市場的法人買賣超排行：外資、投信、自營商、三大法人各取買超、賣超前 CHIP_RANK_N 名，依「張數 × 收盤價」的金額排序。
+
+    回傳 {"pool": {代號: 股票資料}, "lists": {種類: {"buy": [代號], "sell": [代號]}}}，同一檔只存一次。
+    """
+    today = full_day(date)
+    before = [d for d in full_dates() if d < date]
+    prev = full_day(before[0]) if before else {}
+    if not today or not inst:
+        return None
+    pool, lists = {}, {}
+    for k, kind in enumerate(CHIP_KINDS):
+        amt = []
+        for code, v in inst.items():
+            q = today.get(code)
+            if not q or v[k] is None or not tw_kind(code):
+                continue
+            amt.append((v[k] * 1000 * q[1], code))
+        buy = [c for a, c in sorted(amt, reverse=True) if a > 0][:CHIP_RANK_N]
+        sell = [c for a, c in sorted(amt) if a < 0][:CHIP_RANK_N]
+        lists[kind] = {"buy": buy, "sell": sell}
+        for code in buy + sell:
+            if code in pool:
+                continue
+            market, close, value = today[code]
+            p0 = (prev.get(code) or (None, None))[1]
+            pool[code] = {"code": code, "name": names.get(code, code), "market": market, "etf": tw_kind(code) == "etf",
+                          "close": close, "pct": round((close / p0 - 1) * 100, 2) if p0 else None, "value": value, "inst": inst[code]}
+    return {"pool": pool, "lists": lists}
+
+
+def attach_chips(snap, inst, mg, names=None):
+    """把籌碼寫進排行的每一列：inst = [外資, 投信, 自營商, 合計]、mg = [融資餘額, 增減, 融券餘額, 增減]，單位都是張。"""
+    for r in snap.get("rows", []):
+        if r["code"] in inst:
+            r["inst"] = inst[r["code"]]
+        if r["code"] in mg:
+            r["mg"] = mg[r["code"]]
+    snap["chips"] = {"inst": bool(inst), "mg": bool(mg)}
+    rank = chip_rank(snap.get("date"), inst, names or {}) if snap.get("date") else None
+    if rank:
+        snap["chip_rank"] = rank
+    return snap
+
+
+def patch_recent_chips(days=3):
+    """最近幾個交易日裡籌碼還不齊的（例如融資融券比排程晚公布），每次更新時順便補上。最新一天由排行本身處理。"""
+    folder = DATA / "history" / "tw"
+    for f in sorted(folder.glob("*.json"), reverse=True)[1:days + 1]:
+        snap = json.loads(f.read_text(encoding="utf-8"))
+        have = snap.get("chips") or {}
+        if have.get("inst") and have.get("mg"):
+            continue
+        inst, mg, names = fetch_chips(snap["date"])
+        if inst or mg:
+            attach_chips(snap, inst, mg, names)
+            f.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            print("      %s 補上籌碼" % snap["date"])
+
+
+def backfill_chips(force=False):
+    """幫歷史排行（data/history/tw）補上籌碼；已經有的跳過（force 則全部重抓）。最新一天也同步寫回 tw.json。"""
+    del LOG[:]
+    try:
+        folder = DATA / "history" / "tw"
+        latest_path = DATA / "tw.json"
+        latest = json.loads(latest_path.read_text(encoding="utf-8")) if latest_path.exists() else {}
+        done = 0
+        for f in sorted(folder.glob("*.json"), reverse=True):
+            snap = json.loads(f.read_text(encoding="utf-8"))
+            have = snap.get("chips") or {}
+            if not force and have.get("inst") and have.get("mg") and snap.get("chip_rank"):
+                continue
+            inst, mg, names = fetch_chips(snap["date"])
+            if not inst and not mg:
+                print("----  %s  沒有籌碼資料" % snap["date"])
+                continue
+            attach_chips(snap, inst, mg, names)
+            f.write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            if latest.get("date") == snap["date"]:
+                latest_path.write_text(json.dumps(dict(snap, updated=latest.get("updated", snap.get("updated"))), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            done += 1
+            print("OK    %s  補上籌碼" % snap["date"])
+        print("籌碼回補完成：%d 天" % done)
+        return 0
+    finally:
+        (DATA / "run_backfill_chips.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
+
+
 def build_tw():
     date, rows, total = fetch_twse()
     try:
@@ -413,7 +618,12 @@ def build_tw():
                 "markets": {"上市": {"date": date, "count": len(rows), "total_value": total}},
                 "sources": [SRC_TWSE], "total_value": total, "rows": sorted(top_of(rows), key=lambda r: -r["value"])}
     save_full(date, rows, trows)
-    return snapshot(date, rows, total, trows, ttotal, [SRC_TWSE, SRC_TPEX])
+    snap = snapshot(date, rows, total, trows, ttotal, [SRC_TWSE, SRC_TPEX])
+    try:
+        attach_chips(snap, *fetch_chips(date))     # 籌碼抓不到不影響排行；21:30 那次會再抓一次
+    except Exception as e:      # noqa: BLE001
+        print("      籌碼沒有取得：%s" % e)
+    return snap
 
 
 def backfill(want, force=False):
@@ -711,6 +921,11 @@ def run_inner(key, label, build):
             "  （%s）" % new["error"] if new.get("error") else ""))
         ok = new["status"] == "ok"
         save_history(key, new)
+        if key == "tw":
+            try:
+                patch_recent_chips()
+            except Exception as e:  # noqa: BLE001   補籌碼失敗不影響排行
+                print("      補前幾天籌碼失敗：%s" % e)
     except Exception as e:          # noqa: BLE001
         print("FAIL  %s  %s" % (label, e))
         new = dict(old, status="stale", error=str(e), checked=now) if old and old.get("rows") else \
@@ -874,6 +1089,8 @@ def main(only):
         return intraday_tw()
     if "intraday" in only:
         return intraday_us()
+    if "backfill-chips" in only:
+        return backfill_chips(force="force" in only)
     if "backfill-us" in only:
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
         return backfill_us(n[0] if n else 10)

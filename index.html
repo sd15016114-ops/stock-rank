@@ -104,6 +104,7 @@ section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width
 .up{color:var(--up)} .down{color:var(--down)}
 .val{position:relative;min-width:150px}
 .val i{position:absolute;right:8px;top:8px;bottom:8px;background:var(--soft);border-radius:2px}
+.val small.up{color:var(--up)} .val small.down{color:var(--down)}
 .val span{position:relative;font-weight:700}
 .val small{display:none;position:relative;font-size:12px;line-height:1.2;color:var(--muted)}
 .rt{color:var(--muted)} .rt.hot,.val small.hot{color:var(--accent);font-weight:700}
@@ -148,6 +149,14 @@ footer a{color:var(--accent)}
 .det svg .ar{fill:currentColor;opacity:.13}
 .det .axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
 .det .none{padding:22px 0;font-size:14px;color:var(--muted)}
+.det .chips{margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
+.det .chips h4{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--muted)}
+.det .chips h4 small{font-size:12px;margin-left:6px}
+.det .cg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 16px}
+.det .cg+.cg{margin-top:10px}
+.det .cg small{display:block;font-size:12px;color:var(--muted)}
+.det .cg b{font-size:15px;font-weight:700;white-space:nowrap}
+.det .cg i{font-style:normal;font-size:12px;margin-left:4px}
 .det .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
 .det .stats small{display:block;font-size:12px;color:var(--muted)}
 .det .stats b{font-size:15px;font-weight:700}
@@ -156,6 +165,7 @@ footer a{color:var(--accent)}
   .who .indx{display:none}      /* 手機太窄，產業別改在展開的明細裡看 */
   .det .box{padding:6px 10px 16px}
   .det svg{height:120px}
+  .det .cg{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pxm{display:block;color:var(--ink);font-weight:700}
   .rank th .pxh{display:inline}
 }
@@ -173,6 +183,8 @@ footer a{color:var(--accent)}
       <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
+      <div class="seg" id="boardSeg" role="group" aria-label="排行種類"></div>
+      <select id="board" aria-label="排行種類" hidden><option value="value" selected>成交值</option><option value="chips">籌碼</option></select>
       <div class="seg" id="viewSeg" role="group" aria-label="檢視方式"></div>
       <select id="view" aria-label="檢視方式" hidden><option value="rank" selected>排行</option><option value="heat">熱力圖</option></select>
       <select id="date" aria-label="交易日"></select>
@@ -195,6 +207,10 @@ footer a{color:var(--accent)}
       <select id="market" aria-label="市場別" hidden><option value="all">上市＋上櫃</option><option value="上市">只看上市</option><option value="上櫃">只看上櫃</option></select>
       <div class="seg" id="countSeg" role="group" aria-label="顯示名次"></div>
       <select id="count" aria-label="顯示名次" hidden><option value="20">前 20 名</option><option value="50" selected>前 50 名</option><option value="100">前 100 名</option></select>
+      <div class="seg" id="whoSeg" role="group" aria-label="法人"></div>
+      <select id="who" aria-label="法人" hidden><option value="f" selected>外資</option><option value="t">投信</option><option value="d">自營商</option><option value="all">三大法人</option></select>
+      <div class="seg" id="sideSeg" role="group" aria-label="買超或賣超"></div>
+      <select id="side" aria-label="買超或賣超" hidden><option value="buy" selected>買超</option><option value="sell">賣超</option></select>
       <div class="seg" id="sortSeg" role="group" aria-label="排序方式"></div>
       <select id="sort" aria-label="排序方式" hidden><option value="value" selected>依成交值</option><option value="ratio">依放大倍數</option></select>
       <label id="etfWrap"><input type="checkbox" id="etf" checked> 含 ETF</label>
@@ -328,7 +344,7 @@ function intraday(mode, date){
 }
 /* 單日走勢圖：虛線是昨日收盤價，線在虛線上方代表高於昨收 */
 function dayChart(r, d, pts){
-  var W = 600, H = 150, pad = 6, base = r.change!=null ? r.close-r.change : pts[0];
+  var W = 600, H = 150, pad = 6, base = r.change!=null ? r.close-r.change : r.pct!=null ? r.close/(1+r.pct/100) : pts[0];
   var lo = Math.min.apply(null,pts.concat(base)), hi = Math.max.apply(null,pts.concat(base)), span = (hi-lo)||1, last = pts[pts.length-1];
   function y(v){ return (pad + (hi-v)/span*(H-pad*2)).toFixed(1); }
   var path = pts.map(function(v,i){ return (i?'L':'M')+(i/(pts.length-1)*W).toFixed(1)+' '+y(v); }).join(' ');
@@ -349,16 +365,39 @@ function trendChart(r, d){
     ? (MODE==='us' ? '這一天的當日走勢還沒有產生，美股約在台灣時間下午一點半之後更新。' : '這一天的當日走勢還沒有產生，台股約在晚上六點半之後更新。')
     : '這一天沒有當日走勢資料，當日走勢是從開始記錄那天起才有。')+'</div>';
 }
+/* 籌碼：三大法人買賣超與融資融券（張）。買超、增加是紅色，賣超、減少是綠色 */
+function lotsTxt(n){ return n==null ? '—' : (n>0?'+':n<0?'−':'')+Math.abs(n).toLocaleString('zh-TW'); }
+function lotsCls(n){ return n>0 ? 'up' : n<0 ? 'down' : ''; }
+function chipBlock(r, d){
+  if(MODE!=='tw') return '';
+  if(!r.inst && !r.mg){
+    var c = d.chips || {};
+    return '<div class="chips"><h4>籌碼</h4><div class="none" style="padding:4px 0">'+(c.inst||c.mg ? '這檔股票沒有籌碼資料。' : '這一天的籌碼資料還沒有取得，證交所與櫃買中心通常在收盤後的傍晚到晚上陸續公布，之後的更新會補上。')+'</div></div>';
+  }
+  var h = '<div class="chips"><h4>籌碼<small>單位：張</small></h4>';
+  if(r.inst){
+    h += '<div class="cg">'+[['外資',r.inst[0]],['投信',r.inst[1]],['自營商',r.inst[2]],['三大法人合計',r.inst[3]]].map(function(c){
+      return '<div><small>'+c[0]+'</small><b class="'+lotsCls(c[1])+'">'+lotsTxt(c[1])+'</b></div>'; }).join('')+'</div>';
+  }
+  if(r.mg){
+    h += '<div class="cg">'+[['融資餘額',r.mg[0],r.mg[1]],['融券餘額',r.mg[2],r.mg[3]]].map(function(c){
+      return '<div><small>'+c[0]+'</small><b>'+c[1].toLocaleString('zh-TW')+'</b><i class="'+lotsCls(c[2])+'">'+lotsTxt(c[2])+'</i></div>'; }).join('')
+      + '<div><small>券資比</small><b>'+(r.mg[0] ? fix(r.mg[2]/r.mg[0]*100,1)+'%' : '—')+'</b></div></div>';
+  }
+  return h+'</div>';
+}
 function detail(r, d){
   var M = MODES[MODE], cls = r.pct>0 ? 'up' : r.pct<0 ? 'down' : '', sign = r.change>0 ? '+' : r.change<0 ? '−' : '';
   var cells = [['收盤', price(r.close)],
-    ['漲跌', r.change==null ? '—' : '<span class="'+cls+'">'+sign+fix(Math.abs(r.change),2)+(r.pct==null?'':'（'+sign+fix(Math.abs(r.pct),2)+'%）')+'</span>'],
-    ['成交值', yi(r.value)+' '+M.unit], ['成交量', M.vol(r.volume)]];
+    ['漲跌', r.change!=null ? '<span class="'+cls+'">'+sign+fix(Math.abs(r.change),2)+(r.pct==null?'':'（'+sign+fix(Math.abs(r.pct),2)+'%）')+'</span>'
+      : r.pct!=null ? '<span class="'+cls+'">'+(r.pct>0?'+':r.pct<0?'−':'')+fix(Math.abs(r.pct),2)+'%</span>' : '—'],
+    ['成交值', yi(r.value)+' '+M.unit]];
+  if(r.volume!=null) cells.push(['成交量', M.vol(r.volume)]);
   if(r.ratio!=null) cells.push(['放大倍數', fix(r.ratio, r.ratio>=10?1:2)+'×'], ['前 '+(d.avg_days||'')+' 日均值', yi(r.avg)+' '+M.unit]);
   if(MODE==='tw') cells.push(['市場', r.market+(r.etf?' ETF':'')]);
   var ind = MODE==='tw' ? (r.ind && r.ind!=='ETF' ? r.ind : '') : (r.sector||'');
   if(ind) cells.push(['產業', esc(ind)]);
-  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div></div>';
+  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>'+chipBlock(r, d)+'</div>';
 }
 function toggleRow(tr){
   var k = MODE+tr.dataset.code;
@@ -374,6 +413,36 @@ document.addEventListener('click', function(e){
 document.addEventListener('keydown', function(e){
   if((e.key==='Enter' || e.key===' ') && e.target.matches && e.target.matches('.rank tr.row')){ e.preventDefault(); toggleRow(e.target); }
 });
+/* ===== 籌碼排行：全市場法人買賣超，依「張數 × 收盤價」的金額排序 ===== */
+var WHO = {f:'外資', t:'投信', d:'自營商', all:'三大法人'}, WHO_I = {f:0, t:1, d:2, all:3};
+function isChips(){ return MODE==='tw' && $('board').value==='chips'; }
+function renderChips(d, q){
+  var who = $('who').value, side = $('side').value, k = WHO_I[who], cr = d.chip_rank, mk = $('market').value, etf = $('etf').checked;
+  $('listTitle').textContent = WHO[who]+(side==='buy'?'買超':'賣超')+'排行';
+  $('lead').textContent = '全市場上市櫃股票依'+WHO[who]+'當天'+(side==='buy'?'買超':'賣超')+'的金額（張數 × 收盤價）排序，表上同時列出張數。點任一列可以展開走勢與明細。';
+  if(!cr || !cr.lists || !cr.lists[who]){
+    $('rank').innerHTML = '<div class="empty">這一天的籌碼資料還沒有取得。證交所與櫃買中心通常在收盤後的傍晚到晚上陸續公布，之後的更新會補上。</div>';
+    return;
+  }
+  var byCode = {}; (d.rows||[]).forEach(function(r){ byCode[r.code] = r; });
+  var list = cr.lists[who][side].map(function(c){ var p = cr.pool[c]; return p ? (byCode[c] ? Object.assign({}, p, byCode[c]) : p) : null; })
+    .filter(function(r){ return r && (mk==='all' || r.market===mk) && (etf || !r.etf); })
+    .slice(0, Math.min(50, parseInt($('count').value,10)));        /* 籌碼排行每種只存前 50 名 */
+  list.forEach(function(r,i){ r._no = i+1; r._amt = r.inst[k]*1000*r.close; });
+  var rows = list.filter(function(r){ return !q || plain(r.code+r.name).indexOf(q)>=0; });
+  var max = list.length ? Math.abs(list[0]._amt) : 1;
+  if(!rows.length){ $('rank').innerHTML = '<div class="empty">'+(q?'這份排行裡找不到符合的股票。':'沒有符合條件的股票。')+'</div>'; return; }
+  $('rank').innerHTML = '<table><tr><th class="l" colspan="2">名次／股票</th><th class="px">收盤</th><th><span class="pxh">收盤／</span>漲跌幅</th><th class="vol">'+(side==='buy'?'買超':'賣超')+'（張）</th><th><span class="u">金額（億元）</span><span class="us">億元</span></th></tr>'
+    + rows.map(function(r){
+      var open = OPEN===MODE+r.code, n = r.inst[k];
+      return '<tr class="row'+(r._no<=3?' top3':'')+(open?' open':'')+'" data-code="'+esc(r.code)+'" tabindex="0" role="button" aria-expanded="'+open+'"><td class="no l">'+r._no+'</td>'
+        + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+'・'+esc(r.market)+'</small></td>'
+        + '<td class="px">'+price(r.close)+'</td>'+pctCell(r)
+        + '<td class="vol '+lotsCls(n)+'">'+lotsTxt(n)+'</td>'
+        + '<td class="val"><i style="width:calc('+(Math.abs(r._amt)/max*100).toFixed(1)+'% - 16px)"></i><span class="'+lotsCls(n)+'">'+(r._amt<0?'−':'')+yi(Math.abs(r._amt))+'</span><small class="'+lotsCls(n)+'">'+lotsTxt(n)+' 張</small></td></tr>'
+        + (open ? '<tr class="det"><td colspan="9">'+detail(r, d)+'</td></tr>' : '');
+    }).join('') + '</table>';
+}
 function render(){
   var M = MODES[MODE], d = DATA[MODE], all = ranked(), q = plain($('q').value);
   var has = d && d.rows && d.rows.length;
@@ -388,6 +457,16 @@ function render(){
     + (map ? '名次下方是與前一個交易日（'+tradeDay(PREV[MODE].date)+'）相比的升降。' : '這是目前保存的最早一天，還沒有前一日可以比較。');
   renderSums(d||{}, all);
   renderHeat();
+  var chips = isChips();
+  var c100 = $('countSeg').querySelector('button[data-v="100"]');
+  if(c100){ c100.hidden = chips; c100.style.display = chips ? 'none' : ''; if(chips && $('count').value==='100') $('countSeg').querySelector('button[data-v="50"]').click(); syncSeg($('countSeg'), true); }
+  ['whoSeg','sideSeg'].forEach(function(id){ $(id).hidden = !chips; $(id).style.display = chips ? '' : 'none'; syncSeg($(id), true); });
+  $('boardSeg').hidden = MODE!=='tw'; $('boardSeg').style.display = MODE==='tw' ? '' : 'none'; syncSeg($('boardSeg'), true);
+  if(chips && has){
+    $('sortSeg').hidden = true; $('sortSeg').style.display = 'none';
+    renderChips(d, q);
+    $('note').textContent = ''; return;
+  }
   var max = all.length ? all[0].value : 1;
   var rows = all.map(function(r,i){ r._no = i+1; return r; }).filter(function(r){ return !q || plain(r.code+r.name).indexOf(q)>=0; });
   var hasRatio = MODE==='tw' && all.some(function(r){ return r.ratio!=null; }), byRatio = hasRatio && $('sort').value==='ratio';
@@ -538,7 +617,7 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
 function remember(){
-  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, view:$('view').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
+  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, view:$('view').value, board:$('board').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
 }
 var BOOTED = false;
 function setMode(m){
@@ -555,7 +634,7 @@ function setMode(m){
   if(list.length) pickDate(list[0]);
 }
 $('date').addEventListener('input',function(){ pickDate($('date').value); });
-['market','count','etf','q','sort','view'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
+['market','count','etf','q','sort','view','board','who','side'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
 document.querySelectorAll('.modes button').forEach(function(b){
   b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
 });
@@ -563,7 +642,10 @@ if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
 if(SAVED.view==='heat') $('view').value = 'heat';
-segFrom('market'); segFrom('count'); segFrom('sort'); segFrom('view');
+if(SAVED.board==='chips') $('board').value = 'chips';
+if(WHO[SAVED.who]) $('who').value = SAVED.who;
+if(SAVED.side==='sell') $('side').value = 'sell';
+segFrom('market'); segFrom('count'); segFrom('sort'); segFrom('view'); segFrom('board'); segFrom('who'); segFrom('side');
 
 function nul(){ return null; }
 Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_dates.json').catch(nul), load('us_dates.json').catch(nul)]).then(function(res){
