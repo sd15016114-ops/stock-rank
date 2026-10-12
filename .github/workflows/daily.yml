@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, probe, probe-polygon, probe-fugle, probe-chips, backfill, backfill-us, intraday, intraday-tw]
+        options: [update, probe, probe-polygon, probe-fugle, probe-chips, backfill, backfill-us, backfill-chips, intraday, intraday-tw]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -62,7 +62,7 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'backfill-us'
+        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
@@ -73,6 +73,11 @@ jobs:
         run: python scraper/fetch_turnover.py intraday-tw
         env:
           FUGLE_API_KEY: ${{ secrets.FUGLE_API_KEY }}
+        continue-on-error: true
+      - name: 回補台股籌碼
+        id: backfillchips
+        if: inputs.task == 'backfill-chips'
+        run: python scraper/fetch_turnover.py backfill-chips ${{ inputs.days }}
         continue-on-error: true
       - name: 重建美股歷史排行
         id: backfillus
