@@ -246,4 +246,9 @@ with tempfile.TemporaryDirectory() as tmp:
     assert rk["lists"]["all"]["buy"][0] == "1101" and "712345" not in rk["pool"] and "9999" not in rk["pool"]
     e = rk["pool"]["2330"]
     assert e["name"] == "台積電" and e["market"] == "上市" and e["pct"] == round((2550 / 2585 - 1) * 100, 2) and e["inst"] == inst["2330"] and rk["pool"]["0050"]["etf"]
+
+# 美股含 ETF：個股與 ETF 各自取前幾名再合併排序；名單重複時以個股為準
+snap = ft.us_snapshot("2026-10-06", day, prev, {"NVDA": ["NVIDIA Corporation", "Technology"]}, {"SPY": "SPDR S&P 500 ETF Trust", "NVDA": "x", "QQQ": "Invesco QQQ"})
+assert [(r["code"], r["etf"]) for r in snap["rows"]] == [("SPY", True), ("NVDA", False)] and snap["count"] == 1 and snap["etf_count"] == 1, snap["rows"]
+assert snap["total_value"] == 38950 + 24000
 print("全部通過")

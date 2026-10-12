@@ -36,7 +36,7 @@ TWSE_URLS = ("https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json
 TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
 NASDAQ_URL = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&offset=0&download=true"
 
-KEEP_STOCKS, KEEP_ETFS, KEEP_US = 100, 50, 100     # 每個市場保留的檔數
+KEEP_STOCKS, KEEP_ETFS, KEEP_US, KEEP_US_ETF = 100, 50, 100, 50     # 每個市場保留的檔數（個股、ETF）
 KEEP_DAYS = 60                                      # 保留最近幾個交易日的排行，供網頁切換日期與比較名次
 KEEP_FULL = 65                                      # 全市場精簡檔保留幾個交易日（算 60 日均值要用到當天以前的 60 天）
 AVG_DAYS = 60                                       # 均值取當天以前的幾個交易日
@@ -796,22 +796,67 @@ def us_names():
         raise
 
 
-def us_snapshot(date, day, prev, names):
-    """用 Polygon 的當日與前一交易日行情，排出清單內個股的成交值排行。"""
-    rows, total = [], 0
-    for code, (name, sector) in names.items():
+def us_etf_names(max_age_days=7):
+    """美股 ETF 代號 → 名稱，來自 Polygon 的代號清單。變動很少，存在 data/us_etf_names.json，一週更新一次。"""
+    path = DATA / "us_etf_names.json"
+    old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    fresh = old.get("updated") and (datetime.now(TPE).date() - datetime.strptime(old["updated"], "%Y-%m-%d").date()).days < max_age_days
+    if fresh and old.get("names"):
+        return old["names"]
+    names, url, params, pages = {}, "https://api.polygon.io/v3/reference/tickers", {"market": "stocks", "type": "ETF", "active": "true", "limit": 1000}, 0
+    try:
+        while url and pages < 20:
+            status, payload = polygon_get(url, **params)
+            if status != 200:
+                raise ValueError("Polygon 代號清單 HTTP %d" % status)
+            for r in payload.get("results") or []:
+                if r.get("ticker") and r.get("name"):
+                    names[r["ticker"]] = r["name"]
+            url, params, pages = payload.get("next_url"), {}, pages + 1
+        if len(names) < 500:
+            raise ValueError("ETF 清單不完整（%d 檔）" % len(names))
+    except Exception as e:              # noqa: BLE001
+        if old.get("names"):
+            print("      ETF 清單更新失敗（%s），沿用上次存的" % e)
+            return old["names"]
+        raise
+    DATA.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"updated": datetime.now(TPE).date().isoformat(), "names": names}, ensure_ascii=False,
+                               separators=(",", ":"), sort_keys=True) + "\n", encoding="utf-8")
+    print("      ETF 清單更新：%d 檔" % len(names))
+    return names
+
+
+def us_snapshot(date, day, prev, names, etfs=None):
+    """用 Polygon 的當日與前一交易日行情排出成交值排行。和台股一樣保留前 100 檔個股與前 50 檔 ETF，網頁可切換是否含 ETF。"""
+    stocks, funds, total = [], [], 0
+
+    def row(code, name, sector, etf):
         q = day.get(code.replace("/", "."))
         if not q:
-            continue
+            return None
         close, vol, value = q
-        total += value
         p = (prev or {}).get(code.replace("/", "."))
         change = round(close - p[0], 4) if p else None
-        rows.append({"code": code, "name": name, "sector": sector, "close": close, "change": change,
-                     "pct": round(change / p[0] * 100, 2) if p and p[0] else None, "volume": int(vol), "value": int(value)})
-    rows.sort(key=lambda r: -r["value"])
-    return {"date": date, "status": "ok", "count": len(rows), "total_value": int(total),
-            "sources": ["https://polygon.io/", "https://www.nasdaq.com/market-activity/stocks/screener"], "rows": rows[:KEEP_US]}
+        return {"code": code, "name": name, "sector": sector, "etf": etf, "close": close, "change": change,
+                "pct": round(change / p[0] * 100, 2) if p and p[0] else None, "volume": int(vol), "value": int(value)}
+
+    for code, (name, sector) in names.items():
+        r = row(code, name, sector, False)
+        if r:
+            stocks.append(r)
+    for code, name in (etfs or {}).items():
+        if code in names:
+            continue
+        r = row(code, name, "", True)
+        if r:
+            funds.append(r)
+    total = sum(r["value"] for r in stocks + funds)
+    stocks.sort(key=lambda r: -r["value"])
+    funds.sort(key=lambda r: -r["value"])
+    rows = sorted(stocks[:KEEP_US] + funds[:KEEP_US_ETF], key=lambda r: -r["value"])
+    return {"date": date, "status": "ok", "count": len(stocks), "etf_count": len(funds), "total_value": int(total),
+            "sources": ["https://polygon.io/", "https://www.nasdaq.com/market-activity/stocks/screener"], "rows": rows}
 
 
 def build_us():
@@ -821,7 +866,7 @@ def build_us():
     days = us_sessions(2)
     if not days:
         raise ValueError("Polygon 沒有可用的交易日資料")
-    return us_snapshot(days[0][0], days[0][1], days[1][1] if len(days) > 1 else None, names)
+    return us_snapshot(days[0][0], days[0][1], days[1][1] if len(days) > 1 else None, names, us_etf_names())
 
 
 def backfill_us(want):
@@ -832,6 +877,7 @@ def backfill_us(want):
             print("FAIL  美股回補  未設定 POLYGON_API_KEY")
             return 1
         names = us_names()
+        etfs = us_etf_names(max_age_days=0)
         days = us_sessions(want + 1)
         if len(days) < 2:
             print("FAIL  美股回補  Polygon 只回了 %d 天" % len(days))
@@ -843,7 +889,7 @@ def backfill_us(want):
         now = datetime.now(TPE).isoformat(timespec="seconds")
         newest = None
         for i in range(len(days) - 1):
-            snap = us_snapshot(days[i][0], days[i][1], days[i + 1][1], names)
+            snap = us_snapshot(days[i][0], days[i][1], days[i + 1][1], names, etfs)
             snap["updated"] = now
             (folder / ("%s.json" % snap["date"])).write_text(json.dumps(snap, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
             newest = newest or snap
