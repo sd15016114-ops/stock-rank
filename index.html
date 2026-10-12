@@ -388,7 +388,7 @@ function detail(r, d){
   if(MODE==='tw') cells.push(['市場', r.market+(r.etf?' ETF':'')]);
   var ind = MODE==='tw' ? (r.ind && r.ind!=='ETF' ? r.ind : '') : (r.sector||'');
   if(ind) cells.push(['產業', esc(ind)]);
-  return '<div class="box">'+trendChart(r, d)+chipBlock(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div></div>';
+  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>'+chipBlock(r, d)+'</div>';
 }
 function toggleRow(tr){
   var k = MODE+tr.dataset.code;
