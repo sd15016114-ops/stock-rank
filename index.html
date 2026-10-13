@@ -99,6 +99,10 @@ section.block p.lead{margin:0 0 16px;color:var(--muted);font-size:15px;max-width
 .rank td.who{white-space:normal;min-width:8em}
 .who b{font-weight:700}
 .who small{display:block;font-size:13px;color:var(--muted)}
+/* 美股公司圖示：沒有圖示的用代號第一個字母當替代 */
+.who.lg{position:relative;padding-left:56px}
+.who .logo{position:absolute;left:14px;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:50%;overflow:hidden;background:var(--tint);border:1px solid var(--rule);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--muted)}
+.who .logo img{width:100%;height:100%;object-fit:cover;display:block}
 .rank th .us{display:none}
 .tag{font-size:12px;line-height:1;padding:3px 6px;border-radius:3px;background:var(--soft);color:var(--accent);margin-left:6px;font-weight:400;white-space:nowrap}
 .up{color:var(--up)} .down{color:var(--down)}
@@ -126,6 +130,9 @@ footer a{color:var(--accent)}
 @media (max-width:700px){
   .rank th,.rank td{padding:9px 6px}
   .rank td.who{min-width:0}
+  .who.lg{padding-left:34px}
+  .who .logo{left:4px;width:24px;height:24px;margin-top:-12px;font-size:11px}
+  .who.lg b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:15px;line-height:1.3}   /* 美股公司名稱很長，手機上最多兩行 */
   .rank th .u{display:none}
   .rank th .us{display:inline}
   .rank .vol,.rank .rtc{display:none}
@@ -443,6 +450,12 @@ function renderChips(d, q){
         + (open ? '<tr class="det"><td colspan="9">'+detail(r, d)+'</td></tr>' : '');
     }).join('') + '</table>';
 }
+/* 美股公司圖示：data/logos/us/index.json 記錄哪些代號有圖示 */
+var LOGOS = {};
+function logo(r){
+  var f = LOGOS[r.code];
+  return '<span class="logo" aria-hidden="true">'+(f ? '<img src="data/logos/us/'+esc(f)+'" alt="" loading="lazy" onerror="this.parentNode.textContent=\''+esc(r.code.charAt(0))+'\'">' : esc(r.code.charAt(0)))+'</span>';
+}
 function render(){
   var M = MODES[MODE], d = DATA[MODE], all = ranked(), q = plain($('q').value);
   var has = d && d.rows && d.rows.length;
@@ -484,7 +497,7 @@ function render(){
         var sub = MODE==='tw' ? r.market : (r.etf ? '' : r.sector||''), indx = MODE==='tw' && r.ind && r.ind!=='ETF' ? '<span class="indx">・'+esc(r.ind)+'</span>' : '', hot = r.ratio>=2 ? ' hot' : '';
         var open = OPEN===MODE+r.code;
         return '<tr class="row'+(r._no<=3?' top3':'')+(open?' open':'')+'" data-code="'+esc(r.code)+'" tabindex="0" role="button" aria-expanded="'+open+'"><td class="no l">'+r._no+moveCell(r,map)+'</td>'
-          + '<td class="who l"><b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+indx+'</small></td>'
+          + '<td class="who l'+(MODE==='us'?' lg':'')+'">'+(MODE==='us'?logo(r):'')+'<b>'+esc(r.name)+'</b>'+(r.etf?'<span class="tag">ETF</span>':'')+'<small>'+esc(r.code)+(sub?'・'+esc(sub):'')+indx+'</small></td>'
           + '<td class="px">'+price(r.close)+'</td>'+pctCell(r)
           + '<td class="val"><i style="width:calc('+(r.value/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(r.value)+'</span>'+(hasRatio?'<small class="'+hot+'">'+times(r)+'</small>':'')+'</td>'
           + (hasRatio?'<td class="rtc rt'+hot+'">'+times(r)+'</td>':'')
@@ -648,6 +661,7 @@ if(SAVED.side==='sell') $('side').value = 'sell';
 segFrom('market'); segFrom('count'); segFrom('sort'); segFrom('view'); segFrom('board'); segFrom('who'); segFrom('side');
 
 function nul(){ return null; }
+load('logos/us/index.json').then(function(j){ LOGOS = (j && j.icons) || {}; if(MODE==='us') render(); }, nul);
 Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_dates.json').catch(nul), load('us_dates.json').catch(nul)]).then(function(res){
   ['tw','us'].forEach(function(k,i){
     LATEST[k] = DATA[k] = res[i];
