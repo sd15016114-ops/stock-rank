@@ -1196,6 +1196,67 @@ def us_logos(limit=None):
         (DATA / "run_logos_us.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
 
 
+# ---------------------------------------------------------------- 台股休市日（期權結算日曆用）
+TW_HOLIDAY_URL = "https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule"
+
+
+def parse_tw_holidays(records):
+    """證交所市場開休市日期表 → 休市日清單。「開始交易日」「最後交易日」是有交易的日子，其餘（含「僅辦理結算交割」）都算休市。"""
+    out = []
+    for r in records or []:
+        name, d = str(r.get("Name", "")), roc_date(r.get("Date"))
+        if d and not re.search(r"(開始|最後)交易日$", name):
+            out.append(d)
+    return sorted(set(out))
+
+
+def update_tw_holidays():
+    """更新 data/holidays_tw.json（依年份保存，證交所通常在年底前公布隔年的表）。"""
+    path = DATA / "holidays_tw.json"
+    old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"years": {}}
+    days = parse_tw_holidays(get_json(TW_HOLIDAY_URL))
+    years = dict(old.get("years", {}))
+    for y in sorted({d[:4] for d in days}):
+        years[y] = [d for d in days if d.startswith(y)]
+    new = {"source": "https://www.twse.com.tw/zh/trading/holiday.html", "years": years}
+    if new != old:
+        path.write_text(json.dumps(new, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print("      台股休市日：%s" % "、".join("%s 年 %d 天" % (y, len(v)) for y, v in sorted(years.items())))
+
+
+# ---------------------------------------------------------------- 美股休市日（Polygon，期權結算日曆用）
+def parse_us_holidays(items):
+    """Polygon 未來休市日 → {日期: {"name": 名稱, "status": "closed" 或 "early-close"}}。只看 NYSE 與 Nasdaq。"""
+    out = {}
+    for r in items or []:
+        if str(r.get("exchange", "")).upper() not in ("NYSE", "NASDAQ") or not r.get("date"):
+            continue
+        cur = out.get(r["date"])
+        st = "closed" if r.get("status") == "closed" else "early-close"
+        if not cur or st == "closed":
+            out[r["date"]] = {"name": r.get("name", ""), "status": st}
+    return out
+
+
+def update_us_holidays():
+    """更新 data/holidays_us.json：Polygon 只給未來的休市日，所以過去抓到的保留下來一起存。1 次請求。"""
+    if not POLYGON_KEY:
+        print("      美股休市日：未設定 POLYGON_API_KEY，略過")
+        return
+    status, payload = polygon_get("https://api.polygon.io/v1/marketstatus/upcoming")
+    if status != 200 or not isinstance(payload, list):
+        raise ValueError("Polygon 休市日 HTTP %d" % status)
+    path = DATA / "holidays_us.json"
+    old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    days = dict(old.get("days", {}), **parse_us_holidays(payload))
+    keep = (datetime.now(TPE).date() - timedelta(days=400)).isoformat()
+    new = {"source": "https://polygon.io/", "days": {d: v for d, v in sorted(days.items()) if d >= keep}}
+    if new != old:
+        path.write_text(json.dumps(new, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print("      美股休市日：%d 天（休市 %d、提早收盤 %d）" % (len(new["days"]), sum(v["status"] == "closed" for v in new["days"].values()),
+                                                     sum(v["status"] != "closed" for v in new["days"].values())))
+
+
 def main(only):
     if "logos" in only:
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
@@ -1213,7 +1274,21 @@ def main(only):
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
         return backfill(n[0] if n else 60, force="force" in only)
     jobs = [("tw", "台股", build_tw), ("us", "美股", build_us)]
+    if "holidays" in only:
+        jobs, only = [], {"us", "holidays"}
     results = [run(*j) for j in jobs if not only or j[0] in only]
+    if not only or "us" in only:
+        try:
+            update_us_holidays()
+        except Exception as e:      # noqa: BLE001   休市日只用在結算日曆，失敗不影響排行
+            print("      美股休市日沒有更新：%s" % str(e).replace(POLYGON_KEY or "-", "***"))
+    if "holidays" in only:
+        return 0
+    if not only or "tw" in only:
+        try:
+            update_tw_holidays()
+        except Exception as e:      # noqa: BLE001   休市日只用在結算日曆，失敗不影響排行
+            print("      台股休市日沒有更新：%s" % e)
     return 0 if all(results) else 1
 
 
