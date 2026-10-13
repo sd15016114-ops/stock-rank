@@ -39,6 +39,35 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 0 0}
+.tops{position:relative;display:flex;align-items:center;gap:10px}
+/* 期權結算日曆：右上角的按鈕，點開是可摺疊的小日曆 */
+.calbtn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:var(--tint);color:var(--ink);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.calbtn svg{color:var(--accent)}
+.calbtn[aria-expanded=true]{border-color:var(--fill);background:var(--soft)}
+.calpanel{position:absolute;right:0;top:44px;z-index:20;width:316px;max-width:calc(100vw - 32px);background:var(--sheet);border:1px solid var(--rule);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:14px}
+.calpanel .seg{margin-bottom:10px}
+.calpanel .seg button{padding:5px 16px;font-size:14px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-head b{font-size:15px}
+.cal-head button{width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer}
+.cal-head button:hover{background:var(--tint);color:var(--ink)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cal-grid .wd{font-size:11px;color:var(--muted);padding:2px 0 4px}
+.cal-grid .d{position:relative;height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;border-radius:8px;color:var(--ink)}
+.cal-grid .d.off{color:var(--muted);opacity:.45}
+.cal-grid .d.hol{color:var(--muted);text-decoration:line-through}
+.cal-grid .d.today{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.cal-grid .d.wk::after{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.cal-grid .d.mo{background:var(--fill);color:var(--on-fill);font-weight:700}
+.cal-grid .d.mo::after{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--on-fill)}
+.cal-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin:8px 0 6px}
+.cal-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.cal-list{border-top:1px solid var(--rule);padding-top:8px;margin:0;list-style:none}
+.cal-list li{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0}
+.cal-list li b{font-weight:700}
+.cal-list li span{color:var(--muted);white-space:nowrap}
+.cal-note{font-size:11px;color:var(--muted);margin:8px 0 0;line-height:1.5}
+@media (max-width:420px){ .calbtn #calNext{display:none} .calbtn{padding:0 9px} }
 .brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--accent)}
 /* 日夜切換：圓角滑軌，圓鈕左右滑動（左邊日間、右邊夜間） */
 .theme{position:relative;flex:none;width:68px;height:34px;padding:0;border:0;border-radius:999px;background:var(--fill);cursor:pointer;transition:background .25s ease}
@@ -180,7 +209,14 @@ footer a{color:var(--accent)}
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><div class="brand">股市動能排行</div><button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button></header>
+  <header class="top"><div class="brand">股市動能排行</div>
+    <div class="tops">
+      <button type="button" class="calbtn" id="calBtn" aria-expanded="false" aria-controls="calPanel" title="期權結算日曆">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span id="calNext">結算日</span>
+      </button><button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
+      <div class="calpanel" id="calPanel" hidden></div>
+    </div></header>
 
   <section class="intro">
     <h1>今天的錢流向哪裡</h1>
@@ -511,6 +547,101 @@ function render(){
     return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+n+'</a>'; }).join('、')+'，每個交易日收盤後自動擷取。' : '';
 }
 
+/* ===== 期權結算日曆 =====
+   台股（期交所）：台指選擇權月契約在每月第三個星期三結算（台指期貨同日）；週選擇權每週三、週五到期。
+                  遇休市日順延到下一個營業日。休市日來自證交所公布的開休市日期表（data/holidays_tw.json）。
+   美股：個股與指數選擇權月契約在每月第三個星期五到期，3、6、9、12 月同日為季度結算（四巫日）；週選擇權每週五到期。
+        遇休市日提前到前一個營業日。休市日依紐約證交所的固定規則推算。 */
+var TWHOL = {}, CAL = {open:false, mkt:'tw', y:0, m:0};
+function ymd(d){ function p(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function nthWeekday(y, m, wd, n){ var d = new Date(y, m, 1), c = 0; while(true){ if(d.getDay()===wd && ++c===n) return d; d.setDate(d.getDate()+1); } }
+function lastWeekday(y, m, wd){ var d = new Date(y, m+1, 0); while(d.getDay()!==wd) d.setDate(d.getDate()-1); return d; }
+function easter(y){ var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+  i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y, mo-1, da); }
+var USHOL = {};
+function usHolidays(y){
+  if(USHOL[y]) return USHOL[y];
+  function obs(d){ if(d.getDay()===6) d.setDate(d.getDate()-1); else if(d.getDay()===0) d.setDate(d.getDate()+1); return d; }
+  var gf = easter(y); gf.setDate(gf.getDate()-2);
+  var list = [obs(new Date(y,0,1)), nthWeekday(y,0,1,3), nthWeekday(y,1,1,3), gf, lastWeekday(y,4,1), obs(new Date(y,5,19)),
+    obs(new Date(y,6,4)), nthWeekday(y,8,1,1), nthWeekday(y,10,4,4), obs(new Date(y,11,25))];
+  var set = {}; list.forEach(function(d){ if(d.getFullYear()===y) set[ymd(d)] = 1; });
+  return (USHOL[y] = set);
+}
+function isOff(mkt, d){
+  if(d.getDay()===0 || d.getDay()===6) return true;
+  var k = ymd(d);
+  return mkt==='tw' ? (TWHOL[String(d.getFullYear())]||[]).indexOf(k)>=0 : !!usHolidays(d.getFullYear())[k];
+}
+function shift(mkt, d){ var x = new Date(d); while(isOff(mkt, x)) x.setDate(x.getDate() + (mkt==='tw' ? 1 : -1)); return x; }
+/* 某個月的結算日：[{date, kind:'mo'|'wk', name}] */
+function expiries(mkt, y, m){
+  var out = [], d = new Date(y, m, 1);
+  for(; d.getMonth()===m; d.setDate(d.getDate()+1)){
+    var wd = d.getDay(), nth = Math.ceil(d.getDate()/7);
+    if(mkt==='tw'){
+      if(wd===3) out.push({date:shift('tw', d), kind: nth===3 ? 'mo' : 'wk', name: nth===3 ? '台指選擇權月結算（台指期同日）' : '台指週選擇權（週三）'});
+      if(wd===5) out.push({date:shift('tw', d), kind:'wk', name:'台指週選擇權（週五）'});
+    }else if(wd===5){
+      var q = nth===3 && m%3===2;
+      out.push({date:shift('us', d), kind: nth===3 ? 'mo' : 'wk', name: nth===3 ? (q ? '季度結算（四巫日）' : '月選擇權到期') : '週選擇權到期'});
+    }
+  }
+  return out;
+}
+function upcoming(mkt, n){
+  var t = new Date(); t.setHours(0,0,0,0);
+  var list = [], y = t.getFullYear(), m = t.getMonth();
+  for(var i=0; i<3 && list.length<n; i++){
+    expiries(mkt, y, m).forEach(function(e){ if(e.date>=t) list.push(e); });
+    if(++m>11){ m = 0; y++; }
+  }
+  return list.slice(0, n);
+}
+function daysTo(d){ var t = new Date(); t.setHours(0,0,0,0); return Math.round((d-t)/864e5); }
+function renderCal(){
+  var mkt = CAL.mkt, y = CAL.y, m = CAL.m, today = ymd(new Date());
+  var ex = {}; expiries(mkt, y, m).forEach(function(e){ var k = ymd(e.date); if(!ex[k] || e.kind==='mo') ex[k] = e; });
+  var first = new Date(y, m, 1), cells = '';
+  for(var i=0; i<first.getDay(); i++) cells += '<div></div>';
+  for(var d = new Date(first); d.getMonth()===m; d.setDate(d.getDate()+1)){
+    var k = ymd(d), e = ex[k], wkend = d.getDay()===0 || d.getDay()===6, hol = !wkend && isOff(mkt, d);
+    cells += '<div class="d'+(wkend?' off':'')+(hol?' hol':'')+(k===today?' today':'')+(e?' '+e.kind:'')+'"'+(e?' title="'+e.name+'"':hol?' title="休市"':'')+'>'+d.getDate()+'</div>';
+  }
+  var next = upcoming(mkt, 5);
+  var noHol = mkt==='tw' && !TWHOL[String(y)];
+  $('calPanel').innerHTML = '<div class="seg" id="calSeg" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>'
+    + '<button type="button" data-v="tw" aria-pressed="'+(mkt==='tw')+'">台股</button><button type="button" data-v="us" aria-pressed="'+(mkt==='us')+'">美股</button></div>'
+    + '<div class="cal-head"><button type="button" data-step="-1" aria-label="上個月">‹</button><b>'+y+' 年 '+(m+1)+' 月</b><button type="button" data-step="1" aria-label="下個月">›</button></div>'
+    + '<div class="cal-grid">'+'日一二三四五六'.split('').map(function(w){ return '<div class="wd">'+w+'</div>'; }).join('')+cells+'</div>'
+    + '<div class="cal-legend"><span><i style="background:var(--fill)"></i>月結算</span><span><i style="background:var(--accent);border-radius:50%;width:6px;height:6px;vertical-align:1px"></i> 週結算</span><span style="text-decoration:line-through">休市</span></div>'
+    + '<ul class="cal-list">'+next.map(function(e){ var n = daysTo(e.date);
+        return '<li><b>'+(e.date.getMonth()+1)+'/'+e.date.getDate()+'（'+'日一二三四五六'.charAt(e.date.getDay())+'）</b><span style="flex:1;color:var(--ink);white-space:normal">'+e.name+'</span><span>'+(n===0?'今天':n+' 天後')+'</span></li>'; }).join('')+'</ul>'
+    + '<p class="cal-note">'+(mkt==='tw' ? '依期交所規則：月契約為每月第三個星期三，週契約每週三、週五到期，遇休市順延至下一營業日。'+(noHol?'這個月份的休市日證交所尚未公布，遇連假可能有出入。':'')
+      : '美股選擇權月契約為每月第三個星期五到期，週契約每週五到期，遇休市提前一個營業日。SPX、SPY、QQQ 等另有每日到期契約，未列出。')+'實際以交易所公告為準。</p>';
+  syncSeg($('calSeg'), true);
+}
+function paintCalBtn(){
+  var e = upcoming(MODE==='us' ? 'us' : 'tw', 1)[0];
+  $('calNext').textContent = e ? '結算 '+(e.date.getMonth()+1)+'/'+e.date.getDate()+(e.kind==='mo'?' 月':'') : '結算日';
+}
+function toggleCal(open){
+  CAL.open = open==null ? !CAL.open : open;
+  $('calPanel').hidden = !CAL.open; $('calBtn').setAttribute('aria-expanded', CAL.open);
+  if(CAL.open){ var t = new Date(); CAL.mkt = MODE==='us' ? 'us' : 'tw'; CAL.y = t.getFullYear(); CAL.m = t.getMonth(); renderCal(); }
+}
+$('calBtn').addEventListener('click', function(e){ e.stopPropagation(); toggleCal(); });
+$('calPanel').addEventListener('click', function(e){
+  e.stopPropagation();
+  var b = e.target.closest ? e.target.closest('button') : null;
+  if(!b) return;
+  if(b.dataset.step){ CAL.m += +b.dataset.step; if(CAL.m<0){ CAL.m = 11; CAL.y--; } if(CAL.m>11){ CAL.m = 0; CAL.y++; } renderCal(); }
+  else if(b.dataset.v){ CAL.mkt = b.dataset.v; renderCal(); }
+});
+document.addEventListener('click', function(){ if(CAL.open) toggleCal(false); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape' && CAL.open){ toggleCal(false); $('calBtn').focus(); } });
+load('holidays_tw.json').then(function(j){ TWHOL = (j && j.years) || {}; paintCalBtn(); if(CAL.open) renderCal(); }, function(){ paintCalBtn(); });
+
 /* 日間版／夜間版切換：按過之後記在這台裝置，沒按過就跟著裝置設定 */
 function isDark(){
   var t = document.documentElement.getAttribute('data-theme');
@@ -635,6 +766,7 @@ function remember(){
 var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
+  if(typeof paintCalBtn==='function') paintCalBtn();
   $('marketSeg').hidden = MODE!=='tw';
   $('marketSeg').style.display = MODE==='tw' ? '' : 'none';
   document.querySelectorAll('.modes button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.mode===MODE ? 'true' : 'false'); });

@@ -251,4 +251,10 @@ with tempfile.TemporaryDirectory() as tmp:
 snap = ft.us_snapshot("2026-10-06", day, prev, {"NVDA": ["NVIDIA Corporation", "Technology"]}, {"SPY": "SPDR S&P 500 ETF Trust", "NVDA": "x", "QQQ": "Invesco QQQ"})
 assert [(r["code"], r["etf"]) for r in snap["rows"]] == [("SPY", True), ("NVDA", False)] and snap["count"] == 1 and snap["etf_count"] == 1, snap["rows"]
 assert snap["total_value"] == 38950 + 24000
+
+# 台股休市日：開始／最後交易日要排除，「僅辦理結算交割」算休市
+HD = [{"Name": "中華民國開國紀念日", "Date": "1150101"}, {"Name": "國曆新年開始交易日", "Date": "1150102"},
+      {"Name": "農曆春節前最後交易日", "Date": "1150211"}, {"Name": "市場無交易，僅辦理結算交割作業", "Date": "1150212"},
+      {"Name": "國慶日", "Date": "1151009"}]
+assert ft.parse_tw_holidays(HD) == ["2026-01-01", "2026-02-12", "2026-10-09"]
 print("全部通過")

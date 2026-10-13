@@ -1196,6 +1196,34 @@ def us_logos(limit=None):
         (DATA / "run_logos_us.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
 
 
+# ---------------------------------------------------------------- 台股休市日（期權結算日曆用）
+TW_HOLIDAY_URL = "https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule"
+
+
+def parse_tw_holidays(records):
+    """證交所市場開休市日期表 → 休市日清單。「開始交易日」「最後交易日」是有交易的日子，其餘（含「僅辦理結算交割」）都算休市。"""
+    out = []
+    for r in records or []:
+        name, d = str(r.get("Name", "")), roc_date(r.get("Date"))
+        if d and not re.search(r"(開始|最後)交易日$", name):
+            out.append(d)
+    return sorted(set(out))
+
+
+def update_tw_holidays():
+    """更新 data/holidays_tw.json（依年份保存，證交所通常在年底前公布隔年的表）。"""
+    path = DATA / "holidays_tw.json"
+    old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"years": {}}
+    days = parse_tw_holidays(get_json(TW_HOLIDAY_URL))
+    years = dict(old.get("years", {}))
+    for y in sorted({d[:4] for d in days}):
+        years[y] = [d for d in days if d.startswith(y)]
+    new = {"source": "https://www.twse.com.tw/zh/trading/holiday.html", "years": years}
+    if new != old:
+        path.write_text(json.dumps(new, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print("      台股休市日：%s" % "、".join("%s 年 %d 天" % (y, len(v)) for y, v in sorted(years.items())))
+
+
 def main(only):
     if "logos" in only:
         n = [int(a) for a in sys.argv[1:] if a.isdigit()]
@@ -1214,6 +1242,11 @@ def main(only):
         return backfill(n[0] if n else 60, force="force" in only)
     jobs = [("tw", "台股", build_tw), ("us", "美股", build_us)]
     results = [run(*j) for j in jobs if not only or j[0] in only]
+    if not only or "tw" in only:
+        try:
+            update_tw_holidays()
+        except Exception as e:      # noqa: BLE001   休市日只用在結算日曆，失敗不影響排行
+            print("      台股休市日沒有更新：%s" % e)
     return 0 if all(results) else 1
 
 
