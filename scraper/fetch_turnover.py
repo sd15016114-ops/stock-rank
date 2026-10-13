@@ -1130,7 +1130,76 @@ def intraday_tw():
         (DATA / "run_intraday_tw.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
 
 
+# ---------------------------------------------------------------- 美股公司圖示（Polygon）
+LOGO_RETRY_DAYS = 30                                # 沒有圖示的代號，隔多久再查一次
+
+
+def logo_file(code):
+    return re.sub(r"[^A-Za-z0-9._-]", "-", code) + ".jpg"
+
+
+def us_logos(limit=None):
+    """幫美股最新榜上的每一檔下載 Polygon 的公司小圖示，存到 data/logos/us/。
+
+    圖示網址要帶金鑰才能讀，所以先存成檔案，網頁再讀自己的檔案。抓過的不再抓；沒有圖示的（多數 ETF）記下日期，
+    LOGO_RETRY_DAYS 天後才再查。limit 是這次最多處理幾檔，避免每天的更新拖太久。
+    """
+    del LOG[:]
+    try:
+        if not POLYGON_KEY:
+            print("SKIP  美股公司圖示  未設定 POLYGON_API_KEY")
+            return 0
+        folder = DATA / "logos" / "us"
+        folder.mkdir(parents=True, exist_ok=True)
+        index_path = folder / "index.json"
+        index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {"icons": {}, "none": {}}
+        today = datetime.now(TPE).date()
+        codes = []
+        for r in json.loads((DATA / "us.json").read_text(encoding="utf-8")).get("rows", []):
+            if r["code"] not in codes:
+                codes.append(r["code"])
+
+        def due(c):
+            if c in index["icons"] and (folder / index["icons"][c]).exists():
+                return False
+            seen = index["none"].get(c)
+            return not seen or (today - datetime.strptime(seen, "%Y-%m-%d").date()).days >= LOGO_RETRY_DAYS
+
+        todo = [c for c in codes if due(c)][:limit]
+        got = none = 0
+        for code in todo:
+            status, payload = polygon_get("https://api.polygon.io/v3/reference/tickers/%s" % code.replace("/", "."))
+            icon = ((payload.get("results") or {}).get("branding") or {}).get("icon_url") if status == 200 else None
+            if icon:
+                wait = _polygon_last[0] + POLYGON_WAIT - time.time()
+                if wait > 0:
+                    time.sleep(wait)
+                try:
+                    g = requests.get(icon, headers={"Authorization": "Bearer " + POLYGON_KEY, "User-Agent": BOT_UA}, timeout=30)
+                finally:
+                    _polygon_last[0] = time.time()
+                if g.ok and g.headers.get("content-type", "").startswith("image/") and len(g.content) < 200000:
+                    (folder / logo_file(code)).write_bytes(g.content)
+                    index["icons"][code] = logo_file(code)
+                    index["none"].pop(code, None)
+                    got += 1
+                    continue
+            index["none"][code] = today.isoformat()
+            none += 1
+            if (got + none) % 20 == 0:      # 分批存檔，中途被中斷也不會白跑
+                index_path.write_text(json.dumps(index, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        index_path.write_text(json.dumps(index, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        print("OK    美股公司圖示  本次新增 %d 檔、沒有圖示 %d 檔，尚未處理 %d 檔，累計 %d 檔有圖示" % (
+            got, none, len([c for c in codes if due(c)]), len(index["icons"])))
+        return 0
+    finally:
+        (DATA / "run_logos_us.log").write_text(datetime.now(TPE).isoformat(timespec="seconds") + "\n" + "\n".join(LOG) + "\n", encoding="utf-8")
+
+
 def main(only):
+    if "logos" in only:
+        n = [int(a) for a in sys.argv[1:] if a.isdigit()]
+        return us_logos(n[0] if n else None)
     if "intraday-tw" in only:
         return intraday_tw()
     if "intraday" in only:

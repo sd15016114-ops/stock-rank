@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, probe, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw]
+        options: [update, probe, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -67,7 +67,7 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
+        if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
@@ -95,6 +95,12 @@ jobs:
         id: intraday
         if: inputs.task == 'intraday' || github.event.schedule == '15 5 * * 2-6'
         run: python scraper/fetch_turnover.py intraday
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        continue-on-error: true
+      - name: 抓美股公司圖示（每天最多補 20 檔新上榜的）
+        if: inputs.task == 'logos' || github.event.schedule == '15 5 * * 2-6'
+        run: python scraper/fetch_turnover.py logos ${{ inputs.task == 'logos' && '9999' || '20' }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         continue-on-error: true
