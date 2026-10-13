@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, probe, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
+        options: [update, holidays, probe, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -68,7 +68,7 @@ jobs:
       - name: 抓取成交值排行
         id: fetch
         if: inputs.task != 'probe' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
-        run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }}
+        run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }} ${{ inputs.task == 'holidays' && 'holidays' || '' }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料

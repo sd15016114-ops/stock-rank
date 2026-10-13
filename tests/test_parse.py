@@ -257,4 +257,10 @@ HD = [{"Name": "中華民國開國紀念日", "Date": "1150101"}, {"Name": "國�
       {"Name": "農曆春節前最後交易日", "Date": "1150211"}, {"Name": "市場無交易，僅辦理結算交割作業", "Date": "1150212"},
       {"Name": "國慶日", "Date": "1151009"}]
 assert ft.parse_tw_holidays(HD) == ["2026-01-01", "2026-02-12", "2026-10-09"]
+
+# 美股休市日：只看 NYSE、Nasdaq；同一天有休市也有提早收盤時以休市為準
+UP = [{"exchange": "NYSE", "name": "Thanksgiving", "date": "2026-11-26", "status": "closed"},
+      {"exchange": "NASDAQ", "name": "Thanksgiving", "date": "2026-11-27", "status": "early-close", "open": "x", "close": "y"},
+      {"exchange": "OTC", "name": "Columbus Day", "date": "2026-10-12", "status": "closed"}]
+assert ft.parse_us_holidays(UP) == {"2026-11-26": {"name": "Thanksgiving", "status": "closed"}, "2026-11-27": {"name": "Thanksgiving", "status": "early-close"}}
 print("全部通過")
