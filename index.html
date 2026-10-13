@@ -64,7 +64,7 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:16p
 .cal-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .cal-list{border-top:1px solid var(--rule);padding-top:8px;margin:0;list-style:none}
 .cal-list li{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0}
-.cal-list li b{font-weight:700;flex:none;min-width:5.8em}
+.cal-list li b{font-weight:700;flex:none;min-width:5.4em}
 .cal-list li span{color:var(--muted);white-space:nowrap}
 .cal-note{font-size:11px;color:var(--muted);margin:8px 0 0;line-height:1.5}
 @media (max-width:420px){ .calbtn #calNext{display:none} .calbtn{padding:0 9px} }
@@ -580,11 +580,11 @@ function expiries(mkt, y, m){
   for(; d.getMonth()===m; d.setDate(d.getDate()+1)){
     var wd = d.getDay(), nth = Math.ceil(d.getDate()/7);
     if(mkt==='tw'){
-      if(wd===3) out.push({date:shift('tw', d), kind: nth===3 ? 'mo' : 'wk', name: nth===3 ? '台指選擇權月結算（台指期同日）' : '台指週選擇權（週三）'});
-      if(wd===5) out.push({date:shift('tw', d), kind:'wk', name:'台指週選擇權（週五）'});
+      if(wd===3) out.push({date:shift('tw', d), kind: nth===3 ? 'mo' : 'wk', name: nth===3 ? '月結算（台指期同日）' : '週選擇權（週三）'});
+      if(wd===5) out.push({date:shift('tw', d), kind:'wk', name:'週選擇權（週五）'});
     }else if(wd===5){
       var q = nth===3 && m%3===2;
-      out.push({date:shift('us', d), kind: nth===3 ? 'mo' : 'wk', name: nth===3 ? (q ? '季度結算（四巫日）' : '月選擇權到期') : '週選擇權到期'});
+      out.push({date:shift('us', d), kind: nth===3 ? 'mo' : 'wk', name: nth===3 ? (q ? '季度結算（四巫日）' : '月選擇權') : '週選擇權'});
     }
   }
   return out;
