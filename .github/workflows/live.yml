@@ -1,0 +1,52 @@
+name: 盤中資金板塊
+
+on:
+  schedule:
+    - cron: "40 0 * * 1-5"    # UTC 00:40 = 台灣時間 08:40 啟動，等到 9:00 開盤，一路跑到 13:35 收盤後結束
+  workflow_dispatch:
+    inputs:
+      task:
+        description: run＝盤中一路跑到收盤；probe＝只登入抓幾檔試試
+        type: choice
+        default: probe
+        options: [probe, run]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330      # GitHub 單次上限 6 小時，盤中 4.5 小時夠用
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安裝永豐 Shioaji
+        run: pip install shioaji
+
+      - name: 盤中資金
+        env:
+          TZ: Asia/Taipei
+          SHIOAJI_API_KEY: ${{ secrets.SHIOAJI_API_KEY }}
+          SHIOAJI_SECRET_KEY: ${{ secrets.SHIOAJI_SECRET_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python scraper/live_tw.py ${{ github.event.inputs.task || 'run' }}
+
+      - name: 收盤後保存最後一份
+        if: always() && (github.event.inputs.task || 'run') == 'run'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/live_tw.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "沒有變動"; exit 0; fi
+          git commit -m "盤中資金 $(TZ=Asia/Taipei date +%F)"
+          for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push origin HEAD:${{ github.ref_name }} && break; sleep 10; done

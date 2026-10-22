@@ -172,6 +172,28 @@ footer a{color:var(--accent)}
   .wrap{padding:0 16px}
 }
 .pxm,.rank th .pxh{display:none}
+/* 盤中資金板塊 */
+.live-st{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:14px;color:var(--muted);margin:0 0 14px}
+.live-st b{color:var(--ink)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;line-height:1;padding:5px 10px;border-radius:999px;background:var(--soft);color:var(--accent)}
+.badge.on::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--up);animation:blink 1.6s ease-in-out infinite}
+.badge.warn{background:transparent;border:1px solid var(--seal);color:var(--seal)}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){ .badge.on::before{animation:none} }
+#liveRank td.who small{white-space:nowrap}
+#liveRank .shr{color:var(--muted)}
+#liveRank .hot{color:var(--accent);font-weight:700}
+#liveRank .fl small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.det .bars{display:flex;align-items:flex-end;gap:2px;height:110px;margin-top:4px}
+.det .bars i{flex:1;min-width:2px;background:var(--fill);border-radius:2px 2px 0 0}
+.det .bars i.now{background:var(--accent)}
+.det .ltop{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+.det .ltop td{padding:6px 4px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+.det .ltop td.l{text-align:left;white-space:normal}
+.det .ltop tr:last-child td{border-bottom:0}
+.det .ltop small{color:var(--muted);margin-left:4px}
+@media (max-width:700px){ #liveRank .lpc{display:none} }
+@media (min-width:701px){ #liveRank .lpm{display:none} }
 /* 點一列展開：走勢圖與明細 */
 .rank tr.row{cursor:pointer}
 .rank tr.row:hover td,.rank tr.row.open td{background:var(--tint)}
@@ -228,7 +250,7 @@ footer a{color:var(--accent)}
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
       <div class="seg" id="boardSeg" role="group" aria-label="排行種類"></div>
-      <select id="board" aria-label="排行種類" hidden><option value="value" selected>成交值</option><option value="chips">籌碼</option></select>
+      <select id="board" aria-label="排行種類" hidden><option value="value" selected>成交值</option><option value="chips">籌碼</option><option value="live">盤中資金</option></select>
       <div class="seg" id="viewSeg" role="group" aria-label="檢視方式"></div>
       <select id="view" aria-label="檢視方式" hidden><option value="rank" selected>排行</option><option value="heat">熱力圖</option></select>
       <select id="date" aria-label="交易日"></select>
@@ -241,6 +263,21 @@ footer a{color:var(--accent)}
     <p class="lead" id="heatLead"></p>
     <div class="heat" id="heat"></div>
     <div class="legend" id="heatLegend"></div>
+  </section>
+
+  <section class="block" id="liveBlock" hidden>
+    <h2>盤中資金板塊</h2>
+    <p class="lead" id="liveLead"></p>
+    <div class="live-st" id="liveSt"></div>
+    <div class="sums" id="liveSums" style="margin:0 0 22px"></div>
+    <div class="tools">
+      <div class="seg" id="liveKindSeg" role="group" aria-label="板塊分類"></div>
+      <select id="liveKind" aria-label="板塊分類" hidden><option value="ind" selected>產業</option><option value="th">概念股</option></select>
+      <div class="seg" id="liveSortSeg" role="group" aria-label="排序方式"></div>
+      <select id="liveSort" aria-label="排序方式" hidden><option value="v" selected>成交值</option><option value="r">比平常</option><option value="f">近 5 分鐘</option><option value="p">漲跌幅</option></select>
+    </div>
+    <div class="rank" id="liveRank"></div>
+    <p class="fine" id="liveNote"></p>
   </section>
 
   <section class="block" id="rankBlock">
@@ -452,10 +489,10 @@ function toggleRow(tr){
 }
 document.addEventListener('click', function(e){
   var tr = e.target.closest ? e.target.closest('.rank tr.row') : null;
-  if(tr) toggleRow(tr);
+  if(tr) (tr.classList.contains('lrow') ? toggleLive : toggleRow)(tr);
 });
 document.addEventListener('keydown', function(e){
-  if((e.key==='Enter' || e.key===' ') && e.target.matches && e.target.matches('.rank tr.row')){ e.preventDefault(); toggleRow(e.target); }
+  if((e.key==='Enter' || e.key===' ') && e.target.matches && e.target.matches('.rank tr.row')){ e.preventDefault(); (e.target.classList.contains('lrow') ? toggleLive : toggleRow)(e.target); }
 });
 /* ===== 籌碼排行：全市場法人買賣超，依「張數 × 收盤價」的金額排序 ===== */
 var WHO = {f:'外資', t:'投信', d:'自營商', all:'三大法人'}, WHO_I = {f:0, t:1, d:2, all:3};
@@ -487,6 +524,105 @@ function renderChips(d, q){
         + (open ? '<tr class="det"><td colspan="9">'+detail(r, d)+'</td></tr>' : '');
     }).join('') + '</table>';
 }
+/* ===== 盤中資金板塊：交易日 9:00–13:30 每分鐘更新 ===== */
+/* Supabase 的專案網址與公開金鑰（publishable key，只能讀，放在網頁上沒關係）。
+   還沒設定或讀不到時，改讀程式庫裡收盤後存的 data/live_tw.json（上一次收盤的結果） */
+var LIVE_SRC = {url:'', key:''};
+var LIVE = null, LIVE_AT = 0, LIVE_ERR = false, LIVE_OPEN = null;
+function isLive(){ return MODE==='tw' && $('board').value==='live'; }
+function mockMode(){ return /[?&]mock\b/.test(location.search); }
+function fetchLive(){
+  var p;
+  if(mockMode()) p = getJSON('data/live_tw_mock.json');
+  else if(LIVE_SRC.url && LIVE_SRC.key) p = fetch(LIVE_SRC.url.replace(/\/$/,'')+'/rest/v1/live?id=eq.tw&select=data', {cache:'no-store', headers:{apikey:LIVE_SRC.key}})
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(j){ if(!j || !j[0]) throw new Error('empty'); return j[0].data; })
+    .catch(function(){ return load('live_tw.json'); });
+  else p = load('live_tw.json');
+  return p.then(function(d){ LIVE = d; LIVE_ERR = false; }, function(){ LIVE_ERR = true; })
+    .then(function(){ LIVE_AT = Date.now(); if(isLive()) render(); });
+}
+function tpeNow(){ var d = new Date(); return new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000); }
+function inSession(){ var t = tpeNow(), m = t.getHours()*60+t.getMinutes(); return t.getDay()>0 && t.getDay()<6 && m>=539 && m<=820; }
+setInterval(function(){ if(isLive() && document.visibilityState!=='hidden' && inSession() && !mockMode()) fetchLive(); }, 60000);
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible' && isLive() && inSession() && Date.now()-LIVE_AT>55000) fetchLive(); });
+function hm(iso){ var m = /T(\d\d:\d\d)/.exec(iso||''); return m ? m[1] : ''; }
+function ratioOf(g){ return g.a ? g.s/g.a : null; }
+function pctTxt(p){ return p==null ? '—' : (p>0?'▲ ':p<0?'▼ ':'')+fix(Math.abs(p),2)+'%'; }
+function pcls(p){ return p>0 ? 'up' : p<0 ? 'down' : ''; }
+function liveDetail(g, d){
+  var h = g.h || [], ts = d.ts || [], steps = [];
+  for(var i=0; i<h.length; i++) steps.push(Math.max(0, h[i]-(i ? h[i-1] : 0)));
+  var mx = Math.max.apply(null, steps.concat(1)), out = '<div class="box">';
+  if(steps.length>1){
+    out += '<div class="cap"><span><b>每 5 分鐘流進的成交值</b></span><span>最高 <b>'+yi(mx*1e6)+'</b> 億元'+(ts.length?'（'+ts[steps.indexOf(mx)]+'）':'')+'</span></div>'
+      + '<div class="bars" role="img" aria-label="'+esc(g.n)+'每 5 分鐘成交值">'+steps.map(function(v,i){
+        return '<i'+(i===steps.length-1?' class="now"':'')+' style="height:'+Math.max(2, v/mx*100).toFixed(1)+'%" title="'+(ts[i]||'')+'　'+yi(v*1e6)+' 億元"></i>'; }).join('')+'</div>'
+      + '<div class="axis"><span>09:00</span><span>'+(ts[ts.length-1]||'')+'</span></div>';
+  }
+  var cells = [['板塊漲跌', '<span class="'+pcls(g.p)+'">'+pctTxt(g.p)+'</span>'], ['成交值', yi(g.v)+' 億元'], ['占全市場', fix(g.s,1)+'%'],
+    ['平常占比', g.a!=null ? fix(g.a,1)+'%' : '—'], ['上漲／下跌', '<span class="up">'+g.up+'</span>／<span class="down">'+g.dn+'</span> 檔']];
+  out += '<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>';
+  if(g.top && g.top.length){
+    out += '<table class="ltop">'+g.top.map(function(t){
+      return '<tr><td class="l"><b>'+esc(t[1])+'</b><small>'+esc(t[0])+'</small></td><td>'+price(t[4])+'</td><td class="'+pcls(t[3])+'">'+pctTxt(t[3])+'</td><td>'+yi(t[2])+' 億</td><td class="shr">'+(g.v ? fix(t[2]/g.v*100,0) : 0)+'%</td></tr>';
+    }).join('')+'</table>';
+  }
+  return out+'</div>';
+}
+function renderLive(){
+  var d = LIVE, kind = $('liveKind').value, sort = $('liveSort').value, KN = kind==='th' ? '概念股' : '產業';
+  $('liveLead').textContent = '把上市櫃全部股票依'+KN+'加總盤中的累積成交值。「比平常」是目前占全市場成交值的比重，除以前 '+((d&&d.base_days)||20)+' 個交易日的平均占比，1.5 倍以上代表資金明顯往這裡集中；「近 5 分鐘」是最近 5 分鐘流進這個板塊的成交值。點任一列可以看資金進場的節奏與成交值最大的個股。';
+  syncSeg($('liveKindSeg'), true); syncSeg($('liveSortSeg'), true);
+  if(!d){
+    $('liveSt').innerHTML = ''; $('liveSums').innerHTML = '';
+    $('liveRank').innerHTML = '<div class="empty">'+(LIVE_ERR ? '盤中資料還沒有產生。開始收集之後，交易日 9:00 到 13:30 每分鐘更新一次。' : '盤中資料載入中…')+'</div>';
+    $('liveNote').textContent = ''; return;
+  }
+  var today = ymd(tpeNow()), isToday = d.date===today, open = d.phase==='open' && isToday && !d.mock;
+  var badge = d.mock ? '<span class="badge warn">預覽：模擬資料</span>' : open ? '<span class="badge on">盤中</span>' : isToday ? '<span class="badge">今日收盤</span>' : '<span class="badge">上一個交易日</span>';
+  $('liveSt').innerHTML = badge+'<span>資料時間 <b>'+tradeDay(d.date)+' '+hm(d.t)+'</b></span>'
+    + (open ? '<span>每分鐘自動更新</span>' : '')
+    + (!isToday && !d.mock && inSession() ? '<span>今天的盤中資料還沒開始，先顯示上一個交易日收盤的結果。</span>' : '');
+  var list = (d[kind]||[]).slice(), flowTop = null, hotTop = null;
+  list.forEach(function(g){
+    if(g.f!=null && (!flowTop || g.f>flowTop.f)) flowTop = g;
+    var r = ratioOf(g); if(r!=null && g.s>=1 && (!hotTop || r>ratioOf(hotTop))) hotTop = g;
+  });
+  var mk = d.markets || {};
+  var cards = [['全市場累積成交值', yi(d.total)+'<small>億元</small>', '上市 '+yi(mk['上市']||0)+' 億、上櫃 '+yi(mk['上櫃']||0)+' 億']];
+  if(d.flow!=null) cards.push(['近 '+(d.flow_min||5)+' 分鐘成交值', yi(d.flow)+'<small>億元</small>', flowTop ? '流入最多：'+esc(flowTop.n)+'（'+fix(flowTop.fs,1)+'%）' : '']);
+  if(hotTop) cards.push(['比平常最熱的'+KN, esc(hotTop.n), '占 '+fix(hotTop.s,1)+'%，平常 '+fix(hotTop.a,1)+'%（'+fix(ratioOf(hotTop),1)+'×）', true]);
+  cards.push(['漲跌家數', '<span class="up">'+d.up+'</span><small>漲</small> <span class="down">'+d.dn+'</span><small>跌</small>', '有成交 '+(d.count||0).toLocaleString('zh-TW')+' 檔']);
+  $('liveSums').innerHTML = cards.map(function(c){
+    return '<div class="sum"><div class="k">'+c[0]+'</div><div class="v"'+(c[3]?' style="font-size:24px;line-height:1.55"':'')+'>'+c[1]+'</div><div class="n">'+c[2]+'</div></div>';
+  }).join('');
+  var key = {v:function(g){ return g.v; }, r:function(g){ var r = ratioOf(g); return r==null || g.s<0.05 ? -1 : r; }, f:function(g){ return g.f==null ? -Infinity : g.f; }, p:function(g){ return g.p==null ? -Infinity : g.p; }}[sort];
+  list.sort(function(a,b){ return key(b)-key(a); });
+  var max = Math.max.apply(null, list.map(function(g){ return g.v; }).concat(1)), hasF = d.flow!=null;
+  $('liveRank').innerHTML = !list.length ? '<div class="empty">還沒有成交資料。</div>'
+    : '<table><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="lpc">漲跌幅</th><th><span class="u">成交值（億元）</span><span class="us">億元</span></th><th>比平常</th>'+(hasF?'<th>近 5 分鐘<span class="u">（億元）</span></th>':'')+'</tr>'
+    + list.map(function(g,i){
+      var r = ratioOf(g), hot = r!=null && r>=1.5 && g.s>=0.3, k = kind+':'+g.n, isOpen = LIVE_OPEN===k;
+      return '<tr class="row lrow'+(i<3?' top3':'')+(isOpen?' open':'')+'" data-k="'+esc(k)+'" tabindex="0" role="button" aria-expanded="'+isOpen+'"><td class="no l">'+(i+1)+'</td>'
+        + '<td class="who l"><b>'+esc(g.n)+'</b><small>'+g.k+' 檔<span class="lpm">・<span class="'+pcls(g.p)+'">'+pctTxt(g.p)+'</span></span></small></td>'
+        + '<td class="lpc '+pcls(g.p)+'">'+pctTxt(g.p)+'</td>'
+        + '<td class="val"><i style="width:calc('+(g.v/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(g.v)+'</span><small style="display:block">占 '+fix(g.s,1)+'%</small></td>'
+        + '<td class="fl'+(hot?' hot':'')+'">'+(r==null ? '—' : fix(r, r>=10?0:1)+'×')+'<small>平常 '+(g.a!=null?fix(g.a,1)+'%':'—')+'</small></td>'
+        + (hasF ? '<td class="fl">'+yi(g.f||0)+'<small>占 '+fix(g.fs||0,1)+'%</small></td>' : '')+'</tr>'
+        + (isOpen ? '<tr class="det"><td colspan="9">'+liveDetail(g, d)+'</td></tr>' : '');
+    }).join('')+'</table>';
+  $('liveNote').textContent = kind==='th'
+    ? '概念股是本站自行整理的題材名單，一檔股票可能同時屬於好幾個題材，所以各題材加起來會超過全市場。名單會不定期調整。'
+    : '產業別依證交所與櫃買中心的分類，ETF 自成一類。成交值為盤中累積，與收盤後的正式統計可能略有差異。';
+}
+function toggleLive(tr){
+  LIVE_OPEN = LIVE_OPEN===tr.dataset.k ? null : tr.dataset.k;
+  render();
+  var again = document.querySelector('#liveRank tr.lrow[data-k="'+tr.dataset.k.replace(/"/g,'')+'"]');
+  if(again) again.focus({preventScroll:true});
+}
+
 /* 美股公司圖示：data/logos/us/index.json 記錄哪些代號有圖示 */
 var LOGOS = {};
 function logo(r){
@@ -494,6 +630,19 @@ function logo(r){
   return '<span class="logo" aria-hidden="true">'+(f ? '<img src="data/logos/us/'+esc(f)+'" alt="" loading="lazy" onerror="this.parentNode.textContent=\''+esc(r.code.charAt(0))+'\'">' : esc(r.code.charAt(0)))+'</span>';
 }
 function render(){
+  var live = isLive();
+  $('liveBlock').hidden = !live; $('liveBlock').style.display = live ? '' : 'none';
+  $('sums').style.display = live ? 'none' : '';
+  $('date').style.display = live || DATES[MODE].length<1 ? 'none' : '';
+  if(live){
+    $('boardSeg').hidden = false; $('boardSeg').style.display = ''; syncSeg($('boardSeg'), true);
+    ['rankBlock','heatBlock'].forEach(function(id){ $(id).hidden = true; $(id).style.display = 'none'; });
+    $('viewSeg').hidden = true; $('viewSeg').style.display = 'none';
+    $('updated').innerHTML = '盤中資金每個交易日 9:00 到 13:30 每分鐘更新一次';
+    $('src').innerHTML = '盤中資料來源：永豐金證券 Shioaji API。';
+    if(!LIVE && !LIVE_AT) fetchLive();
+    renderLive(); return;
+  }
   var M = MODES[MODE], d = DATA[MODE], all = ranked(), q = plain($('q').value);
   var has = d && d.rows && d.rows.length;
   var map = prevRanks(), isLatest = has && LATEST[MODE] && d.date===LATEST[MODE].date;
@@ -764,7 +913,7 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
 function remember(){
-  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, view:$('view').value, board:$('board').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
+  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:MODE, view:$('view').value, board:$('board').value, liveKind:$('liveKind').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
 }
 var BOOTED = false;
 function setMode(m){
@@ -782,7 +931,7 @@ function setMode(m){
   if(list.length) pickDate(list[0]);
 }
 $('date').addEventListener('input',function(){ pickDate($('date').value); });
-['market','count','etf','q','sort','view','board','who','side'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
+['market','count','etf','q','sort','view','board','who','side','liveKind','liveSort'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
 document.querySelectorAll('.modes button').forEach(function(b){
   b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
 });
@@ -790,10 +939,11 @@ if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
 if(SAVED.view==='heat') $('view').value = 'heat';
-if(SAVED.board==='chips') $('board').value = 'chips';
+if(SAVED.board==='chips' || SAVED.board==='live') $('board').value = SAVED.board;
+if(SAVED.liveKind==='th') $('liveKind').value = 'th';
 if(WHO[SAVED.who]) $('who').value = SAVED.who;
 if(SAVED.side==='sell') $('side').value = 'sell';
-segFrom('market'); segFrom('count'); segFrom('sort'); segFrom('view'); segFrom('board'); segFrom('who'); segFrom('side');
+segFrom('market'); segFrom('count'); segFrom('sort'); segFrom('view'); segFrom('board'); segFrom('who'); segFrom('side'); segFrom('liveKind'); segFrom('liveSort');
 
 function nul(){ return null; }
 load('logos/us/index.json').then(function(j){ LOGOS = (j && j.icons) || {}; if(MODE==='us') render(); }, nul);
