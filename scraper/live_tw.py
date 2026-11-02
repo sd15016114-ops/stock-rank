@@ -13,9 +13,11 @@
 import inspect
 import json
 import math
+import re
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 from collections import deque
 from datetime import datetime, timedelta, timezone, time as dtime
@@ -199,7 +201,7 @@ def add_sample(hist, at, gv, kinds_names):
 
 # ---------------------------------------------------------------- Supabase
 def sb_put(payload):
-    url, key = os.environ.get("SUPABASE_URL", "").rstrip("/"), os.environ.get("SUPABASE_SECRET_KEY", "")
+    url, key = re.sub(r"(/rest/v1)?/*$", "", os.environ.get("SUPABASE_URL", "").strip()), os.environ.get("SUPABASE_SECRET_KEY", "").strip()
     if not url or not key:
         return False
     body = json.dumps([{"id": "tw", "data": payload, "updated_at": payload["t"]}], ensure_ascii=False, separators=(",", ":")).encode("utf-8")
@@ -397,6 +399,19 @@ def probe():
         groups = memberships(imap, themes)
         payload = aggregate(quotes, {}, groups, baseline(imap, themes), now(), "probe", themes=themes)
         log("Supabase 寫入：%s" % ("成功" if sb_put(payload) else "沒有設定"))
+        pub = os.environ.get("SUPABASE_PUBLIC_KEY")
+        if pub:                                    # 用網頁上的公開金鑰讀回來，確認網頁讀得到、也確認公開金鑰寫不進去
+            base = re.sub(r"(/rest/v1)?/*$", "", os.environ["SUPABASE_URL"].strip())
+            req = urllib.request.Request(base + "/rest/v1/live?id=eq.tw&select=updated_at,data->>total", headers={"apikey": pub})
+            with urllib.request.urlopen(req, timeout=20) as r:
+                log("公開金鑰讀回：%s" % r.read().decode("utf-8")[:200])
+            try:
+                bad = urllib.request.Request(base + "/rest/v1/live", data=b'[{"id":"hack","data":{}}]', method="POST",
+                                             headers={"apikey": pub, "Content-Type": "application/json"})
+                urllib.request.urlopen(bad, timeout=20)
+                log("⚠ 公開金鑰竟然可以寫入，權限要檢查")
+            except urllib.error.HTTPError as e:
+                log("公開金鑰寫入被擋下（%d），權限正確" % e.code)
 
 
 # ---------------------------------------------------------------- 預覽用的模擬資料

@@ -52,6 +52,7 @@ jobs:
           SHIOAJI_SECRET_KEY: ${{ secrets.SHIOAJI_SECRET_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_PUBLIC_KEY: sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6   # 網頁上用的公開金鑰，只能讀
       - name: 實測資料來源
         if: inputs.task == 'probe'
         run: python scraper/probe.py

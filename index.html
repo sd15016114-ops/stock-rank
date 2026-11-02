@@ -527,14 +527,14 @@ function renderChips(d, q){
 /* ===== 盤中資金板塊：交易日 9:00–13:30 每分鐘更新 ===== */
 /* Supabase 的專案網址與公開金鑰（publishable key，只能讀，放在網頁上沒關係）。
    還沒設定或讀不到時，改讀程式庫裡收盤後存的 data/live_tw.json（上一次收盤的結果） */
-var LIVE_SRC = {url:'', key:''};
+var LIVE_SRC = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
 var LIVE = null, LIVE_AT = 0, LIVE_ERR = false, LIVE_OPEN = null;
 function isLive(){ return MODE==='tw' && $('board').value==='live'; }
 function mockMode(){ return /[?&]mock\b/.test(location.search); }
 function fetchLive(){
   var p;
   if(mockMode()) p = getJSON('data/live_tw_mock.json');
-  else if(LIVE_SRC.url && LIVE_SRC.key) p = fetch(LIVE_SRC.url.replace(/\/$/,'')+'/rest/v1/live?id=eq.tw&select=data', {cache:'no-store', headers:{apikey:LIVE_SRC.key}})
+  else if(LIVE_SRC.url && LIVE_SRC.key) p = fetch(LIVE_SRC.url.replace(/(\/rest\/v1)?\/*$/,'')+'/rest/v1/live?id=eq.tw&select=data', {cache:'no-store', headers:{apikey:LIVE_SRC.key}})
     .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(j){ if(!j || !j[0]) throw new Error('empty'); return j[0].data; })
     .catch(function(){ return load('live_tw.json'); });
