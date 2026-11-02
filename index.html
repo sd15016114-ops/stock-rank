@@ -184,6 +184,11 @@ footer a{color:var(--accent)}
 #liveRank .shr{color:var(--muted)}
 #liveRank .hot{color:var(--accent);font-weight:700}
 #liveRank .fl small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.zoombar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:34px;margin-bottom:8px;font-size:14px;color:var(--muted)}
+.zoombar b{color:var(--ink)}
+.zoomback{font:inherit;font-size:14px;font-weight:700;color:var(--on-fill);background:var(--fill);border:0;border-radius:999px;padding:5px 14px;cursor:pointer}
+.heat.zoomable .ind{cursor:zoom-in}
+.heat.zoomable .ind:hover{box-shadow:inset 0 0 0 2px var(--ink)}
 .det .bars{display:flex;align-items:flex-end;gap:2px;height:110px;margin-top:4px}
 .det .bars i{flex:1;min-width:2px;background:var(--fill);border-radius:2px 2px 0 0}
 .det .bars i.now{background:var(--accent)}
@@ -279,7 +284,7 @@ footer a{color:var(--accent)}
       <select id="liveSort" aria-label="排序方式" hidden><option value="v" selected>成交值</option><option value="r">比平常</option><option value="f">近 5 分鐘</option><option value="p">漲跌幅</option></select>
     </div>
     <div class="rank" id="liveRank"></div>
-    <div id="liveHeatWrap" hidden><div class="heat" id="liveHeat"></div><div class="legend" id="liveHeatLegend"></div></div>
+    <div id="liveHeatWrap" hidden><div class="zoombar" id="liveZoom"></div><div class="heat" id="liveHeat"></div><div class="legend" id="liveHeatLegend"></div></div>
     <p class="fine" id="liveNote"></p>
   </section>
 
@@ -531,7 +536,8 @@ function renderChips(d, q){
 /* Supabase 的專案網址與公開金鑰（publishable key，只能讀，放在網頁上沒關係）。
    還沒設定或讀不到時，改讀程式庫裡收盤後存的 data/live_tw.json（上一次收盤的結果） */
 var LIVE_SRC = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
-var LIVE = null, LIVE_AT = 0, LIVE_ERR = false, LIVE_OPEN = null;
+var LIVE = null, LIVE_AT = 0, LIVE_ERR = false, LIVE_OPEN = null, LIVE_ZOOM = null;
+var HEAT_N = 12, HEAT_ZOOM_N = 30, LIST_TOP_N = 8;     /* 熱力圖每個板塊畫幾檔、放大後畫幾檔、列表展開列幾檔 */
 function isLive(){ return MODE==='tw' && $('board').value==='live'; }
 function mockMode(){ return /[?&]mock\b/.test(location.search); }
 function fetchLive(){
@@ -567,7 +573,7 @@ function liveDetail(g, d){
     ['平常占比', g.a!=null ? fix(g.a,1)+'%' : '—'], ['上漲／下跌', '<span class="up">'+g.up+'</span>／<span class="down">'+g.dn+'</span> 檔']];
   out += '<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>';
   if(g.top && g.top.length){
-    out += '<table class="ltop">'+g.top.map(function(t){
+    out += '<table class="ltop">'+g.top.slice(0, LIST_TOP_N).map(function(t){
       return '<tr><td class="l"><b>'+esc(t[1])+'</b><small>'+esc(t[0])+'</small></td><td>'+price(t[4])+'</td><td class="'+pcls(t[3])+'">'+pctTxt(t[3])+'</td><td>'+yi(t[2])+' 億</td><td class="shr">'+(g.v ? fix(t[2]/g.v*100,0) : 0)+'%</td></tr>';
     }).join('')+'</table>';
   }
@@ -605,10 +611,16 @@ function renderLive(){
   $('liveHeatWrap').hidden = !heat; $('liveHeatWrap').style.display = heat ? '' : 'none';
   syncSeg($('liveViewSeg'), true); syncSeg($('liveSortSeg'), true);
   if(heat){
-    paintHeat($('liveHeat'), list.filter(function(g){ return g.v>0; }).sort(function(a,b){ return b.v-a.v; }).map(function(g){
-      return {name:g.n, value:g.v, pct:g.p, count:g.k, top:(g.top||[]).map(function(t){ return [t[0],t[1],t[2],t[3]]; })}; }));
+    var zg = LIVE_ZOOM && LIVE_ZOOM.kind===kind ? list.filter(function(g){ return g.n===LIVE_ZOOM.name; })[0] : null;
+    if(!zg) LIVE_ZOOM = null;
+    var shown = (zg ? [zg] : list.filter(function(g){ return g.v>0; }).sort(function(a,b){ return b.v-a.v; }));
+    $('liveZoom').innerHTML = zg ? '<button type="button" class="zoomback" id="zoomBack">← 回全部'+KN+'</button><span><b>'+esc(zg.n)+'</b>　'+yi(zg.v)+' 億元・'+zg.k+' 檔・<span class="'+pcls(zg.p)+'">'+pctTxt(zg.p)+'</span></span>'
+      : '<span>點任一個'+KN+'可以放大，看裡面成交值前 '+HEAT_ZOOM_N+' 檔。</span>';
+    paintHeat($('liveHeat'), shown.map(function(g){
+      return {name:g.n, value:g.v, pct:g.p, count:g.k, top:(g.top||[]).slice(0, zg ? HEAT_ZOOM_N : HEAT_N).map(function(t){ return [t[0],t[1],t[2],t[3]]; })}; }));
+    $('liveHeat').classList.toggle('zoomable', !zg);
     $('liveHeatLegend').innerHTML = '跌 '+[-5,-2.5,-1,0,1,2.5,5].map(function(p){ return '<i style="background:'+heatColor(p)[0]+'" title="'+p+'%"></i>'; }).join('')+' 漲（±5% 以上最深）';
-    $('liveNote').textContent = '方塊面積是成交值，顏色是漲跌幅；'+KN+'的漲跌幅以成交值加權平均，每個'+KN+'列出成交值最大的 8 檔，其餘合成「其他」。滑鼠移上去或點一下可以看數字。'
+    $('liveNote').textContent = '方塊面積是成交值，顏色是漲跌幅；'+KN+'的漲跌幅以成交值加權平均，每個'+KN+'列出成交值最大的 '+(LIVE_ZOOM ? HEAT_ZOOM_N : HEAT_N)+' 檔，其餘合成「其他」。滑鼠移上去或點一下可以看數字。'
       + (kind==='th' ? '一檔股票可能同時屬於好幾個題材。' : '');
     return;
   }
@@ -631,6 +643,12 @@ function renderLive(){
     ? '概念股是本站自行整理的題材名單，一檔股票可能同時屬於好幾個題材，所以各題材加起來會超過全市場。名單會不定期調整。'
     : '產業別依證交所與櫃買中心的分類，ETF 自成一類。成交值為盤中累積，與收盤後的正式統計可能略有差異。';
 }
+document.addEventListener('click', function(e){
+  if(!e.target.closest) return;
+  if(e.target.closest('#zoomBack')){ LIVE_ZOOM = null; render(); return; }
+  var t = e.target.closest('#liveHeat.zoomable .ind');
+  if(t){ LIVE_ZOOM = {kind:$('liveKind').value, name:t.dataset.name}; render(); $('liveZoom').scrollIntoView({block:'nearest'}); }
+});
 function toggleLive(tr){
   LIVE_OPEN = LIVE_OPEN===tr.dataset.k ? null : tr.dataset.k;
   render();
@@ -874,7 +892,7 @@ function paintHeat(box, list){
       inner += '<div class="st" style="left:'+r.x.toFixed(1)+'px;top:'+r.y.toFixed(1)+'px;width:'+r.w.toFixed(1)+'px;height:'+r.h.toFixed(1)+'px;background:'+c[0]+';color:'+c[1]+'"'
         + (t ? ' title="'+esc(t[1])+'（'+esc(t[0])+'）　'+yi(t[2])+' 億元　'+sign(t[3])+'"' : ' title="'+esc(g.name)+'其他個股　'+yi(r.item.v)+' 億元　'+sign(r.item.p)+'"')+'>'+txt+'</div>';
     });
-    return '<div class="ind" style="left:'+R.x.toFixed(1)+'px;top:'+R.y.toFixed(1)+'px;width:'+R.w.toFixed(1)+'px;height:'+R.h.toFixed(1)+'px;background:'+col[0]+'" title="'
+    return '<div class="ind" data-name="'+esc(g.name)+'" style="left:'+R.x.toFixed(1)+'px;top:'+R.y.toFixed(1)+'px;width:'+R.w.toFixed(1)+'px;height:'+R.h.toFixed(1)+'px;background:'+col[0]+'" title="'
       + esc(g.name)+'　'+yi(g.value)+' 億元（占 '+fix(g.value/total*100,1)+'%）　'+sign(g.pct)+'　'+g.count+' 檔">'
       + (head ? '<b>'+esc(g.name)+' '+sign(g.pct)+'</b>' : '')+inner+'</div>';
   }).join('');
