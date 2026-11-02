@@ -360,9 +360,13 @@ def probe():
     log("shioaji 版本 %s" % getattr(sj, "__version__", "?"))
     log("login 參數：%s" % inspect.signature(api.login))
     log("snapshots 參數：%s" % inspect.signature(api.snapshots))
-    log("有 api.contracts：%s，有 api.Contracts：%s" % (hasattr(api, "contracts"), hasattr(api, "Contracts")))
     api = sj_login()
     log("登入成功。%s" % usage(api))
+    for attr in ("contracts", "Contracts"):
+        try:
+            log("api.%s：%s" % (attr, type(getattr(api, attr)).__name__))
+        except Exception as e:                     # noqa: BLE001
+            log("api.%s 讀取失敗：%s" % (attr, e))
     cons = [get_contract(api, c) for c in ("2330", "2317", "0050", "6488", "3008")]
     log("合約：%s" % [(getattr(c, "code", None), getattr(c, "name", None)) for c in cons])
     snaps = api.snapshots(cons)
