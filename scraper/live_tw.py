@@ -247,10 +247,21 @@ def sj_contracts(api, uni):
             miss.append(code)
             continue
         cons.append(c)
-        names[code] = c.name
+        names[code] = contract_name(api, c, code)
     if miss:
         log("永豐查不到 %d 檔：%s" % (len(miss), " ".join(miss[:20])))
     return cons, names
+
+
+def contract_name(api, c, code):
+    """新版的合約物件沒有名稱，改從舊版合約表查；都查不到就用代號"""
+    n = getattr(c, "name", None)
+    if not n:
+        try:
+            n = api.Contracts.Stocks[code].name
+        except Exception:                          # noqa: BLE001
+            n = None
+    return n or code
 
 
 def amount_scale(snaps):
@@ -368,7 +379,8 @@ def probe():
         except Exception as e:                     # noqa: BLE001
             log("api.%s 讀取失敗：%s" % (attr, e))
     cons = [get_contract(api, c) for c in ("2330", "2317", "0050", "6488", "3008")]
-    log("合約：%s" % [(getattr(c, "code", None), getattr(c, "name", None)) for c in cons])
+    log("合約欄位：%s" % [a for a in dir(cons[0]) if not a.startswith("_")])
+    log("名稱：%s" % [contract_name(api, c, c.code) for c in cons])
     snaps = api.snapshots(cons)
     for s in snaps:
         log("%s close=%s change_rate=%s total_volume=%s average_price=%s total_amount=%s" % (
