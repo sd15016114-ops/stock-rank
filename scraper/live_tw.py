@@ -10,6 +10,7 @@
   SHIOAJI_API_KEY、SHIOAJI_SECRET_KEY    永豐 API 金鑰（只需要行情權限，不需要下單憑證）
   SUPABASE_URL、SUPABASE_SECRET_KEY      Supabase 專案網址與可寫入的金鑰
 """
+import inspect
 import json
 import math
 import os
@@ -221,15 +222,25 @@ def sj_login():
     if not key or not secret:
         raise SystemExit("未設定 SHIOAJI_API_KEY / SHIOAJI_SECRET_KEY")
     api = sj.Shioaji()
-    api.login(api_key=key, secret_key=secret, fetch_contract=True, subscribe_trade=False)
+    params = inspect.signature(api.login).parameters        # 新舊版的參數不同，有的才帶
+    kw = {k: v for k, v in (("fetch_contract", True), ("subscribe_trade", False)) if k in params}
+    api.login(api_key=key, secret_key=secret, **kw)
     return api
+
+
+def get_contract(api, code):
+    """新版用 api.contracts.get(代號)，舊版用 api.Contracts.Stocks[代號]"""
+    c = getattr(api, "contracts", None)
+    if c is not None and hasattr(c, "get"):
+        return c.get(code)
+    return api.Contracts.Stocks[code]
 
 
 def sj_contracts(api, uni):
     cons, names, miss = [], {}, []
     for code in uni:
         try:
-            c = api.Contracts.Stocks[code]
+            c = get_contract(api, code)
         except Exception:                          # noqa: BLE001
             c = None
         if c is None:
@@ -344,9 +355,16 @@ def run():
 
 def probe():
     """登入、抓 5 檔看看欄位與單位，再試寫一次 Supabase。"""
+    import shioaji as sj
+    api = sj.Shioaji()
+    log("shioaji 版本 %s" % getattr(sj, "__version__", "?"))
+    log("login 參數：%s" % inspect.signature(api.login))
+    log("snapshots 參數：%s" % inspect.signature(api.snapshots))
+    log("有 api.contracts：%s，有 api.Contracts：%s" % (hasattr(api, "contracts"), hasattr(api, "Contracts")))
     api = sj_login()
     log("登入成功。%s" % usage(api))
-    cons = [api.Contracts.Stocks[c] for c in ("2330", "2317", "0050", "6488", "3008")]
+    cons = [get_contract(api, c) for c in ("2330", "2317", "0050", "6488", "3008")]
+    log("合約：%s" % [(getattr(c, "code", None), getattr(c, "name", None)) for c in cons])
     snaps = api.snapshots(cons)
     for s in snaps:
         log("%s close=%s change_rate=%s total_volume=%s average_price=%s total_amount=%s" % (
