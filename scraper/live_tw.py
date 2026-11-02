@@ -200,11 +200,11 @@ def add_sample(hist, at, gv, kinds_names):
 
 
 # ---------------------------------------------------------------- Supabase
-def sb_put(payload):
+def sb_put(payload, row="tw"):
     url, key = re.sub(r"(/rest/v1)?/*$", "", os.environ.get("SUPABASE_URL", "").strip()), os.environ.get("SUPABASE_SECRET_KEY", "").strip()
     if not url or not key:
         return False
-    body = json.dumps([{"id": "tw", "data": payload, "updated_at": payload["t"]}], ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    body = json.dumps([{"id": row, "data": payload, "updated_at": payload["t"]}], ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     headers = {"apikey": key, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates,return=minimal"}
     if not key.startswith("sb_"):                  # 舊版的 service_role 金鑰（JWT）要另外放在 Authorization
         headers["Authorization"] = "Bearer " + key
@@ -398,11 +398,11 @@ def probe():
         imap, themes = load_imap(), load_themes()
         groups = memberships(imap, themes)
         payload = aggregate(quotes, {}, groups, baseline(imap, themes), now(), "probe", themes=themes)
-        log("Supabase 寫入：%s" % ("成功" if sb_put(payload) else "沒有設定"))
+        log("Supabase 寫入：%s" % ("成功" if sb_put(payload, "probe") else "沒有設定"))   # 寫到另一列，不蓋掉網頁正在用的資料
         pub = os.environ.get("SUPABASE_PUBLIC_KEY")
         if pub:                                    # 用網頁上的公開金鑰讀回來，確認網頁讀得到、也確認公開金鑰寫不進去
             base = re.sub(r"(/rest/v1)?/*$", "", os.environ["SUPABASE_URL"].strip())
-            req = urllib.request.Request(base + "/rest/v1/live?id=eq.tw&select=updated_at,data->>total", headers={"apikey": pub})
+            req = urllib.request.Request(base + "/rest/v1/live?id=eq.probe&select=updated_at,data->>total", headers={"apikey": pub})
             with urllib.request.urlopen(req, timeout=20) as r:
                 log("公開金鑰讀回：%s" % r.read().decode("utf-8")[:200])
             try:

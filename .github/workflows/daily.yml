@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, holidays, probe, probe-live, live-run, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
+        options: [update, holidays, probe, probe-live, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -25,7 +25,7 @@ permissions:
   contents: write
 
 concurrency:              # 同一時間只跑一個，避免兩次執行同時提交而衝突
-  group: ${{ github.event.inputs.task == 'live-run' && 'live' || 'fetch' }}   # 盤中資金跑整個盤中，不要擋到盤後更新
+  group: fetch
   cancel-in-progress: false
 
 jobs:
@@ -53,15 +53,6 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           SUPABASE_PUBLIC_KEY: sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6   # 網頁上用的公開金鑰，只能讀
-      - name: 盤中資金（分支測試：跑到收盤）
-        if: inputs.task == 'live-run'
-        run: pip install shioaji && python scraper/live_tw.py run
-        env:
-          SHIOAJI_API_KEY: ${{ secrets.SHIOAJI_API_KEY }}
-          SHIOAJI_SECRET_KEY: ${{ secrets.SHIOAJI_SECRET_KEY }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-        continue-on-error: true
       - name: 實測資料來源
         if: inputs.task == 'probe'
         run: python scraper/probe.py
@@ -85,7 +76,7 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'live-run' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
+        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }} ${{ inputs.task == 'holidays' && 'holidays' || '' }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
