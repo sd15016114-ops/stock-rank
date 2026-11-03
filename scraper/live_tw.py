@@ -31,7 +31,7 @@ BASE_DAYS = 20          # 「平常占比」用前 20 個交易日的平均
 TOP_N = 30              # 每個板塊存成交值最大的 30 檔（列表展開看前 8 檔，熱力圖放大後看 30 檔）
 SAMPLE_MIN = 5          # 板塊走勢每 5 分鐘記一點
 FLOW_MIN = 5            # 「近 5 分鐘」的資金
-OPEN_T, CLOSE_T, END_T = dtime(9, 0), dtime(13, 30), dtime(13, 36)
+LOGIN_T, OPEN_T, CLOSE_T, END_T = dtime(8, 50), dtime(9, 0), dtime(13, 30), dtime(13, 36)
 CHUNK = 500             # Shioaji 一次最多查 500 檔快照
 MAX_RELOGIN = 3
 
@@ -316,9 +316,13 @@ def run():
     if not trading_day(today):
         log("今天休市，不執行")
         return
+    if now().time() >= END_T:
+        log("已經收盤，不執行（多排的備用排程）")
+        return
     imap, themes = load_imap(), load_themes()
     groups, base, uni = memberships(imap, themes), baseline(imap, themes), universe()
     log("全市場 %d 檔，平常占比用前 %d 個交易日" % (len(uni), base["days"]))
+    wait_until(datetime.combine(today, LOGIN_T, TPE))      # 太早啟動時先等著，8:00 永豐流量歸零後再登入
     api, relogin = sj_login(), 0
     cons, names = sj_contracts(api, uni)
     hist, recent, scale, fails, last = {"ts": [], "ind": {}, "th": {}}, deque(maxlen=FLOW_MIN + 3), None, 0, None
