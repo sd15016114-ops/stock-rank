@@ -169,7 +169,7 @@ footer p{margin:0 0 6px;max-width:50em}
   <header class="top">
     <a class="brand" href="./">股市動能排行</a>
     <div class="right">
-      <nav class="nav" aria-label="主選單"><a href="./" aria-current="page">今日資金</a><a id="rankLink" href="rank.html">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
+      <nav class="nav" aria-label="主選單"><a href="./" aria-current="page">今日資金</a><a id="liveLink" href="rank.html#live">盤中資金</a><a id="rankLink" href="rank.html">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
       <button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
     </div>
   </header>
@@ -189,6 +189,7 @@ footer p{margin:0 0 6px;max-width:50em}
       <div class="seg" id="sortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="fn" aria-pressed="true">淨流入</button><button type="button" data-v="fn5" aria-pressed="false">近 5 分鐘</button><button type="button" data-v="v" aria-pressed="false">成交值</button><button type="button" data-v="r" aria-pressed="false">比平常</button></div>
     </div>
     <div class="card" id="sec"></div>
+    <a class="more" id="liveMore" href="rank.html#live">完整盤中資金：熱力圖、點板塊看個股 →</a>
   </section>
 
   <section class="block">
@@ -252,7 +253,7 @@ function pageUrl(file){
   return location.hostname==='htmlpreview.github.io' && g ? 'https://htmlpreview.github.io/?'+g[1]+file : (file==='index.html' ? './' : file);
 }
 document.querySelector('.brand').href = document.querySelector('nav.nav a[aria-current]').href = pageUrl('index.html');
-$('rankLink').href = $('moreLink').href = pageUrl('rank.html'); $('usLink').href = pageUrl('rank.html')+'#us';
+$('rankLink').href = $('moreLink').href = pageUrl('rank.html'); $('liveLink').href = $('liveMore').href = pageUrl('rank.html#live'); $('usLink').href = pageUrl('rank.html')+'#us';
 /* 橫移式按鈕 */
 function syncSeg(seg, still){
   var on = seg.querySelector('button[aria-pressed=true]'), th = seg.querySelector('.thumb');
