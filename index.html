@@ -37,7 +37,7 @@ a{color:var(--accent)}
 /* 頁首 */
 header.top{display:flex;justify-content:space-between;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:18px 0 0}
 .brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--accent);text-decoration:none}
-nav.nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+nav.nav{display:flex;gap:4px;align-items:center;margin-right:auto;margin-left:8px}
 nav.nav a{font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:999px}
 nav.nav a[aria-current]{color:var(--on-fill);background:var(--fill);font-weight:700}
 nav.nav a:not([aria-current]):hover{background:var(--tint);color:var(--ink)}
@@ -174,7 +174,7 @@ footer p{margin:0 0 6px;max-width:50em}
   .story{font-size:16px}
   .tbl th,.tbl td{padding:9px 6px}
   #stk .w{display:none}
-  .right{width:100%;justify-content:space-between}
+  nav.nav{order:3;width:100%;margin:0}
 }
 </style>
 </head>
@@ -182,8 +182,8 @@ footer p{margin:0 0 6px;max-width:50em}
 <div class="wrap">
   <header class="top">
     <a class="brand" href="./">股市動能排行</a>
+    <nav class="nav" aria-label="主選單"><a href="./" aria-current="page">盤中資金</a><a id="rankLink" href="rank.html">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
     <div class="right">
-      <nav class="nav" aria-label="主選單"><a href="./" aria-current="page">盤中資金</a><a id="rankLink" href="rank.html">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
       <button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
     </div>
   </header>
