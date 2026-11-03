@@ -208,6 +208,15 @@ footer a{color:var(--accent)}
 .det .ltop tr:last-child td{border-bottom:0}
 .det .ltop small{color:var(--muted);margin-left:4px}
 @media (max-width:700px){ #liveRank .lpc{display:none} }
+#liveRank table.lbars td.who{width:1%;min-width:7.5em}
+#liveRank td.lb{width:100%;padding-left:6px}
+.lbar{display:flex;align-items:center;gap:8px;height:26px}
+.lbar i{flex:none;height:100%;min-width:3px;border-radius:3px;background:var(--muted);opacity:.85}
+.lbar i.up{background:var(--up)} .lbar i.down{background:var(--down)} .lbar i.flat{opacity:.35}
+.lbar span{font-weight:700;white-space:nowrap}
+.lkey{float:right;font-size:12px;color:var(--muted)}
+.lkey i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 8px;vertical-align:-1px}
+.lkey i.up{background:var(--up)} .lkey i.down{background:var(--down)}
 @media (min-width:701px){ #liveRank .lpm{display:none} }
 /* 點一列展開：走勢圖與明細 */
 .rank tr.row{cursor:pointer}
@@ -652,16 +661,19 @@ function renderLive(){
   var key = {v:function(g){ return g.v; }, r:function(g){ var r = ratioOf(g); return r==null || g.s<0.05 ? -1 : r; }, f:function(g){ return g.f==null ? -Infinity : g.f; }, p:function(g){ return g.p==null ? -Infinity : g.p; }}[sort];
   list.sort(function(a,b){ return key(b)-key(a); });
   var max = Math.max.apply(null, list.map(function(g){ return g.v; }).concat(1)), hasF = d.flow!=null;
+  /* 每一列只畫一條：長度是目前選的排序指標，顏色是板塊漲跌（紅漲綠跌） */
+  var M = {v:{h:'成交值', val:function(g){ return g.v; }, txt:function(g){ return yi(g.v)+' 億'; }},
+           r:{h:'比平常', val:function(g){ var r = ratioOf(g); return r==null ? 0 : r; }, txt:function(g){ var r = ratioOf(g); return r==null ? '—' : fix(r, r>=10?0:1)+'×'; }},
+           f:{h:'近 5 分鐘流入', val:function(g){ return Math.max(0, g.f||0); }, txt:function(g){ return yi(g.f||0)+' 億'; }},
+           p:{h:'漲跌幅', val:function(g){ return Math.abs(g.p||0); }, txt:function(g){ return pctTxt(g.p); }}}[sort];
+  var top = Math.max.apply(null, list.map(M.val).concat(0)) || 1;
   $('liveRank').innerHTML = !list.length ? '<div class="empty">還沒有成交資料。</div>'
-    : '<table><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="lpc">漲跌幅</th><th><span class="u">成交值（億元）</span><span class="us">億元</span></th><th>比平常</th>'+(hasF?'<th>近 5 分鐘<span class="u">（億元）</span></th>':'')+'</tr>'
+    : '<table class="lbars"><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="l">'+M.h+'<span class="lkey"><i class="up"></i>漲 <i class="down"></i>跌</span></th></tr>'
     + list.map(function(g,i){
-      var r = ratioOf(g), hot = r!=null && r>=1.5 && g.s>=0.3, k = kind+':'+g.n, isOpen = LIVE_OPEN===k;
+      var k = kind+':'+g.n, isOpen = LIVE_OPEN===k, w = M.val(g)/top;
       return '<tr class="row lrow'+(i<3?' top3':'')+(isOpen?' open':'')+'" data-k="'+esc(k)+'" tabindex="0" role="button" aria-expanded="'+isOpen+'"><td class="no l">'+(i+1)+'</td>'
-        + '<td class="who l"><b>'+esc(g.n)+'</b><small>'+g.k+' 檔<span class="lpm">・<span class="'+pcls(g.p)+'">'+pctTxt(g.p)+'</span></span></small></td>'
-        + '<td class="lpc '+pcls(g.p)+'">'+pctTxt(g.p)+'</td>'
-        + '<td class="val"><i style="width:calc('+(g.v/max*100).toFixed(1)+'% - 16px)"></i><span>'+yi(g.v)+'</span><small style="display:block">占 '+fix(g.s,1)+'%</small></td>'
-        + '<td class="fl'+(hot?' hot':'')+'">'+(r==null ? '—' : fix(r, r>=10?0:1)+'×')+'<small>平常 '+(g.a!=null?fix(g.a,1)+'%':'—')+'</small></td>'
-        + (hasF ? '<td class="fl">'+yi(g.f||0)+'<small>占 '+fix(g.fs||0,1)+'%</small></td>' : '')+'</tr>'
+        + '<td class="who l"><b>'+esc(g.n)+'</b><small>'+g.k+' 檔</small></td>'
+        + '<td class="lb"><div class="lbar"><i class="'+(pcls(g.p)||'flat')+'" style="width:calc((100% - 78px) * '+w.toFixed(4)+')"></i><span>'+M.txt(g)+'</span></div></td></tr>'
         + (isOpen ? '<tr class="det"><td colspan="9">'+liveDetail(g, d)+'</td></tr>' : '');
     }).join('')+'</table>';
   $('liveNote').textContent = kind==='th'
