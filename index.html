@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script>try{ var t = localStorage.getItem('stock-rank-theme'); if(t==='light'||t==='dark') document.documentElement.setAttribute('data-theme', t); }catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>股市動能排行｜今天的錢流向哪裡</title>
+<title>盤中資金｜股市動能排行</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
 <style>
 :root{
@@ -51,6 +51,7 @@ nav.nav a:not([aria-current]):hover{background:var(--tint);color:var(--ink)}
 /* 今日摘要 */
 .hero{padding:34px 0 0}
 .hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.25;margin:0 0 10px}
+.tag{margin:-4px 0 10px;color:var(--muted);font-size:16px}
 .meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:14px;color:var(--muted)}
 .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;line-height:1;padding:5px 10px;border-radius:999px;background:var(--soft);color:var(--accent)}
 .badge.on::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--up);animation:blink 1.6s ease-in-out infinite}
@@ -133,6 +134,19 @@ p.lead{margin:0 0 14px;color:var(--muted);font-size:15px;max-width:46em}
 .det .ltop tr.lh td{font-size:12px;color:var(--muted)}
 .det .ltop small{color:var(--muted);margin-left:4px}
 
+.heat{position:relative;width:100%;background:var(--sheet);border:1px solid var(--rule);overflow:hidden}
+.heat .ind{position:absolute;overflow:hidden;box-shadow:inset 0 0 0 1px var(--sheet)}
+.heat .ind>b{position:absolute;left:0;right:0;top:0;height:18px;padding:0 5px;font-size:11px;font-weight:700;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,.28);color:#fff;z-index:1}
+.heat .st{position:absolute;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.15;box-shadow:inset 0 0 0 .5px rgba(128,128,128,.45)}
+.heat .st span{font-size:12px;font-weight:700;white-space:nowrap;max-width:100%;overflow:hidden}
+.heat .st small{font-size:10.5px;white-space:nowrap}
+.legend{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{width:26px;height:10px;display:inline-block}
+.zoombar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:34px;margin-bottom:8px;font-size:14px;color:var(--muted)}
+.zoombar b{color:var(--ink)}
+.zoomback{font:inherit;font-size:14px;font-weight:700;color:var(--on-fill);background:var(--fill);border:0;border-radius:999px;padding:5px 14px;cursor:pointer}
+.heat.zoomable .ind{cursor:zoom-in}
+.heat.zoomable .ind:hover{box-shadow:inset 0 0 0 2px var(--ink)}
 /* 資金輪動 */
 .rot{padding:14px 16px 10px;overflow-x:auto}
 .rot table{border-collapse:separate;border-spacing:2px;width:100%;table-layout:fixed}
@@ -169,13 +183,14 @@ footer p{margin:0 0 6px;max-width:50em}
   <header class="top">
     <a class="brand" href="./">股市動能排行</a>
     <div class="right">
-      <nav class="nav" aria-label="主選單"><a href="./" aria-current="page">今日資金</a><a id="liveLink" href="rank.html#live">盤中資金</a><a id="rankLink" href="rank.html">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
+      <nav class="nav" aria-label="主選單"><a href="./" aria-current="page">盤中資金</a><a id="rankLink" href="rank.html">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
       <button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
     </div>
   </header>
 
   <section class="hero">
-    <h1>今天的錢流向哪裡</h1>
+    <h1>盤中資金</h1>
+    <p class="tag">今天的錢流向哪裡：交易時間每分鐘更新，收盤後保留當天的結果。</p>
     <div class="meta" id="meta">資料載入中…</div>
     <div class="story" id="story"></div>
     <div class="sums" id="sums"></div>
@@ -187,9 +202,10 @@ footer p{margin:0 0 6px;max-width:50em}
     <div class="tools">
       <div class="seg" id="kindSeg" role="group" aria-label="分類"><i class="thumb"></i><button type="button" data-v="ind" aria-pressed="true">產業</button><button type="button" data-v="th" aria-pressed="false">概念股</button></div>
       <div class="seg" id="sortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="fn" aria-pressed="true">淨流入</button><button type="button" data-v="fn5" aria-pressed="false">近 5 分鐘</button><button type="button" data-v="v" aria-pressed="false">成交值</button><button type="button" data-v="r" aria-pressed="false">比平常</button></div>
+      <div class="seg" id="viewSeg" role="group" aria-label="檢視"><i class="thumb"></i><button type="button" data-v="list" aria-pressed="true">列表</button><button type="button" data-v="heat" aria-pressed="false">熱力圖</button></div>
     </div>
     <div class="card" id="sec"></div>
-    <a class="more" id="liveMore" href="rank.html#live">完整盤中資金：熱力圖、點板塊看個股 →</a>
+    <div id="heatWrap" hidden><div class="zoombar" id="zoom"></div><div class="heat" id="heat"></div><div class="legend" id="heatLegend"></div></div>
   </section>
 
   <section class="block">
@@ -201,15 +217,7 @@ footer p{margin:0 0 6px;max-width:50em}
     <div class="card rot" id="rot"></div>
   </section>
 
-  <section class="block">
-    <h2>個股資金 <small id="stkWhen"></small></h2>
-    <p class="lead" id="stkLead"></p>
-    <div class="tools">
-      <div class="seg" id="ssortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="value" aria-pressed="true">成交值</button><button type="button" data-v="ratio" aria-pressed="false">放大倍數</button><button type="button" data-v="f" aria-pressed="false">外資買超</button><button type="button" data-v="t" aria-pressed="false">投信買超</button></div>
-    </div>
-    <div class="card" id="stk" style="overflow-x:auto"></div>
-    <a class="more" id="moreLink" href="rank.html">完整排行、歷史日期、融資融券 →</a>
-  </section>
+  <p><a class="more" id="moreLink" href="rank.html">看收盤後的成交值排行、法人籌碼、歷史日期 →</a></p>
 
   <footer>
     <p>資料來源：臺灣證券交易所、證券櫃檯買賣中心（盤後）；永豐金證券 Shioaji API（盤中）。盤後資料每個交易日約 18:30 更新，盤中資料 9:00–13:30 每分鐘更新。</p>
@@ -253,7 +261,7 @@ function pageUrl(file){
   return location.hostname==='htmlpreview.github.io' && g ? 'https://htmlpreview.github.io/?'+g[1]+file : (file==='index.html' ? './' : file);
 }
 document.querySelector('.brand').href = document.querySelector('nav.nav a[aria-current]').href = pageUrl('index.html');
-$('rankLink').href = $('moreLink').href = pageUrl('rank.html'); $('liveLink').href = $('liveMore').href = pageUrl('rank.html#live'); $('usLink').href = pageUrl('rank.html')+'#us';
+$('rankLink').href = $('moreLink').href = pageUrl('rank.html'); $('usLink').href = pageUrl('rank.html')+'#us';
 /* 橫移式按鈕 */
 function syncSeg(seg, still){
   var on = seg.querySelector('button[aria-pressed=true]'), th = seg.querySelector('.thumb');
@@ -262,7 +270,7 @@ function syncSeg(seg, still){
   th.style.width = on.offsetWidth+'px'; th.style.transform = 'translateX('+on.offsetLeft+'px)';
   if(still){ void th.offsetWidth; seg.classList.remove('still'); }
 }
-var STATE = {kind:'ind', sort:'fn', rkind:'ind', ssort:'value'};
+var STATE = {kind:'ind', sort:'fn', rkind:'ind', view:'list'};
 try{ Object.assign(STATE, JSON.parse(localStorage.getItem('stock-rank-home')||'{}')); }catch(e){}
 function segBind(id, key, after){
   var seg = $(id);
@@ -276,7 +284,7 @@ function segBind(id, key, after){
     after();
   });
 }
-window.addEventListener('resize', function(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); if(typeof renderRotation==='function' && ROT) renderRotation(); });
+window.addEventListener('resize', function(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); if(typeof renderRotation==='function' && ROT) renderRotation(); if(STATE.view==='heat' && LIVE) renderSectors(); });
 
 /* ===== 資料 ===== */
 var TW = null, ROT = null, LIVE = null;
@@ -396,6 +404,11 @@ function renderSectors(){
   $('secLead').textContent = '上市櫃全部股票依'+KN+'加總。「淨流入」是每檔股票每分鐘新增的成交值，價格上漲算流入、下跌算流出；「比平常」是占全市場成交值的比重除以前 '+(d.base_days||20)+' 日平均。點任一列可以看資金進出的節奏與主要個股。'
     + (open ? '' : ' 現在不是交易時間，顯示的是最近一個交易日收盤時的結果。');
   var list = (d[kind]||[]).filter(function(g){ return g.v>0; });
+  var heatOn = STATE.view==='heat';
+  syncSeg($('viewSeg'), true);
+  $('sortSeg').style.display = heatOn ? 'none' : ''; $('sec').style.display = heatOn ? 'none' : '';
+  $('heatWrap').hidden = !heatOn;
+  if(heatOn){ renderHeatView(list, kind, KN); return; }
   var hasFlow = list.length && list[0].fn!=null, sort = STATE.sort;
   if(!hasFlow && (sort==='fn' || sort==='fn5')) sort = 'v';
   var M = {fn:{h:'淨流入', dv:true, val:function(g){ return g.fn||0; }, txt:function(g){ return yiS(g.fn||0)+' 億'; }},
@@ -427,6 +440,80 @@ document.addEventListener('keydown', function(e){
   if((e.key==='Enter'||e.key===' ') && e.target.matches && e.target.matches('#sec tr.row')){ e.preventDefault(); e.target.click(); }
 });
 
+function squarify(items, x, y, w, h){
+  var total = items.reduce(function(s,i){ return s+i.v; },0), out = [];
+  if(!(total>0) || w<=0 || h<=0) return out;
+  var k = w*h/total, rest = items.map(function(i){ return {item:i, a:i.v*k}; });
+  while(rest.length){
+    var side = Math.min(w,h), row = [], sum = 0, best = Infinity, mx = 0, mn = Infinity;
+    while(rest.length){
+      var a = rest[0].a, s2 = sum+a, hi = Math.max(mx,a), lo = Math.min(mn,a);
+      var worst = Math.max(side*side*hi/(s2*s2), s2*s2/(side*side*lo));
+      if(row.length && worst>best) break;
+      row.push(rest.shift()); sum = s2; best = worst; mx = hi; mn = lo;
+    }
+    var thick = sum/side, pos;
+    if(w>=h){ pos = y; row.forEach(function(r){ var len = r.a/thick; out.push({item:r.item, x:x, y:pos, w:thick, h:len}); pos += len; }); x += thick; w -= thick; }
+    else    { pos = x; row.forEach(function(r){ var len = r.a/thick; out.push({item:r.item, x:pos, y:y, w:len, h:thick}); pos += len; }); y += thick; h -= thick; }
+  }
+  return out;
+}
+/* 漲跌幅 → 顏色：紅漲綠跌，5% 以上最深；回傳 [底色, 字色] */
+function heatColor(pct){
+  var dark = isDark(), base = dark ? [42,42,42] : [232,238,243];
+  if(pct==null || !pct) return ['rgb('+base.join(',')+')', dark ? '#E6E6E6' : '#16242F'];
+  var to = pct>0 ? (dark ? [226,74,62] : [214,52,52]) : (dark ? [34,160,107] : [18,138,90]);
+  var t = .18 + .82*Math.min(Math.abs(pct)/5, 1);
+  var c = base.map(function(b,i){ return Math.round(b+(to[i]-b)*t); });
+  return ['rgb('+c.join(',')+')', t>.42 ? '#fff' : (dark ? '#E6E6E6' : '#16242F')];
+}
+function sign(p){ return p==null ? '' : (p>0?'+':'')+fix(p,2)+'%'; }
+/* 熱力圖功能的總開關：目前先隱藏。要重新開放時把 false 改成 true 就好，其他程式和資料都還在 */
+/* 畫熱力圖：list 是 [{name, value, pct, count, top:[[代號,名稱,成交值,漲跌幅]…]}]，由大到小 */
+function paintHeat(box, list){
+  var W = box.clientWidth, H = W<520 ? 440 : 520, HEAD = 18, total = list.reduce(function(s,g){ return s+g.value; },0);
+  box.style.height = H+'px';
+  var html = squarify(list.map(function(g){ return {v:g.value, g:g}; }), 0, 0, W, H).map(function(R){
+    var g = R.item.g, col = heatColor(g.pct), head = R.w>44 && R.h>40 ? HEAD : 0, inner = '';
+    var shown = g.top.reduce(function(s,t){ return s+t[2]; },0), items = g.top.map(function(t){ return {v:t[2], t:t}; });
+    var restV = g.value-shown, restP = null;       /* 沒列出來的個股合成一塊「其他」，漲跌幅由產業的加權平均反推 */
+    if(restV>0){
+      if(g.pct!=null) restP = (g.pct*g.value - g.top.reduce(function(s,t){ return s+(t[3]||0)*t[2]; },0))/restV;
+      items.push({v:restV, t:null, p:restP});
+    }
+    items.sort(function(a,b){ return b.v-a.v; });
+    squarify(items, 0, head, R.w, R.h-head).forEach(function(r){
+      var t = r.item.t, c = heatColor(t ? t[3] : r.item.p), txt = '';
+      if(t && r.w>38 && r.h>18) txt = '<span>'+esc(t[1])+'</span>'+(r.h>34 && r.w>46 ? '<small>'+sign(t[3])+'</small>' : '');
+      else if(!t && r.w>38 && r.h>18) txt = '<small>其他</small>';
+      inner += '<div class="st" style="left:'+r.x.toFixed(1)+'px;top:'+r.y.toFixed(1)+'px;width:'+r.w.toFixed(1)+'px;height:'+r.h.toFixed(1)+'px;background:'+c[0]+';color:'+c[1]+'"'
+        + (t ? ' title="'+esc(t[1])+'（'+esc(t[0])+'）　'+yi(t[2])+' 億元　'+sign(t[3])+'"' : ' title="'+esc(g.name)+'其他個股　'+yi(r.item.v)+' 億元　'+sign(r.item.p)+'"')+'>'+txt+'</div>';
+    });
+    return '<div class="ind" data-name="'+esc(g.name)+'" style="left:'+R.x.toFixed(1)+'px;top:'+R.y.toFixed(1)+'px;width:'+R.w.toFixed(1)+'px;height:'+R.h.toFixed(1)+'px;background:'+col[0]+'" title="'
+      + esc(g.name)+'　'+yi(g.value)+' 億元（占 '+fix(g.value/total*100,1)+'%）　'+sign(g.pct)+'　'+g.count+' 檔">'
+      + (head ? '<b>'+esc(g.name)+' '+sign(g.pct)+'</b>' : '')+inner+'</div>';
+  }).join('');
+  box.innerHTML = html;
+}
+/* 熱力圖：方塊大小是成交值、顏色是漲跌；點板塊放大看裡面前 30 檔 */
+var ZOOM = null;
+function renderHeatView(list, kind, KN){
+  var zg = ZOOM && ZOOM.kind===kind ? list.filter(function(g){ return g.n===ZOOM.name; })[0] : null;
+  if(!zg) ZOOM = null;
+  var shown = zg ? [zg] : list.slice().sort(function(a,b){ return b.v-a.v; });
+  $('zoom').innerHTML = zg ? '<button type="button" class="zoomback" id="zoomBack">← 回全部'+KN+'</button><span><b>'+esc(zg.n)+'</b>　'+yi(zg.v)+' 億元・'+zg.k+' 檔・<span class="'+cls(zg.p)+'">'+pctTxt(zg.p)+'</span></span>'
+    : '<span>點任一個'+KN+'可以放大，看裡面成交值前 30 檔。</span>';
+  paintHeat($('heat'), shown.map(function(g){ return {name:g.n, value:g.v, pct:g.p, count:g.k, top:(g.top||[]).slice(0, zg ? 30 : 12).map(function(t){ return [t[0],t[1],t[2],t[3]]; })}; }));
+  $('heat').classList.toggle('zoomable', !zg);
+  $('heatLegend').innerHTML = '跌 '+[-5,-2.5,-1,0,1,2.5,5].map(function(p){ return '<i style="background:'+heatColor(p)[0]+'"></i>'; }).join('')+' 漲（±5% 以上最深；方塊大小是成交值）';
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest) return;
+  if(e.target.closest('#zoomBack')){ ZOOM = null; renderSectors(); return; }
+  var t = e.target.closest('#heat.zoomable .ind');
+  if(t){ ZOOM = {kind:STATE.kind, name:t.dataset.name}; renderSectors(); $('zoom').scrollIntoView({block:'nearest'}); }
+});
+
 /* ===== 資金輪動 ===== */
 function heat(r){   /* 比平常的倍數 → 底色：多於平常是紅、少於平常是綠 */
   if(r==null || !isFinite(r)) return 'transparent';
@@ -451,44 +538,10 @@ function renderRotation(){
   $('rot').innerHTML = '<table><colgroup><col class="nmc">'+dates.map(function(){ return '<col>'; }).join('')+'<col class="shc"></colgroup>'+head+rows+'</table><div class="rlegend">比平常少 '+[0.5,0.7,0.85,1,1.25,1.5,1.8].map(function(r){ return '<i style="background:'+heat(r)+'"></i>'; }).join('')+' 比平常多（右邊是最新一天的占比，以及跟 5 天前比的變化，單位：百分點）</div>';
 }
 
-/* ===== 個股資金 ===== */
-function renderStocks(){
-  syncSeg($('ssortSeg'), true);
-  var d = TW;
-  if(!d || !d.rows){ $('stk').innerHTML = '<div class="empty">盤後資料載入中…</div>'; return; }
-  $('stkWhen').textContent = tradeDay(d.date)+' 收盤';
-  var sort = STATE.ssort, list;
-  if(sort==='f' || sort==='t'){
-    var cr = d.chip_rank, k = {f:0, t:1}[sort], byCode = {};
-    d.rows.forEach(function(r){ byCode[r.code] = r; });
-    list = cr && cr.lists && cr.lists[sort] ? cr.lists[sort].buy.map(function(c){ var p = cr.pool[c]; return p ? Object.assign({}, p, byCode[c]||{}) : null; }).filter(function(r){ return r && !r.etf; }) : [];
-    list.forEach(function(r){ r._amt = r.inst[k]*1000*r.close; });
-    $('stkLead').textContent = '全市場依'+(sort==='f'?'外資':'投信')+'當天買超的金額（張數 × 收盤價）排序。';
-  }else{
-    list = d.rows.filter(function(r){ return !r.etf; });
-    if(sort==='ratio'){ list = list.filter(function(r){ return r.ratio!=null && r.value>=3e8; }).sort(function(a,b){ return b.ratio-a.ratio; }); }
-    else list = list.slice().sort(function(a,b){ return b.value-a.value; });
-    $('stkLead').textContent = sort==='ratio' ? '成交值 3 億元以上的股票，依當天成交值是前 '+(d.avg_days||60)+' 日平均的幾倍排序，看哪些股票突然有大錢進出。' : '依當天成交值排序（不含 ETF），橫條是與第一名的相對大小。';
-  }
-  list = list.slice(0, 20);
-  if(!list.length){ $('stk').innerHTML = '<div class="empty">這一天的資料還沒有取得。</div>'; return; }
-  var max = Math.max.apply(null, list.map(function(r){ return r.value||0; }).concat(1));
-  function lots(n){ return n==null ? '—' : (n>0?'+':n<0?'−':'')+Math.abs(n).toLocaleString('zh-TW'); }
-  $('stk').innerHTML = '<table class="tbl"><tr><th class="l" colspan="2">名次／股票</th><th>收盤／漲跌</th><th>成交值（億）</th><th>放大</th><th class="'+(sort==='f'?'':'w')+'">外資（張）</th><th class="'+(sort==='t'?'':'w')+'">投信（張）</th></tr>'
-    + list.map(function(r,i){
-      var inst = r.inst || [];
-      return '<tr class="'+(i<3?'top3':'')+'"><td class="no l">'+(i+1)+'</td><td class="who l"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+(r.ind && r.ind!=='ETF' ? '・'+esc(r.ind) : '')+'</small></td>'
-        + '<td><span style="display:block;font-weight:700">'+price(r.close)+'</span><span class="'+cls(r.pct)+'" style="font-size:13px">'+pctTxt(r.pct)+'</span></td>'
-        + '<td class="val"><i style="width:calc('+((r.value||0)/max*100).toFixed(1)+'% - 16px)"></i><span>'+(r.value!=null?yi(r.value):'—')+'</span></td>'
-        + '<td class="'+(r.ratio>=2?'hot':'')+'">'+(r.ratio!=null ? fix(r.ratio, r.ratio>=10?0:1)+'×' : '—')+'</td>'
-        + '<td class="'+(sort==='f'?'':'w ')+cls(inst[0])+'">'+lots(inst[0])+'</td><td class="'+(sort==='t'?'':'w ')+cls(inst[1])+'">'+lots(inst[1])+'</td></tr>';
-    }).join('')+'</table>';
-}
-
 /* ===== 啟動 ===== */
-function renderAll(){ renderStory(); renderSectors(); renderRotation(); renderStocks(); }
+function renderAll(){ renderStory(); renderSectors(); renderRotation(); }
 segBind('kindSeg', 'kind', renderSectors); segBind('sortSeg', 'sort', renderSectors);
-segBind('rkindSeg', 'rkind', renderRotation); segBind('ssortSeg', 'ssort', renderStocks);
+segBind('rkindSeg', 'rkind', renderRotation); segBind('viewSeg', 'view', renderSectors);
 function nul(){ return null; }
 Promise.all([load('tw.json').catch(nul), load('rotation_tw.json').catch(nul), fetchLive()]).then(function(res){
   TW = res[0]; ROT = res[1]; renderAll();
@@ -499,7 +552,7 @@ setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) f
 /* 日間／夜間 */
 function isDark(){ var t = document.documentElement.getAttribute('data-theme'); return t ? t==='dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
 function paintTheme(){ $('theme').setAttribute('aria-checked', isDark() ? 'true' : 'false'); }
-$('theme').addEventListener('click', function(){ var n = isDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('stock-rank-theme', n); }catch(e){} paintTheme(); });
+$('theme').addEventListener('click', function(){ var n = isDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('stock-rank-theme', n); }catch(e){} paintTheme(); if(STATE.view==='heat') renderSectors(); });
 paintTheme();
 </script>
 </body>
