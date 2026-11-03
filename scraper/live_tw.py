@@ -475,6 +475,38 @@ def probe():
                 log("公開金鑰寫入被擋下（%d），權限正確" % e.code)
 
 
+# ---------------------------------------------------------------- 資金輪動
+ROTATION_DAYS = 20
+
+
+def rotation(days=ROTATION_DAYS):
+    """最近 N 個交易日各產業、概念股占全市場成交值的比重（%），給首頁的資金輪動圖用 → data/rotation_tw.json"""
+    imap, themes = load_imap(), load_themes()
+    groups = memberships(imap, themes)
+    files = list(reversed(full_files()[:days]))
+    out = {"dates": [], "totals": [], "ind": {}, "th": {}}
+    for i, f in enumerate(files):
+        j = json.loads(f.read_text(encoding="utf-8"))
+        rows = j.get("上市", []) + j.get("上櫃", [])
+        total = sum(r[2] for r in rows) or 1
+        day = {"ind": {}, "th": {}}
+        for code, _close, value in rows:
+            ind, ths = groups(code)
+            day["ind"][ind] = day["ind"].get(ind, 0) + value
+            for t in ths:
+                day["th"][t] = day["th"].get(t, 0) + value
+        out["dates"].append(j["date"])
+        out["totals"].append(total)
+        for kind in ("ind", "th"):
+            for name in set(out[kind]) | set(day[kind]) | (set(themes) if kind == "th" else set()):
+                seq = out[kind].setdefault(name, [0] * i)
+                seq.append(round(day[kind].get(name, 0) / total * 100, 3))
+    out["updated"] = now().isoformat(timespec="seconds")
+    p = DATA / "rotation_tw.json"
+    p.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    print("資金輪動：%s～%s，%d 天" % (out["dates"][0], out["dates"][-1], len(out["dates"])))
+
+
 # ---------------------------------------------------------------- 預覽用的模擬資料
 def mock(date=None):
     """拿某天的盤後全市場資料，假裝現在是盤中 11:02，產生一份模擬的盤中資料。只給網頁預覽，不會上線。"""
@@ -542,6 +574,8 @@ if __name__ == "__main__":
         run()
     elif cmd == "probe":
         probe()
+    elif cmd == "rotation":
+        rotation()
     elif cmd == "mock":
         mock(sys.argv[2] if len(sys.argv) > 2 else None)
     else:
