@@ -1,16 +1,17 @@
-/* 左側收放選單：兩個頁面共用。
+/* 選單：兩個頁面共用，任何時候都看得到。
    電腦（寬 900px 以上）：左邊固定一欄，按 ☰ 可以收成只剩圖示，收合狀態記在這台裝置。
-   手機：平常收起來，按 ☰ 從左邊滑出，點旁邊或按 Esc 關掉。
+   平板（600～899px）：左邊固定一條只有圖示的窄欄。
+   手機（600px 以下）：畫面最下面固定一排分頁按鈕，跟一般 App 一樣。
    頁面只要在 header.top 裡放品牌名稱，載入這支程式就好；頁面裡的連結要點到哪一頁由這裡決定。 */
 (function(){
   var ITEMS = [
-    {id:'live', label:'盤中資金', sub:'板塊資金流向、熱力圖', href:'index.html',
+    {id:'live', short:'盤中資金', label:'盤中資金', sub:'板塊資金流向、熱力圖', href:'index.html',
      icon:'<path d="M3 17l5-6 4 3 6-8 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="6" r="1.6" fill="currentColor"/>'},
-    {id:'rank', label:'成交值排行', sub:'台股成交值、放大倍數', href:'rank.html',
+    {id:'rank', short:'成交值', label:'成交值排行', sub:'台股成交值、放大倍數', href:'rank.html',
      icon:'<path d="M5 20V11M12 20V5M19 20v-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'},
-    {id:'chips', label:'法人籌碼', sub:'三大法人買賣超', href:'rank.html#chips',
+    {id:'chips', short:'法人籌碼', label:'法人籌碼', sub:'三大法人買賣超', href:'rank.html#chips',
      icon:'<circle cx="8" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="16.5" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M2.8 19c.6-3.4 2.7-5.2 5.2-5.2s4.6 1.8 5.2 5.2M13.6 15.2c.9-.9 1.9-1.3 2.9-1.3 2.1 0 3.8 1.6 4.3 4.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>'},
-    {id:'us', label:'美股', sub:'美股成交值排行', href:'rank.html#us',
+    {id:'us', short:'美股', label:'美股', sub:'美股成交值排行', href:'rank.html#us',
      icon:'<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17" fill="none" stroke="currentColor" stroke-width="1.6"/>'}
   ];
 
@@ -53,13 +54,25 @@
   +   'body.side-mini .side .sb{justify-content:center;padding:0}'
   +   'header.top .menubtn,header.top .lead-in .brand{display:none}'
   + '}'
-  /* 手機：從左邊滑出 */
-  + '@media (max-width:899px){'
-  +   '.side{transform:translateX(-102%);visibility:hidden;transition:transform .22s ease,visibility 0s .22s}'
-  +   'body.side-open .side{visibility:visible;box-shadow:0 0 30px rgba(0,0,0,.25);transition:transform .22s ease}'
-  +   'body.side-open .side{transform:none}'
-  +   'body.side-open .scrim{opacity:1;pointer-events:auto}'
-  +   'body.side-open{overflow:hidden}'
+  /* 平板：常駐一條只有圖示的窄欄 */
+  + '@media (min-width:600px) and (max-width:899px){'
+  +   'body{padding-left:var(--side-mini)}'
+  +   '.side{width:var(--side-mini)}'
+  +   '.side .sb,.side nav a span,.side .foot{display:none}'
+  +   '.side nav{padding-top:14px}'
+  +   '.side nav a{justify-content:center;padding:10px 0}'
+  +   'header.top .menubtn{display:none}'
+  + '}'
+  /* 手機：最下面一排分頁按鈕 */
+  + '.tabbar{display:none}'
+  + '@media (max-width:599px){'
+  +   '.side,.scrim,header.top .menubtn{display:none !important}'
+  +   'body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}'
+  +   '.tabbar{display:flex;position:fixed;z-index:40;left:0;right:0;bottom:0;background:var(--sheet);border-top:1px solid var(--rule);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.06)}'
+  +   '.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;color:var(--muted);text-decoration:none;font-size:11px;font-weight:500}'
+  +   '.tabbar a svg{width:22px;height:22px}'
+  +   '.tabbar a[aria-current]{color:var(--accent);font-weight:700}'
+  +   '.tabbar a[aria-current] svg{background:var(--fill);color:var(--on-fill);border-radius:999px;padding:2px 14px;width:52px;box-sizing:border-box}'
   + '}'
   + '@media (prefers-reduced-motion: reduce){.side,.scrim,body{transition:none !important}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
@@ -72,6 +85,12 @@
         return '<a id="nav-'+it.id+'" href="'+pageUrl(it.href)+'" title="'+it.label+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+it.icon+'</svg><span><b>'+it.label+'</b><small>'+it.sub+'</small></span></a>';
       }).join('')+'</nav>'
     + '<div class="foot">資料來源：證交所、櫃買中心、永豐金證券、Polygon。僅供參考，不構成投資建議。</div>';
+  var tabs = document.createElement('nav');
+  tabs.className = 'tabbar'; tabs.setAttribute('aria-label', '主選單');
+  tabs.innerHTML = ITEMS.map(function(it){
+    return '<a id="tab-'+it.id+'" href="'+pageUrl(it.href)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+it.icon+'</svg>'+it.short+'</a>';
+  }).join('');
+  document.body.appendChild(tabs);
   var scrim = document.createElement('div'); scrim.className = 'scrim';
   document.body.insertBefore(scrim, document.body.firstChild);
   document.body.insertBefore(side, document.body.firstChild);
@@ -105,7 +124,10 @@
 
   /* 目前在哪一頁：頁面可以呼叫 navMark('rank'|'us'|'live') 改亮起來的項目 */
   window.navMark = function(id){
-    ITEMS.forEach(function(it){ var a = document.getElementById('nav-'+it.id); if(it.id===id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+    ITEMS.forEach(function(it){ ['nav-','tab-'].forEach(function(pre){
+      var a = document.getElementById(pre+it.id); if(!a) return;
+      if(it.id===id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    }); });
   };
   var isRank = /rank\.html/.test(location.pathname + location.search);
   window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : 'live');
