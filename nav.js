@@ -6,8 +6,10 @@
   var ITEMS = [
     {id:'live', label:'盤中資金', sub:'板塊資金流向、熱力圖', href:'index.html',
      icon:'<path d="M3 17l5-6 4 3 6-8 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="6" r="1.6" fill="currentColor"/>'},
-    {id:'rank', label:'排行與籌碼', sub:'台股成交值、法人買賣超', href:'rank.html',
+    {id:'rank', label:'成交值排行', sub:'台股成交值、放大倍數', href:'rank.html',
      icon:'<path d="M5 20V11M12 20V5M19 20v-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'},
+    {id:'chips', label:'法人籌碼', sub:'三大法人買賣超', href:'rank.html#chips',
+     icon:'<circle cx="8" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="16.5" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M2.8 19c.6-3.4 2.7-5.2 5.2-5.2s4.6 1.8 5.2 5.2M13.6 15.2c.9-.9 1.9-1.3 2.9-1.3 2.1 0 3.8 1.6 4.3 4.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>'},
     {id:'us', label:'美股', sub:'美股成交值排行', href:'rank.html#us',
      icon:'<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17" fill="none" stroke="currentColor" stroke-width="1.6"/>'}
   ];
@@ -106,5 +108,5 @@
     ITEMS.forEach(function(it){ var a = document.getElementById('nav-'+it.id); if(it.id===id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   };
   var isRank = /rank\.html/.test(location.pathname + location.search);
-  window.navMark(isRank ? (location.hash==='#us' ? 'us' : 'rank') : 'live');
+  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : 'live');
 })();

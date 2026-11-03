@@ -39,6 +39,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 header.top{display:flex;justify-content:space-between;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:18px 0 0}
+#boardSeg{display:none !important}   /* 成交值、籌碼改由左側選單切換 */
 body.livepage .pickrow,body.livepage #updated,body.livepage #sums,body.livepage #liveBlock>h2{display:none !important}
 body.livepage #liveBlock{padding-top:14px}
 .tops{position:relative;display:flex;align-items:center;gap:10px}
@@ -280,7 +281,7 @@ footer a{color:var(--accent)}
 <script src="nav.js"></script>
 
   <section class="intro">
-    <h1>排行與籌碼</h1>
+    <h1>成交值排行</h1>
     <p>台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。</p>
     <div class="updated" id="updated">資料載入中…</div>
     <div class="pickrow">
@@ -449,6 +450,17 @@ function pctCell(r){
 }
 function renderSums(d, rows){
   var M = MODES[MODE];
+  if(isChips()){                                   /* 法人籌碼頁：摘要卡片改成三大法人各自的買賣超金額 */
+    var S = d.inst_sum || {}, mk = ['上市','上櫃'].filter(function(m){ return S[m]; });
+    if(!mk.length){ $('sums').innerHTML = ''; return; }
+    $('sums').innerHTML = [['all','三大法人合計'],['f','外資'],['t','投信'],['d','自營商']].map(function(c){
+      var tot = mk.reduce(function(a,m){ return a+(S[m][c[0]] ? S[m][c[0]][2] : 0); },0);
+      var cls = tot>0 ? 'up' : tot<0 ? 'down' : '';
+      return '<div class="sum"><div class="k">'+c[1]+(tot>=0?'買超':'賣超')+'</div><div class="v"><span class="'+cls+'">'+(tot>0?'+':tot<0?'−':'')+yi(Math.abs(tot))+'</span><small>億元</small></div><div class="n">'
+        + mk.map(function(m){ var v = S[m][c[0]] ? S[m][c[0]][2] : 0; return m+' '+(v>0?'+':v<0?'−':'')+yi(Math.abs(v)); }).join('、')+' 億</div></div>';
+    }).join('');
+    return;
+  }
   if(!rows.length){ $('sums').innerHTML=''; return; }
   var sum = rows.reduce(function(s,r){ return s+r.value; },0), top10 = rows.slice(0,10).reduce(function(s,r){ return s+r.value; },0);
   var up = rows.filter(function(r){ return r.pct>0; }).length, down = rows.filter(function(r){ return r.pct<0; }).length;
@@ -1034,18 +1046,19 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
 function remember(){
-  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:LIVE_PAGE ? (SAVED.mode||'tw') : MODE, view:$('view').value, board:LIVE_PAGE ? (SAVED.board==='chips' ? 'chips' : 'value') : $('board').value, liveKind:$('liveKind').value, liveView:$('liveView').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
+  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:LIVE_PAGE ? (SAVED.mode||'tw') : MODE, view:$('view').value, board:$('board').value, liveKind:$('liveKind').value, liveView:$('liveView').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
 }
 var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
-  if(window.navMark) navMark(MODE==='us' ? 'us' : 'rank');
-  /* 台股、美股由左側選單分開，頁面標題跟著換 */
-  document.querySelector('.intro h1').textContent = MODE==='us' ? '美股' : '排行與籌碼';
-  document.querySelector('.intro p').textContent = MODE==='us'
-    ? 'NYSE、Nasdaq 每個交易日收盤後的成交值排行，台灣時間下午一點多更新，可以切換日期回看過去的排行。'
-    : '台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。';
-  document.title = (MODE==='us' ? '美股' : '排行與籌碼')+'｜股市動能排行';               /* 左側選單亮起來的跟著台股／美股切換 */
+  /* 成交值排行、法人籌碼、美股由左側選單分開，頁面標題跟著換 */
+  var page = MODE==='us' ? 'us' : $('board').value==='chips' ? 'chips' : 'rank';
+  if(window.navMark) navMark(page);
+  var T = {rank:['成交值排行', '台股每天收盤後的成交值排行與放大倍數，可以切換日期回看過去 60 個交易日。'],
+           chips:['法人籌碼', '台股三大法人每天的買賣超：上市、上櫃的買賣金額，以及外資、投信、自營商各自買超、賣超最多的股票。'],
+           us:['美股', 'NYSE、Nasdaq 每個交易日收盤後的成交值排行，台灣時間下午一點多更新，可以切換日期回看過去的排行。']}[page];
+  document.querySelector('.intro h1').textContent = T[0]; document.querySelector('.intro p').textContent = T[1];
+  document.title = T[0]+'｜股市動能排行';               /* 左側選單亮起來的跟著台股／美股切換 */
   if(typeof paintCalBtn==='function') paintCalBtn();
   $('marketSeg').hidden = MODE!=='tw';
   $('marketSeg').style.display = MODE==='tw' ? '' : 'none';
@@ -1070,7 +1083,7 @@ if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
 if(SAVED.view==='heat') $('view').value = 'heat';
-if(SAVED.board==='chips') $('board').value = 'chips';
+$('board').value = location.hash==='#chips' ? 'chips' : 'value';      /* 成交值排行或法人籌碼，由網址決定 */
 if(LIVE_PAGE){ $('board').value = 'live'; }
 else{ var lo = $('board').querySelector('option[value=live]'); if(lo) lo.remove(); }   /* 排行頁不再放盤中資金 */
 if(SAVED.liveKind==='th') $('liveKind').value = 'th';
