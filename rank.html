@@ -39,11 +39,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);f
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 header.top{display:flex;justify-content:space-between;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:18px 0 0}
-nav.nav{display:flex;gap:4px;margin-right:auto;margin-left:8px}
-nav.nav a{font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:999px}
-nav.nav a[aria-current]{color:var(--on-fill);background:var(--fill);font-weight:700}
-nav.nav a:not([aria-current]):hover{background:var(--tint);color:var(--ink)}
-@media (max-width:700px){ nav.nav{order:3;width:100%;margin:0} }
+#boardSeg{display:none !important}   /* 成交值、籌碼改由左側選單切換 */
 body.livepage .pickrow,body.livepage #updated,body.livepage #sums,body.livepage #liveBlock>h2{display:none !important}
 body.livepage #liveBlock{padding-top:14px}
 .tops{position:relative;display:flex;align-items:center;gap:10px}
@@ -274,8 +270,7 @@ footer a{color:var(--accent)}
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><a class="brand" id="homeBrand" href="./" style="text-decoration:none">股市動能排行</a>
-    <nav class="nav" aria-label="主選單"><a id="homeLink" href="./">盤中資金</a><a id="rankLink" href="rank.html" aria-current="page">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
+  <header class="top"><a class="brand" href="./" style="text-decoration:none">股市動能排行</a>
     <div class="tops">
       <button type="button" class="calbtn" id="calBtn" aria-expanded="false" aria-controls="calPanel" title="期權結算日曆">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -283,13 +278,14 @@ footer a{color:var(--accent)}
       </button><button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
       <div class="calpanel" id="calPanel" hidden></div>
     </div></header>
+<script src="nav.js"></script>
 
   <section class="intro">
-    <h1>排行與籌碼</h1>
-    <p>台股、美股每天收盤後的成交值排行與法人籌碼，可以切換日期回看過去 60 個交易日。</p>
+    <h1>成交值排行</h1>
+    <p>台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。</p>
     <div class="updated" id="updated">資料載入中…</div>
     <div class="pickrow">
-      <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
+      <div class="seg modes" role="group" aria-label="市場" style="display:none"><i class="thumb" aria-hidden="true"></i>
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
       <div class="seg" id="boardSeg" role="group" aria-label="排行種類"></div>
@@ -390,8 +386,6 @@ function pageUrl(file){
   var g = /(https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/[^/]+\/)/.exec(location.search);
   return location.hostname==='htmlpreview.github.io' && g ? 'https://htmlpreview.github.io/?'+g[1]+file : (file==='index.html' ? './' : file);
 }
-document.getElementById('homeBrand').href = document.getElementById('homeLink').href = pageUrl('index.html');
-document.getElementById('rankLink').href = pageUrl('rank.html'); document.getElementById('usLink').href = pageUrl('rank.html#us');
 /* 盤中資金搬到首頁了，舊的 rank.html#live 連結直接轉過去 */
 var LIVE_PAGE = false;
 if(location.hash==='#live') location.replace(pageUrl('index.html'));
@@ -456,6 +450,17 @@ function pctCell(r){
 }
 function renderSums(d, rows){
   var M = MODES[MODE];
+  if(isChips()){                                   /* 法人籌碼頁：摘要卡片改成三大法人各自的買賣超金額 */
+    var S = d.inst_sum || {}, mk = ['上市','上櫃'].filter(function(m){ return S[m]; });
+    if(!mk.length){ $('sums').innerHTML = ''; return; }
+    $('sums').innerHTML = [['all','三大法人合計'],['f','外資'],['t','投信'],['d','自營商']].map(function(c){
+      var tot = mk.reduce(function(a,m){ return a+(S[m][c[0]] ? S[m][c[0]][2] : 0); },0);
+      var cls = tot>0 ? 'up' : tot<0 ? 'down' : '';
+      return '<div class="sum"><div class="k">'+c[1]+(tot>=0?'買超':'賣超')+'</div><div class="v"><span class="'+cls+'">'+(tot>0?'+':tot<0?'−':'')+yi(Math.abs(tot))+'</span><small>億元</small></div><div class="n">'
+        + mk.map(function(m){ var v = S[m][c[0]] ? S[m][c[0]][2] : 0; return m+' '+(v>0?'+':v<0?'−':'')+yi(Math.abs(v)); }).join('、')+' 億</div></div>';
+    }).join('');
+    return;
+  }
   if(!rows.length){ $('sums').innerHTML=''; return; }
   var sum = rows.reduce(function(s,r){ return s+r.value; },0), top10 = rows.slice(0,10).reduce(function(s,r){ return s+r.value; },0);
   var up = rows.filter(function(r){ return r.pct>0; }).length, down = rows.filter(function(r){ return r.pct<0; }).length;
@@ -1041,13 +1046,19 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
 /* 記住上次看的市場與篩選（只存在這台裝置） */
 try{ SAVED = JSON.parse(localStorage.getItem('stock-rank')||'{}'); }catch(e){ SAVED = {}; }
 function remember(){
-  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:LIVE_PAGE ? (SAVED.mode||'tw') : MODE, view:$('view').value, board:LIVE_PAGE ? (SAVED.board==='chips' ? 'chips' : 'value') : $('board').value, liveKind:$('liveKind').value, liveView:$('liveView').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
+  try{ localStorage.setItem('stock-rank', JSON.stringify({mode:LIVE_PAGE ? (SAVED.mode||'tw') : MODE, view:$('view').value, board:$('board').value, liveKind:$('liveKind').value, liveView:$('liveView').value, who:$('who').value, side:$('side').value, market:$('market').value, count:$('count').value, etf:$('etf').checked})); }catch(e){}
 }
 var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
-  var navOn = MODE==='us' ? 'usLink' : 'rankLink';                     /* 選單亮起來的跟著台股／美股切換 */
-  ['rankLink','usLink'].forEach(function(id){ var a = document.getElementById(id); if(id===navOn) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  /* 成交值排行、法人籌碼、美股由左側選單分開，頁面標題跟著換 */
+  var page = MODE==='us' ? 'us' : $('board').value==='chips' ? 'chips' : 'rank';
+  if(window.navMark) navMark(page);
+  var T = {rank:['成交值排行', '台股每天收盤後的成交值排行與放大倍數，可以切換日期回看過去 60 個交易日。'],
+           chips:['法人籌碼', '台股三大法人每天的買賣超：上市、上櫃的買賣金額，以及外資、投信、自營商各自買超、賣超最多的股票。'],
+           us:['美股', 'NYSE、Nasdaq 每個交易日收盤後的成交值排行，台灣時間下午一點多更新，可以切換日期回看過去的排行。']}[page];
+  document.querySelector('.intro h1').textContent = T[0]; document.querySelector('.intro p').textContent = T[1];
+  document.title = T[0]+'｜股市動能排行';               /* 左側選單亮起來的跟著台股／美股切換 */
   if(typeof paintCalBtn==='function') paintCalBtn();
   $('marketSeg').hidden = MODE!=='tw';
   $('marketSeg').style.display = MODE==='tw' ? '' : 'none';
@@ -1072,7 +1083,7 @@ if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
 if(SAVED.etf===false) $('etf').checked = false;
 if(SAVED.view==='heat') $('view').value = 'heat';
-if(SAVED.board==='chips') $('board').value = 'chips';
+$('board').value = location.hash==='#chips' ? 'chips' : 'value';      /* 成交值排行或法人籌碼，由網址決定 */
 if(LIVE_PAGE){ $('board').value = 'live'; }
 else{ var lo = $('board').querySelector('option[value=live]'); if(lo) lo.remove(); }   /* 排行頁不再放盤中資金 */
 if(SAVED.liveKind==='th') $('liveKind').value = 'th';
@@ -1092,7 +1103,6 @@ Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_da
   });
   if(!res[0] && !res[1]) $('updated').textContent = '資料載入失敗，請稍後重新整理。';
   setMode(location.hash==='#us' ? 'us' : 'tw');
-  if(LIVE_PAGE){ document.querySelector('.intro h1').textContent = '盤中資金'; document.querySelector('.intro p').textContent = '交易日 9:00 到 13:30，每分鐘整理全市場的資金流向：哪些產業、概念股有錢流入或流出，熱力圖看漲跌與成交值分布，點板塊可以放大看裡面的個股。'; }
 });
 </script>
 </body>
