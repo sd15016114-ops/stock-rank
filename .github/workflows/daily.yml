@@ -84,6 +84,10 @@ jobs:
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         continue-on-error: true      # 有市場失敗時仍然提交其他市場的資料
+      - name: 更新資金輪動（首頁用）
+        if: steps.which.outputs.market != 'us' && (github.event_name == 'schedule' || inputs.task == 'update')
+        run: python scraper/live_tw.py rotation
+        continue-on-error: true
       - name: 抓台股當日走勢
         id: intradaytw
         if: inputs.task == 'intraday-tw' || github.event.schedule == '30 10 * * 1-5' || github.event.schedule == '30 13 * * 1-5'
