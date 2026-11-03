@@ -275,7 +275,7 @@ footer a{color:var(--accent)}
 <body>
 <div class="wrap">
   <header class="top"><a class="brand" id="homeBrand" href="./" style="text-decoration:none">股市動能排行</a>
-    <nav class="nav" aria-label="主選單"><a id="homeLink" href="./">盤中資金</a><a id="rankLink" href="rank.html" aria-current="page">排行與籌碼</a></nav>
+    <nav class="nav" aria-label="主選單"><a id="homeLink" href="./">盤中資金</a><a id="rankLink" href="rank.html" aria-current="page">排行與籌碼</a><a id="usLink" href="rank.html#us">美股</a></nav>
     <div class="tops">
       <button type="button" class="calbtn" id="calBtn" aria-expanded="false" aria-controls="calPanel" title="期權結算日曆">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -391,7 +391,7 @@ function pageUrl(file){
   return location.hostname==='htmlpreview.github.io' && g ? 'https://htmlpreview.github.io/?'+g[1]+file : (file==='index.html' ? './' : file);
 }
 document.getElementById('homeBrand').href = document.getElementById('homeLink').href = pageUrl('index.html');
-document.getElementById('rankLink').href = pageUrl('rank.html');
+document.getElementById('rankLink').href = pageUrl('rank.html'); document.getElementById('usLink').href = pageUrl('rank.html#us');
 /* 盤中資金搬到首頁了，舊的 rank.html#live 連結直接轉過去 */
 var LIVE_PAGE = false;
 if(location.hash==='#live') location.replace(pageUrl('index.html'));
@@ -1046,6 +1046,8 @@ function remember(){
 var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
+  var navOn = MODE==='us' ? 'usLink' : 'rankLink';                     /* 選單亮起來的跟著台股／美股切換 */
+  ['rankLink','usLink'].forEach(function(id){ var a = document.getElementById(id); if(id===navOn) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   if(typeof paintCalBtn==='function') paintCalBtn();
   $('marketSeg').hidden = MODE!=='tw';
   $('marketSeg').style.display = MODE==='tw' ? '' : 'none';
@@ -1061,7 +1063,10 @@ function setMode(m){
 $('date').addEventListener('input',function(){ pickDate($('date').value); });
 ['market','count','etf','q','sort','view','board','who','side','liveKind','liveView','liveSort'].forEach(function(id){ $(id).addEventListener('input',function(){ render(); remember(); }); });
 document.querySelectorAll('.modes button').forEach(function(b){
-  b.addEventListener('click',function(){ setMode(b.dataset.mode); remember(); });
+  b.addEventListener('click',function(){
+    setMode(b.dataset.mode); remember();
+    try{ history.replaceState(null, '', b.dataset.mode==='us' ? '#us' : location.pathname+location.search); }catch(e){}   /* 網址跟著台股／美股，重新整理或分享都會停在同一個 */
+  });
 });
 if(SAVED.market) $('market').value = SAVED.market;
 if(SAVED.count) $('count').value = SAVED.count;
@@ -1086,7 +1091,7 @@ Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_da
     DATES[k] = list;
   });
   if(!res[0] && !res[1]) $('updated').textContent = '資料載入失敗，請稍後重新整理。';
-  setMode(LIVE_PAGE ? 'tw' : location.hash==='#us' ? 'us' : (SAVED.mode||'tw'));
+  setMode(location.hash==='#us' ? 'us' : 'tw');
   if(LIVE_PAGE){ document.querySelector('.intro h1').textContent = '盤中資金'; document.querySelector('.intro p').textContent = '交易日 9:00 到 13:30，每分鐘整理全市場的資金流向：哪些產業、概念股有錢流入或流出，熱力圖看漲跌與成交值分布，點板塊可以放大看裡面的個股。'; }
 });
 </script>
