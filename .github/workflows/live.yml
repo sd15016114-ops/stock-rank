@@ -2,7 +2,13 @@ name: 盤中資金板塊
 
 on:
   schedule:
-    - cron: "40 0 * * 1-5"    # UTC 00:40 = 台灣時間 08:40 啟動，等到 9:00 開盤，一路跑到 13:35 收盤後結束
+    # GitHub 的排程常常延遲很久、偶爾整個跳過，所以排好幾個時間：第一個成功啟動的會一路跑到收盤，
+    # 其他的會排隊，等輪到時已經收盤，或發現今天已經有人在跑，就直接結束
+    - cron: "45 23 * * 0-4"   # 台灣時間 07:45（週一到週五）
+    - cron: "15 0 * * 1-5"    # 08:15
+    - cron: "45 0 * * 1-5"    # 08:45
+    - cron: "15 1 * * 1-5"    # 09:15
+    - cron: "45 1 * * 1-5"    # 09:45
   workflow_dispatch:
     inputs:
       task:
@@ -21,7 +27,7 @@ concurrency:
 jobs:
   live:
     runs-on: ubuntu-latest
-    timeout-minutes: 330      # GitHub 單次上限 6 小時，盤中 4.5 小時夠用
+    timeout-minutes: 355      # GitHub 單次上限 6 小時；最早 07:45 啟動到 13:36 結束約 5 小時 50 分
     steps:
       - uses: actions/checkout@v4
 
