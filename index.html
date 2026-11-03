@@ -212,8 +212,8 @@ footer a{color:var(--accent)}
 #liveRank table.lbars td.who{width:1%;min-width:7.5em}
 #liveRank td.lb{width:100%;padding-left:6px}
 .lbar{display:flex;align-items:center;gap:8px;height:26px}
-.lbar i{flex:none;height:100%;min-width:3px;border-radius:3px;background:var(--muted);opacity:.85}
-.lbar i.up{background:var(--up)} .lbar i.down{background:var(--down)} .lbar i.flat{opacity:.35}
+.lbar i{flex:none;height:100%;min-width:3px;border-radius:3px;background:var(--muted);opacity:.5}
+.lbar i.up{background:var(--up)} .lbar i.down{background:var(--down)} .lbar i.flat{opacity:.25}
 .lbar span{font-weight:700;white-space:nowrap}
 .lbar.dv{display:grid;grid-template-columns:1fr 1fr 84px;gap:0}
 .lbar.dv .neg,.lbar.dv .pos{height:100%;display:flex}
@@ -223,7 +223,7 @@ footer a{color:var(--accent)}
 .lbar.dv .neg i{border-radius:3px 0 0 3px} .lbar.dv .pos i{border-radius:0 3px 3px 0}
 .lbar.dv span{text-align:right}
 .det .nbars{position:relative;height:120px;margin-top:4px;border-bottom:0;background:linear-gradient(var(--rule),var(--rule)) 0 50%/100% 1px no-repeat}
-.det .nbars i{position:absolute;border-radius:2px}
+.det .nbars i{position:absolute;border-radius:2px;opacity:.55}
 .det .nbars i.up{background:var(--up)} .det .nbars i.down{background:var(--down)}
 .lkey{float:right;font-size:12px;color:var(--muted)}
 .lkey i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 8px;vertical-align:-1px}
@@ -311,7 +311,7 @@ footer a{color:var(--accent)}
       <div class="seg" id="liveSortSeg" role="group" aria-label="排序方式"></div>
       <div class="seg" id="liveViewSeg" role="group" aria-label="檢視方式"></div>
       <select id="liveView" aria-label="檢視方式" hidden><option value="list" selected>列表</option><option value="heat">熱力圖</option></select>
-      <select id="liveSort" aria-label="排序方式" hidden><option value="fn" selected>淨流入</option><option value="fn5">近 5 分鐘</option><option value="v">成交值</option><option value="r">比平常</option><option value="p">漲跌幅</option></select>
+      <select id="liveSort" aria-label="排序方式" hidden><option value="fn" selected>淨流入</option><option value="fn5">近 5 分鐘</option><option value="v">成交值</option><option value="r">比平常</option></select>
     </div>
     <div class="rank" id="liveRank"></div>
     <div id="liveHeatWrap" hidden><div class="zoombar" id="liveZoom"></div><div class="heat" id="liveHeat"></div><div class="legend" id="liveHeatLegend"></div></div>
