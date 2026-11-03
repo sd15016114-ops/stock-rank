@@ -206,6 +206,7 @@ footer a{color:var(--accent)}
 .det .ltop td{padding:6px 4px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
 .det .ltop td.l{text-align:left;white-space:normal}
 .det .ltop tr:last-child td{border-bottom:0}
+.det .ltop tr.lh td{font-size:12px;color:var(--muted);padding-bottom:4px}
 .det .ltop small{color:var(--muted);margin-left:4px}
 @media (max-width:700px){ #liveRank .lpc{display:none} }
 #liveRank table.lbars td.who{width:1%;min-width:7.5em}
@@ -214,6 +215,16 @@ footer a{color:var(--accent)}
 .lbar i{flex:none;height:100%;min-width:3px;border-radius:3px;background:var(--muted);opacity:.85}
 .lbar i.up{background:var(--up)} .lbar i.down{background:var(--down)} .lbar i.flat{opacity:.35}
 .lbar span{font-weight:700;white-space:nowrap}
+.lbar.dv{display:grid;grid-template-columns:1fr 1fr 84px;gap:0}
+.lbar.dv .neg,.lbar.dv .pos{height:100%;display:flex}
+.lbar.dv .neg{justify-content:flex-end;border-right:1px solid var(--muted)}
+.lbar.dv .pos{justify-content:flex-start}
+.lbar.dv i{height:100%}
+.lbar.dv .neg i{border-radius:3px 0 0 3px} .lbar.dv .pos i{border-radius:0 3px 3px 0}
+.lbar.dv span{text-align:right}
+.det .nbars{position:relative;height:120px;margin-top:4px;border-bottom:0;background:linear-gradient(var(--rule),var(--rule)) 0 50%/100% 1px no-repeat}
+.det .nbars i{position:absolute;border-radius:2px}
+.det .nbars i.up{background:var(--up)} .det .nbars i.down{background:var(--down)}
 .lkey{float:right;font-size:12px;color:var(--muted)}
 .lkey i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 8px;vertical-align:-1px}
 .lkey i.up{background:var(--up)} .lkey i.down{background:var(--down)}
@@ -300,7 +311,7 @@ footer a{color:var(--accent)}
       <div class="seg" id="liveSortSeg" role="group" aria-label="排序方式"></div>
       <div class="seg" id="liveViewSeg" role="group" aria-label="檢視方式"></div>
       <select id="liveView" aria-label="檢視方式" hidden><option value="list" selected>列表</option><option value="heat">熱力圖</option></select>
-      <select id="liveSort" aria-label="排序方式" hidden><option value="v" selected>成交值</option><option value="r">比平常</option><option value="f">近 5 分鐘</option><option value="p">漲跌幅</option></select>
+      <select id="liveSort" aria-label="排序方式" hidden><option value="fn" selected>淨流入</option><option value="fn5">近 5 分鐘</option><option value="v">成交值</option><option value="r">比平常</option><option value="p">漲跌幅</option></select>
     </div>
     <div class="rank" id="liveRank"></div>
     <div id="liveHeatWrap" hidden><div class="zoombar" id="liveZoom"></div><div class="heat" id="liveHeat"></div><div class="legend" id="liveHeatLegend"></div></div>
@@ -593,29 +604,42 @@ function hm(iso){ var m = /T(\d\d:\d\d)/.exec(iso||''); return m ? m[1] : ''; }
 function ratioOf(g){ return g.a ? g.s/g.a : null; }
 function pctTxt(p){ return p==null ? '—' : (p>0?'▲ ':p<0?'▼ ':'')+fix(Math.abs(p),2)+'%'; }
 function pcls(p){ return p>0 ? 'up' : p<0 ? 'down' : ''; }
+function netBars(g, d){
+  var h = g.hn || [], ts = d.ts || [], st = [];
+  for(var i=0; i<h.length; i++) st.push(h[i]-(i ? h[i-1] : 0));
+  if(st.length<2) return '';
+  var mx = Math.max.apply(null, st.map(Math.abs).concat(1));
+  return '<div class="cap"><span><b>每 5 分鐘淨流入</b>（紅：流入、綠：流出）</span><span>累積 <b class="'+lotsCls(g.fn)+'">'+yiSigned(g.fn||0)+'</b> 億元</span></div>'
+    + '<div class="nbars" role="img" aria-label="'+esc(g.n)+'每 5 分鐘淨流入">'+st.map(function(v,i){
+      var hgt = Math.max(1, Math.abs(v)/mx*50).toFixed(1);
+      return '<i class="'+(v>=0?'up':'down')+'" style="height:'+hgt+'%;'+(v>=0?'bottom:50%':'top:50%')+';left:'+(i/st.length*100).toFixed(2)+'%;width:calc('+(100/st.length).toFixed(2)+'% - 2px)" title="'+(ts[i]||'')+'　'+yiSigned(v*1e6)+' 億元"></i>'; }).join('')+'</div>'
+    + '<div class="axis"><span>09:00</span><span>'+(ts[ts.length-1]||'')+'</span></div>';
+}
 function liveDetail(g, d){
   var h = g.h || [], ts = d.ts || [], steps = [];
   for(var i=0; i<h.length; i++) steps.push(Math.max(0, h[i]-(i ? h[i-1] : 0)));
   var mx = Math.max.apply(null, steps.concat(1)), out = '<div class="box">';
-  if(steps.length>1){
+  if(g.hn && g.hn.length>1) out += netBars(g, d);
+  else if(steps.length>1){
     out += '<div class="cap"><span><b>每 5 分鐘流進的成交值</b></span><span>最高 <b>'+yi(mx*1e6)+'</b> 億元'+(ts.length?'（'+ts[steps.indexOf(mx)]+'）':'')+'</span></div>'
       + '<div class="bars" role="img" aria-label="'+esc(g.n)+'每 5 分鐘成交值">'+steps.map(function(v,i){
         return '<i'+(i===steps.length-1?' class="now"':'')+' style="height:'+Math.max(2, v/mx*100).toFixed(1)+'%" title="'+(ts[i]||'')+'　'+yi(v*1e6)+' 億元"></i>'; }).join('')+'</div>'
       + '<div class="axis"><span>09:00</span><span>'+(ts[ts.length-1]||'')+'</span></div>';
   }
   var cells = [['板塊漲跌', '<span class="'+pcls(g.p)+'">'+pctTxt(g.p)+'</span>'], ['成交值', yi(g.v)+' 億元'], ['占全市場', fix(g.s,1)+'%'],
-    ['平常占比', g.a!=null ? fix(g.a,1)+'%' : '—'], ['上漲／下跌', '<span class="up">'+g.up+'</span>／<span class="down">'+g.dn+'</span> 檔']];
+    ].concat(g.fn!=null ? [['流入', '<span class="up">'+yi(g.fi)+' 億元</span>'], ['流出', '<span class="down">'+yi(g.fo)+' 億元</span>'], ['淨流入', '<span class="'+lotsCls(g.fn)+'">'+yiSigned(g.fn)+' 億元</span>']] : []).concat([
+    ['平常占比', g.a!=null ? fix(g.a,1)+'%' : '—'], ['上漲／下跌', '<span class="up">'+g.up+'</span>／<span class="down">'+g.dn+'</span> 檔']]);
   out += '<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>';
   if(g.top && g.top.length){
-    out += '<table class="ltop">'+g.top.slice(0, LIST_TOP_N).map(function(t){
-      return '<tr><td class="l"><b>'+esc(t[1])+'</b><small>'+esc(t[0])+'</small></td><td>'+price(t[4])+'</td><td class="'+pcls(t[3])+'">'+pctTxt(t[3])+'</td><td>'+yi(t[2])+' 億</td><td class="shr">'+(g.v ? fix(t[2]/g.v*100,0) : 0)+'%</td></tr>';
+    out += '<table class="ltop"><tr class="lh"><td class="l">成交值前 '+Math.min(LIST_TOP_N, g.top.length)+' 檔</td><td>成交價</td><td>漲跌</td><td>成交值</td><td>'+(g.top[0][5]!=null?'淨流入':'占板塊')+'</td></tr>'+g.top.slice(0, LIST_TOP_N).map(function(t){
+      return '<tr><td class="l"><b>'+esc(t[1])+'</b><small>'+esc(t[0])+'</small></td><td>'+price(t[4])+'</td><td class="'+pcls(t[3])+'">'+pctTxt(t[3])+'</td><td>'+yi(t[2])+' 億</td>'+(t[5]!=null ? '<td class="'+lotsCls(t[5])+'">'+yiSigned(t[5])+'</td>' : '<td class="shr">'+(g.v ? fix(t[2]/g.v*100,0) : 0)+'%</td>')+'</tr>';
     }).join('')+'</table>';
   }
   return out+'</div>';
 }
 function renderLive(){
   var d = LIVE, kind = $('liveKind').value, sort = $('liveSort').value, KN = kind==='th' ? '概念股' : '產業';
-  $('liveLead').textContent = '把上市櫃全部股票依'+KN+'加總盤中的累積成交值。「比平常」是目前占全市場成交值的比重，除以前 '+((d&&d.base_days)||20)+' 個交易日的平均占比，1.5 倍以上代表資金明顯往這裡集中；「近 5 分鐘」是最近 5 分鐘流進這個板塊的成交值。點任一列可以看資金進場的節奏與成交值最大的個股。';
+  $('liveLead').textContent = '把上市櫃全部股票依'+KN+'加總盤中的累積成交值。「比平常」是目前占全市場成交值的比重，除以前 '+((d&&d.base_days)||20)+' 個交易日的平均占比，1.5 倍以上代表資金明顯往這裡集中；「淨流入」是每檔股票每分鐘新增的成交值，這一分鐘價格上漲算流入、下跌算流出，加總後相減；「近 5 分鐘」是最近 5 分鐘的淨流入。點任一列可以看資金進出的節奏與成交值最大的個股。';
   syncSeg($('liveKindSeg'), true); syncSeg($('liveSortSeg'), true);
   if(!d){
     $('liveSt').innerHTML = ''; $('liveSums').innerHTML = '';
@@ -629,12 +653,13 @@ function renderLive(){
     + (!isToday && !d.mock && inSession() ? '<span>今天的盤中資料還沒開始，先顯示上一個交易日收盤的結果。</span>' : '');
   var list = (d[kind]||[]).slice(), flowTop = null, hotTop = null;
   list.forEach(function(g){
-    if(g.f!=null && (!flowTop || g.f>flowTop.f)) flowTop = g;
+    if(g.fn5!=null && (!flowTop || g.fn5>flowTop.fn5)) flowTop = g;
     var r = ratioOf(g); if(r!=null && g.s>=1 && (!hotTop || r>ratioOf(hotTop))) hotTop = g;
   });
   var mk = d.markets || {};
   var cards = [['全市場累積成交值', yi(d.total)+'<small>億元</small>', '上市 '+yi(mk['上市']||0)+' 億、上櫃 '+yi(mk['上櫃']||0)+' 億']];
-  if(d.flow!=null) cards.push(['近 '+(d.flow_min||5)+' 分鐘成交值', yi(d.flow)+'<small>億元</small>', flowTop ? '流入最多：'+esc(flowTop.n)+'（'+fix(flowTop.fs,1)+'%）' : '']);
+  if(d.fi!=null) cards.push(['全市場淨流入', '<span class="'+lotsCls(d.fi-d.fo)+'">'+yiSigned(d.fi-d.fo)+'</span><small>億元</small>', '流入 '+yi(d.fi)+' 億、流出 '+yi(d.fo)+' 億'+(flowTop && flowTop.fn5>0 ? '；近 '+(d.flow_min||5)+' 分鐘流入最多：'+esc(flowTop.n) : '')]);
+  else if(d.flow!=null) cards.push(['近 '+(d.flow_min||5)+' 分鐘成交值', yi(d.flow)+'<small>億元</small>', '']);
   if(hotTop) cards.push(['比平常最熱的'+KN, esc(hotTop.n), '占 '+fix(hotTop.s,1)+'%，平常 '+fix(hotTop.a,1)+'%（'+fix(ratioOf(hotTop),1)+'×）', true]);
   cards.push(['漲跌家數', '<span class="up">'+d.up+'</span><small>漲</small> <span class="down">'+d.dn+'</span><small>跌</small>', '有成交 '+(d.count||0).toLocaleString('zh-TW')+' 檔']);
   $('liveSums').innerHTML = cards.map(function(c){
@@ -658,22 +683,26 @@ function renderLive(){
       + (kind==='th' ? '一檔股票可能同時屬於好幾個題材。' : '');
     return;
   }
-  var key = {v:function(g){ return g.v; }, r:function(g){ var r = ratioOf(g); return r==null || g.s<0.05 ? -1 : r; }, f:function(g){ return g.f==null ? -Infinity : g.f; }, p:function(g){ return g.p==null ? -Infinity : g.p; }}[sort];
+  var key = {v:function(g){ return g.v; }, r:function(g){ var r = ratioOf(g); return r==null || g.s<0.05 ? -1 : r; }, fn:function(g){ return g.fn==null ? g.v : g.fn; }, fn5:function(g){ return g.fn5==null ? -Infinity : g.fn5; }, p:function(g){ return g.p==null ? -Infinity : g.p; }}[sort];
   list.sort(function(a,b){ return key(b)-key(a); });
   var max = Math.max.apply(null, list.map(function(g){ return g.v; }).concat(1)), hasF = d.flow!=null;
   /* 每一列只畫一條：長度是目前選的排序指標，顏色是板塊漲跌（紅漲綠跌） */
   var M = {v:{h:'成交值', val:function(g){ return g.v; }, txt:function(g){ return yi(g.v)+' 億'; }},
            r:{h:'比平常', val:function(g){ var r = ratioOf(g); return r==null ? 0 : r; }, txt:function(g){ var r = ratioOf(g); return r==null ? '—' : fix(r, r>=10?0:1)+'×'; }},
-           f:{h:'近 5 分鐘流入', val:function(g){ return Math.max(0, g.f||0); }, txt:function(g){ return yi(g.f||0)+' 億'; }},
+           fn:{h:'淨流入', dv:true, val:function(g){ return g.fn||0; }, txt:function(g){ return yiSigned(g.fn||0)+' 億'; }},
+           fn5:{h:'近 5 分鐘淨流入', dv:true, val:function(g){ return g.fn5||0; }, txt:function(g){ return yiSigned(g.fn5||0)+' 億'; }},
            p:{h:'漲跌幅', val:function(g){ return Math.abs(g.p||0); }, txt:function(g){ return pctTxt(g.p); }}}[sort];
-  var top = Math.max.apply(null, list.map(M.val).concat(0)) || 1;
+  if(M.dv && list.length && list[0].fn==null) M = {h:'成交值', val:function(g){ return g.v; }, txt:function(g){ return yi(g.v)+' 億'; }};   /* 舊資料沒有流入流出 */
+  var top = Math.max.apply(null, list.map(function(g){ return Math.abs(M.val(g)); }).concat(0)) || 1;
   $('liveRank').innerHTML = !list.length ? '<div class="empty">還沒有成交資料。</div>'
-    : '<table class="lbars"><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="l">'+M.h+'<span class="lkey"><i class="up"></i>漲 <i class="down"></i>跌</span></th></tr>'
+    : '<table class="lbars"><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="l">'+M.h+'<span class="lkey">'+(M.dv ? '<i class="up"></i>流入 <i class="down"></i>流出' : '<i class="up"></i>漲 <i class="down"></i>跌')+'</span></th></tr>'
     + list.map(function(g,i){
       var k = kind+':'+g.n, isOpen = LIVE_OPEN===k, w = M.val(g)/top;
       return '<tr class="row lrow'+(i<3?' top3':'')+(isOpen?' open':'')+'" data-k="'+esc(k)+'" tabindex="0" role="button" aria-expanded="'+isOpen+'"><td class="no l">'+(i+1)+'</td>'
         + '<td class="who l"><b>'+esc(g.n)+'</b><small>'+g.k+' 檔</small></td>'
-        + '<td class="lb"><div class="lbar"><i class="'+(pcls(g.p)||'flat')+'" style="width:calc((100% - 78px) * '+w.toFixed(4)+')"></i><span>'+M.txt(g)+'</span></div></td></tr>'
+        + '<td class="lb">'+(M.dv
+          ? '<div class="lbar dv"><div class="neg">'+(w<0 ? '<i class="down" style="width:'+(-w*100).toFixed(2)+'%"></i>' : '')+'</div><div class="pos">'+(w>0 ? '<i class="up" style="width:'+(w*100).toFixed(2)+'%"></i>' : '')+'</div><span class="'+lotsCls(w)+'">'+M.txt(g)+'</span></div>'
+          : '<div class="lbar"><i class="'+(pcls(g.p)||'flat')+'" style="width:calc((100% - 78px) * '+w.toFixed(4)+')"></i><span>'+M.txt(g)+'</span></div>')+'</td></tr>'
         + (isOpen ? '<tr class="det"><td colspan="9">'+liveDetail(g, d)+'</td></tr>' : '');
     }).join('')+'</table>';
   $('liveNote').textContent = kind==='th'

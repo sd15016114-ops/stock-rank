@@ -58,4 +58,19 @@ assert L.amount_scale([S(1000 * 10, 1000, 10)]) == 1000
 b = L.baseline(L.load_imap(), L.load_themes())
 assert b["days"] > 0 and abs(sum(b["ind"].values()) - 100) < 0.5, sum(b["ind"].values())
 assert not L.trading_day(datetime(2026, 10, 24).date())                    # 星期六
+
+# 資金流入流出：每分鐘價格方向法
+f = L.Flows()
+f.update({"A": {"v": 100, "p": 1.0, "c": 10.0, "m": "上市"}, "B": {"v": 50, "p": -1.0, "c": 20.0, "m": "上市"}, "C": {"v": 0, "p": None, "c": None, "m": "上市"}})
+assert f.io == {"A": [100, 0], "B": [0, 50]}, f.io                        # 第一次看到：照當天漲跌
+f.update({"A": {"v": 130, "p": 0.5, "c": 9.9, "m": "上市"}, "B": {"v": 80, "p": -1.0, "c": 20.0, "m": "上市"}})
+assert f.io == {"A": [100, 30], "B": [0, 80]}, f.io                       # A 價格下跌→流出；B 價格沒變→沿用上次方向
+f.update({"A": {"v": 150, "p": 0.6, "c": 10.1, "m": "上市"}, "B": {"v": 80, "p": -1.0, "c": 20.5, "m": "上市"}})
+assert f.io == {"A": [120, 30], "B": [0, 80]}, f.io                       # B 沒有新成交不計
+gn = L.group_net({"2330": [100, 40], "2382": [10, 30]}, groups)
+assert gn["ind"] == {"半導體": 60, "電腦及週邊": -20} and gn["th"] == {"AI伺服器": 40}, gn
+p2 = L.aggregate(quotes, {}, groups, base, at, "open", past, None, themes, {"2330": [500, 100], "2303": [0, 200]}, {"ind": {"半導體": 150}})
+semi = p2["ind"][0]
+assert semi["fi"] == 500 and semi["fo"] == 300 and semi["fn"] == 200 and semi["fn5"] == 50, semi
+assert semi["top"][0][5] == 400 and semi["top"][1][5] == -200 and p2["fi"] == 500 and p2["fo"] == 300
 print("全部通過")
