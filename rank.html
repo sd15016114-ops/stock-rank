@@ -281,10 +281,10 @@ footer a{color:var(--accent)}
 
   <section class="intro">
     <h1>排行與籌碼</h1>
-    <p>台股、美股每天收盤後的成交值排行與法人籌碼，可以切換日期回看過去 60 個交易日。</p>
+    <p>台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。</p>
     <div class="updated" id="updated">資料載入中…</div>
     <div class="pickrow">
-      <div class="seg modes" role="group" aria-label="市場"><i class="thumb" aria-hidden="true"></i>
+      <div class="seg modes" role="group" aria-label="市場" style="display:none"><i class="thumb" aria-hidden="true"></i>
       <button type="button" data-mode="tw" aria-pressed="true">台股</button><button type="button" data-mode="us" aria-pressed="false">美股</button>
     </div>
       <div class="seg" id="boardSeg" role="group" aria-label="排行種類"></div>
@@ -1039,7 +1039,13 @@ function remember(){
 var BOOTED = false;
 function setMode(m){
   MODE = MODES[m] ? m : 'tw';
-  if(window.navMark) navMark(MODE==='us' ? 'us' : 'rank');               /* 左側選單亮起來的跟著台股／美股切換 */
+  if(window.navMark) navMark(MODE==='us' ? 'us' : 'rank');
+  /* 台股、美股由左側選單分開，頁面標題跟著換 */
+  document.querySelector('.intro h1').textContent = MODE==='us' ? '美股' : '排行與籌碼';
+  document.querySelector('.intro p').textContent = MODE==='us'
+    ? 'NYSE、Nasdaq 每個交易日收盤後的成交值排行，台灣時間下午一點多更新，可以切換日期回看過去的排行。'
+    : '台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。';
+  document.title = (MODE==='us' ? '美股' : '排行與籌碼')+'｜股市動能排行';               /* 左側選單亮起來的跟著台股／美股切換 */
   if(typeof paintCalBtn==='function') paintCalBtn();
   $('marketSeg').hidden = MODE!=='tw';
   $('marketSeg').style.display = MODE==='tw' ? '' : 'none';
@@ -1084,7 +1090,6 @@ Promise.all([load('tw.json').catch(nul), load('us.json').catch(nul), load('tw_da
   });
   if(!res[0] && !res[1]) $('updated').textContent = '資料載入失敗，請稍後重新整理。';
   setMode(location.hash==='#us' ? 'us' : 'tw');
-  if(LIVE_PAGE){ document.querySelector('.intro h1').textContent = '盤中資金'; document.querySelector('.intro p').textContent = '交易日 9:00 到 13:30，每分鐘整理全市場的資金流向：哪些產業、概念股有錢流入或流出，熱力圖看漲跌與成交值分布，點板塊可以放大看裡面的個股。'; }
 });
 </script>
 </body>
