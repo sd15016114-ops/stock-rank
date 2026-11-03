@@ -135,11 +135,50 @@ def group_values(quotes, groups):
     return out
 
 
-def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, themes=None):
+class Flows:
+    """資金流入／流出（每分鐘價格方向法）：每檔股票這一分鐘新增的成交值，成交價比上一分鐘高算流入、低算流出，
+    價格沒變就沿用這檔上一次的方向。第一次看到的時候（開盤，或程式中途才啟動），先用當天的漲跌決定方向。
+    這是用每分鐘快照推估的「主動買／主動賣」，不是逐筆內外盤，所以是近似值。"""
+
+    def __init__(self):
+        self.last = {}          # 代號 → (累積成交值, 成交價, 方向)
+        self.io = {}            # 代號 → [流入, 流出]（元）
+
+    def update(self, quotes):
+        for code, q in quotes.items():
+            v, c = q["v"], q.get("c")
+            if v <= 0 or c is None:
+                continue
+            pv, pc, pd = self.last.get(code, (0, None, 0))
+            if pc is None:
+                p = q.get("p") or 0
+                d = 1 if p > 0 else -1 if p < 0 else 0
+            else:
+                d = 1 if c > pc else -1 if c < pc else pd
+            dv = v - pv
+            if dv > 0 and d:
+                self.io.setdefault(code, [0, 0])[0 if d > 0 else 1] += dv
+            self.last[code] = (v, c, d)
+
+
+def group_net(io, groups):
+    """各板塊目前的累積淨流入：{"ind": {名稱: 值}, "th": {...}}"""
+    out = {"ind": {}, "th": {}}
+    for code, (fi, fo) in io.items():
+        ind, ths = groups(code)
+        out["ind"][ind] = out["ind"].get(ind, 0) + fi - fo
+        for t in ths:
+            out["th"][t] = out["th"].get(t, 0) + fi - fo
+    return out
+
+
+def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, themes=None, io=None, past_net=None):
     """把每檔的快照整理成網頁用的格式。
     quotes：{代號: {"v": 累積成交值(元), "p": 漲跌幅(%), "c": 成交價, "m": 市場}}
     past：FLOW_MIN 分鐘前的 (板塊成交值, 全市場成交值)，用來算近幾分鐘的資金流向
-    hist：{"ts": [...], "ind": {名稱: [...]}, "th": {...}}，每 SAMPLE_MIN 分鐘的累積成交值（百萬元）"""
+    hist：{"ts": [...], "ind": {名稱: [...]}, "th": {...}, "net": {"ind": ..., "th": ...}}，每 SAMPLE_MIN 分鐘的累積成交值與累積淨流入（百萬元）
+    io：Flows.io，每檔的累積 [流入, 流出]；past_net：FLOW_MIN 分鐘前各板塊的累積淨流入"""
+    io = io or {}
     total = sum(q["v"] for q in quotes.values())
     pv, ptotal = past if past else (None, None)
     flow = total - ptotal if ptotal is not None else None
@@ -167,12 +206,21 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
                  "p": round(sum(p * x for p, x in w) / wsum, 2) if wsum else None,
                  "up": sum(1 for c in codes if (quotes[c].get("p") or 0) > 0),
                  "dn": sum(1 for c in codes if (quotes[c].get("p") or 0) < 0),
-                 "top": [[c, names.get(c, c), quotes[c]["v"], quotes[c].get("p"), quotes[c].get("c")] for c in codes[:TOP_N]]}
+                 "top": [[c, names.get(c, c), quotes[c]["v"], quotes[c].get("p"), quotes[c].get("c"),
+                          io[c][0] - io[c][1] if c in io else 0] for c in codes[:TOP_N]]}
+            if io:
+                g["fi"] = sum(io[c][0] for c in codes if c in io)       # 累積流入
+                g["fo"] = sum(io[c][1] for c in codes if c in io)       # 累積流出
+                g["fn"] = g["fi"] - g["fo"]                             # 淨流入
+                if past_net is not None:
+                    g["fn5"] = g["fn"] - past_net.get(kind, {}).get(name, 0)   # 近 FLOW_MIN 分鐘淨流入
             if pv is not None:
                 g["f"] = v - pv.get(kind, {}).get(name, 0)          # 近 FLOW_MIN 分鐘流入的成交值
                 g["fs"] = round(g["f"] / flow * 100, 3) if flow else 0  # 占這段時間全市場成交值的比重
             if hist and name in hist.get(kind, {}):
                 g["h"] = hist[kind][name]
+            if hist and name in hist.get("net", {}).get(kind, {}):
+                g["hn"] = hist["net"][kind][name]
             rows.append(g)
         out[kind] = sorted(rows, key=lambda g: -g["v"])
     mk = {}
@@ -180,6 +228,7 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
         mk[q["m"]] = mk.get(q["m"], 0) + q["v"]
     return {"date": at.date().isoformat(), "t": at.isoformat(timespec="seconds"), "phase": phase,
             "total": total, "flow": flow, "flow_min": FLOW_MIN, "markets": mk,
+            "fi": sum(x[0] for x in io.values()) if io else None, "fo": sum(x[1] for x in io.values()) if io else None,
             "count": sum(1 for q in quotes.values() if q["v"] > 0),
             "up": sum(1 for q in quotes.values() if (q.get("p") or 0) > 0),
             "dn": sum(1 for q in quotes.values() if (q.get("p") or 0) < 0),
@@ -187,16 +236,21 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
             "ts": (hist or {}).get("ts", []), "ind": out["ind"], "th": out["th"]}
 
 
-def add_sample(hist, at, gv, kinds_names):
-    """每 SAMPLE_MIN 分鐘記一次各板塊的累積成交值（百萬元）；中途才出現的板塊前面補 0"""
+def add_sample(hist, at, gv, kinds_names, gn=None):
+    """每 SAMPLE_MIN 分鐘記一次各板塊的累積成交值與累積淨流入（百萬元）；中途才出現的板塊前面補 0"""
     hist["ts"].append(at.strftime("%H:%M"))
     n = len(hist["ts"])
+    net = hist.setdefault("net", {"ind": {}, "th": {}})
     for kind in ("ind", "th"):
         names = set(hist[kind]) | set(gv[kind]) | set(kinds_names.get(kind, []))
         for name in names:
             seq = hist[kind].setdefault(name, [])
             seq.extend([0] * (n - 1 - len(seq)))
             seq.append(round(gv[kind].get(name, 0) / 1e6))
+            if gn is not None:
+                sn = net[kind].setdefault(name, [])
+                sn.extend([0] * (n - 1 - len(sn)))
+                sn.append(round(gn[kind].get(name, 0) / 1e6))
 
 
 # ---------------------------------------------------------------- Supabase
@@ -326,6 +380,7 @@ def run():
     api, relogin = sj_login(), 0
     cons, names = sj_contracts(api, uni)
     hist, recent, scale, fails, last = {"ts": [], "ind": {}, "th": {}}, deque(maxlen=FLOW_MIN + 3), None, 0, None
+    flows = Flows()
     wait_until(datetime.combine(today, OPEN_T, TPE) + timedelta(seconds=20))
     while now().time() < END_T:
         at = now().replace(second=0, microsecond=0)
@@ -333,16 +388,18 @@ def run():
             quotes, scale = sj_quotes(api, cons, uni, scale)
             fails = 0
             gv = group_values(quotes, groups)
+            flows.update(quotes)
+            gn = group_net(flows.io, groups)
             total = sum(q["v"] for q in quotes.values())
-            past = None
-            for (m, g, t) in recent:                 # 找最接近 FLOW_MIN 分鐘前的那一筆
+            past = past_net = None
+            for (m, g, t, n) in recent:              # 找最接近 FLOW_MIN 分鐘前的那一筆
                 if (at - m).total_seconds() >= FLOW_MIN * 60 - 5:
-                    past = (g, t)
-            recent.append((at, gv, total))
+                    past, past_net = (g, t), n
+            recent.append((at, gv, total, gn))
             if at.minute % SAMPLE_MIN == 0 or not hist["ts"] or (at.time() >= CLOSE_T and hist["ts"][-1] < "13:30"):
-                add_sample(hist, at, gv, {"th": list(themes)})
+                add_sample(hist, at, gv, {"th": list(themes)}, gn)
             phase = "closed" if at.time() >= CLOSE_T else "open"
-            last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes)
+            last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes, flows.io, past_net)
             save_local(last)
             ok = sb_put(last)
             log("%s 全市場 %.0f 億%s %s" % (phase, total / 1e8, "" if ok else "（未寫入 Supabase）", usage(api) if at.minute % 30 == 0 else ""))
@@ -454,18 +511,25 @@ def mock(date=None):
             for code, close, value in cur[mk]:
                 f = min(1, frac(m) * wiggle(code, m)) if m < 270 else 1
                 pc = pclose.get(code)
-                q[code] = {"v": int(value * f), "p": round((close / pc - 1) * 100, 2) if pc and close else None, "c": close, "m": mk}
+                h = sum(ord(ch) for ch in code)
+                c = round(pc + (close - pc) * min(1, m / 200) + pc * 0.006 * math.sin(m / 9 + h), 2) if pc and close else close
+                q[code] = {"v": int(value * f), "p": round((c / pc - 1) * 100, 2) if pc and c else None, "c": c, "m": mk}
         return q
 
     day = datetime.fromisoformat(cur["date"]).replace(tzinfo=TPE)
     end_m = 122                                    # 11:02
     hist = {"ts": [], "ind": {}, "th": {}}
-    for m in list(range(5, end_m, SAMPLE_MIN)):
-        add_sample(hist, day + timedelta(hours=9, minutes=m), group_values(quotes_at(m), groups), {"th": list(themes)})
+    flows, past, past_net = Flows(), None, None
+    for m in range(1, end_m + 1):                  # 每分鐘跑一次，跟正式執行一樣累積流入流出
+        q = quotes_at(m)
+        flows.update(q)
+        if m == end_m - FLOW_MIN:
+            past = (group_values(q, groups), sum(x["v"] for x in q.values()))
+            past_net = group_net(flows.io, groups)
+        if m % SAMPLE_MIN == 0 and m < end_m:
+            add_sample(hist, day + timedelta(hours=9, minutes=m), group_values(q, groups), {"th": list(themes)}, group_net(flows.io, groups))
     at = day + timedelta(hours=9, minutes=end_m)
-    pq = quotes_at(end_m - FLOW_MIN)
-    past = (group_values(pq, groups), sum(q["v"] for q in pq.values()))
-    payload = aggregate(quotes_at(end_m), names, groups, base, at, "open", past, hist, themes)
+    payload = aggregate(quotes_at(end_m), names, groups, base, at, "open", past, hist, themes, flows.io, past_net)
     payload["mock"] = True
     out = DATA / "live_tw_mock.json"
     out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
