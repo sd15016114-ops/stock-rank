@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, holidays, probe, probe-live, probe-inst, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
+        options: [update, holidays, probe, probe-live, probe-nasdaq, probe-inst, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -25,7 +25,7 @@ permissions:
   contents: write
 
 concurrency:              # 同一時間只跑一個，避免兩次執行同時提交而衝突
-  group: fetch
+  group: ${{ github.event.inputs.task == 'probe-nasdaq' && 'probe-nasdaq' || 'fetch' }}   # 實測不要跟盤後更新排隊
   cancel-in-progress: false
 
 jobs:
@@ -56,6 +56,9 @@ jobs:
       - name: 實測法人買賣金額
         if: inputs.task == 'probe-inst'
         run: python scraper/probe_inst.py
+      - name: 實測 Nasdaq 篩選器盤中更新
+        if: inputs.task == 'probe-nasdaq'
+        run: python scraper/probe_nasdaq_live.py 30
       - name: 實測資料來源
         if: inputs.task == 'probe'
         run: python scraper/probe.py
@@ -79,7 +82,7 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-inst' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
+        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-nasdaq' && inputs.task != 'probe-inst' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }} ${{ inputs.task == 'holidays' && 'holidays' || '' }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
