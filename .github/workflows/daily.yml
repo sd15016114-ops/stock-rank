@@ -58,7 +58,7 @@ jobs:
         run: python scraper/probe_inst.py
       - name: 實測 Nasdaq 篩選器盤中更新
         if: inputs.task == 'probe-nasdaq'
-        run: python scraper/probe_nasdaq_live.py 30
+        run: python scraper/probe_nasdaq_live.py ${{ inputs.days == '60' && '30' || inputs.days }}
       - name: 實測資料來源
         if: inputs.task == 'probe'
         run: python scraper/probe.py
