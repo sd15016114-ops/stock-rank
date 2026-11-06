@@ -294,8 +294,9 @@ $('moreLink').href = pageUrl('rank.html');
 function syncSeg(seg, still){
   var on = seg.querySelector('button[aria-pressed=true]'), th = seg.querySelector('.thumb');
   if(!on || !th || !on.offsetWidth) return;
-  if(still) seg.classList.add('still');
-  th.style.width = on.offsetWidth+'px'; th.style.transform = 'translateX('+on.offsetLeft+'px)';
+  if(still && !window.jelly) seg.classList.add('still');   /* 果凍效果會自己處理「不要動畫」，這裡加 still 會打斷正在跑的動畫 */
+  if(window.jelly) jelly(th, on.offsetLeft, on.offsetLeft+on.offsetWidth, still);
+  else{ th.style.width = on.offsetWidth+'px'; th.style.transform = 'translateX('+on.offsetLeft+'px)'; }
   if(still){ void th.offsetWidth; seg.classList.remove('still'); }
 }
 var STATE = {kind:'ind', sort:'fn', rkind:'ind', view:'list'};

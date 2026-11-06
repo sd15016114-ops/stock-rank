@@ -1029,9 +1029,9 @@ window.addEventListener('resize', function(){ renderHeat(); if(isLive() && $('li
 function syncSeg(seg, still){
   var on = seg.querySelector('button[aria-pressed=true]'), thumb = seg.querySelector('.thumb');
   if(!on || !thumb || !on.offsetWidth) return;
-  if(still) seg.classList.add('still');
-  thumb.style.width = on.offsetWidth+'px';
-  thumb.style.transform = 'translateX('+on.offsetLeft+'px)';
+  if(still && !window.jelly) seg.classList.add('still');   /* 果凍效果會自己處理「不要動畫」，這裡加 still 會打斷正在跑的動畫 */
+  if(window.jelly) jelly(thumb, on.offsetLeft, on.offsetLeft+on.offsetWidth, still);
+  else{ thumb.style.width = on.offsetWidth+'px'; thumb.style.transform = 'translateX('+on.offsetLeft+'px)'; }
   if(still){ void thumb.offsetWidth; seg.classList.remove('still'); }
   /* 選項被捲到看不見時，自動捲回來 */
   if(on.offsetLeft < seg.scrollLeft || on.offsetLeft+on.offsetWidth > seg.scrollLeft+seg.clientWidth)

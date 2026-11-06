@@ -84,8 +84,50 @@
   +   '.tabbar a[aria-current]{color:var(--accent);font-weight:700}'
   +   '.tabbar a[aria-current] svg{color:var(--on-fill)}'
   + '}'
-  + '@media (prefers-reduced-motion: reduce){.side,.scrim,body{transition:none !important}}';
+  + '@media (prefers-reduced-motion: reduce){.side,.scrim,body{transition:none !important}}'
+  /* ===== 果凍效果：滑塊的前緣先跑、後緣晚一點跟上（移動時被拉長），到定點用彈簧曲線微微彈一下；按住時稍微壓扁 ===== */
+  + '@property --l{syntax:"<length>";inherits:false;initial-value:0px}'
+  + '@property --r{syntax:"<length>";inherits:false;initial-value:0px}'
+  + ':root{--spring:linear(0,.16 5%,.52 12%,.84 20%,1.02 28%,1.07 34%,1.06 40%,1.02 50%,.995 62%,.99 72%,1)}'
+  + '.seg .thumb,.tthumb{left:var(--l) !important;width:calc(var(--r) - var(--l)) !important;transform:none}'
+  + '.tthumb{top:var(--tt,0px)}'
+  + '.seg .thumb,.tthumb,.sthumb{transition:--l .5s var(--spring),--r .5s var(--spring),--t .5s var(--spring),--b .5s var(--spring),scale .25s var(--spring)}'
+  + '.seg.press .thumb,.tabbar.press .tthumb,.side nav.press .sthumb{scale:.94}'
+  + '.theme i{transition:transform .55s var(--spring) !important}'
+  + '@property --t{syntax:"<length>";inherits:false;initial-value:0px}'
+  + '@property --b{syntax:"<length>";inherits:false;initial-value:0px}'
+  + '.sthumb{top:var(--t) !important;height:calc(var(--b) - var(--t)) !important;transform:none !important}'
+  /* 底部分頁列：半透明毛玻璃，後面的內容隱約透出來 */
+  + '@media (max-width:599px){.tabbar{background:color-mix(in srgb,var(--sheet) 72%,transparent) !important;-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}'
+  +   '.tthumb{box-shadow:0 1px 4px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35)}}'
+  + '@media (prefers-reduced-motion: reduce){.seg .thumb,.tthumb,.sthumb{transition-timing-function:ease !important;transition-delay:0s !important}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+
+  /* 把滑塊的兩個邊移到 a～b。往哪邊走，那一邊先動、另一邊晚 70ms 才跟上，看起來就像果凍被拉長再彈回去 */
+  var LAG = 55;
+  function edges(el, a, b, still, vert){
+    var A = vert ? '--t' : '--l', B = vert ? '--b' : '--r';
+    var a0 = parseFloat(el.style.getPropertyValue(A)), b0 = parseFloat(el.style.getPropertyValue(B));
+    if(Math.abs(a0-a)<0.5 && Math.abs(b0-b)<0.5) return;   /* 已經在往這裡走（或已經到了），不要打斷正在跑的動畫 */
+    if(still || isNaN(a0)){
+      el.style.transitionProperty = 'none';
+      el.style.setProperty(A, a+'px'); el.style.setProperty(B, b+'px');
+      void el.offsetWidth; el.style.transitionProperty = '';
+      return;
+    }
+    var fwd = a > a0;                                 /* 往右（或往下）走 */
+    el.style.transitionDelay = vert
+      ? (fwd ? '0s,0s,'+LAG+'ms,0s,0s' : '0s,0s,0s,'+LAG+'ms,0s')
+      : (fwd ? LAG+'ms,0s,0s,0s,0s' : '0s,'+LAG+'ms,0s,0s,0s');
+    el.style.setProperty(A, a+'px'); el.style.setProperty(B, b+'px');
+  }
+  window.jelly = edges;
+  /* 按住按鈕時滑塊稍微壓扁 */
+  function pressable(root, sel){
+    root.addEventListener('pointerdown', function(e){ var g = e.target.closest(sel); if(g) g.classList.add('press'); });
+    ['pointerup','pointercancel','pointerleave'].forEach(function(t){ root.addEventListener(t, function(){ document.querySelectorAll('.press').forEach(function(x){ x.classList.remove('press'); }); }, true); });
+  }
+  pressable(document, '.seg');
 
   var burger = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   var side = document.createElement('aside');
@@ -140,9 +182,10 @@
     [tabs, side].forEach(function(el){ if(still) el.classList.add('still'); });
     if(t && t.offsetWidth){
       var r = t.querySelector('svg').getBoundingClientRect(), base = tabs.getBoundingClientRect();
-      tt.style.transform = 'translate('+(r.left-base.left)+'px,'+(r.top-base.top)+'px)';
+      tt.style.setProperty('--tt', (r.top-base.top)+'px');
+      edges(tt, r.left-base.left, r.right-base.left, still);
     }
-    if(a && a.offsetHeight){ st.style.height = a.offsetHeight+'px'; st.style.transform = 'translateY('+a.offsetTop+'px)'; }
+    if(a && a.offsetHeight) edges(st, a.offsetTop, a.offsetTop+a.offsetHeight, still, true);
     if(still){ void tabs.offsetWidth; void side.offsetWidth; requestAnimationFrame(function(){ tabs.classList.remove('still'); side.classList.remove('still'); }); }
   }
   window.navMark = function(id, still){
@@ -168,6 +211,7 @@
     setTimeout(function(){ location.href = href; }, 260);
   }
   tabs.addEventListener('click', onNav); side.addEventListener('click', onNav);
+  pressable(tabs, '.tabbar'); pressable(side, '.side nav');
   var isRank = /rank\.html/.test(location.pathname + location.search);
   window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : 'live', true);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ placeThumbs(true); });
