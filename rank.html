@@ -389,7 +389,19 @@ function pageUrl(file){
 /* 盤中資金搬到首頁了，舊的 rank.html#live 連結直接轉過去 */
 var LIVE_PAGE = false;
 if(location.hash==='#live') location.replace(pageUrl('index.html'));
-window.addEventListener('hashchange', function(){ if(location.hash==='#live') location.replace(pageUrl('index.html')); else location.reload(); });
+window.addEventListener('hashchange', function(){
+  if(location.hash==='#live'){ location.replace(pageUrl('index.html')); return; }
+  /* 成交值排行、法人籌碼、美股在同一頁：直接換內容，不重新載入 */
+  function apply(){
+    $('board').value = location.hash==='#chips' ? 'chips' : 'value';
+    setMode(location.hash==='#us' ? 'us' : 'tw'); remember();
+  }
+  /* 內容淡出、換好再淡入；選單上的滑塊同時滑到新的項目 */
+  var main = document.querySelector('.wrap'), id = {'#us':'us', '#chips':'chips'}[location.hash] || 'rank';
+  if(window.navMark) navMark(id);
+  main.style.transition = 'opacity .15s ease'; main.style.opacity = '0';
+  setTimeout(function(){ apply(); window.scrollTo({top:0}); main.style.opacity = '1'; }, 150);
+});
 function load(file){
   var remote = dataUrl(file), local = 'data/'+file;
   return remote ? getJSON(remote).catch(function(){ return getJSON(local); }) : getJSON(local);

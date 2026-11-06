@@ -35,7 +35,17 @@
   + '.side nav a span b{font-size:15px;font-weight:700}'
   + '.side nav a span small{font-size:12px;color:var(--muted)}'
   + '.side nav a:hover{background:var(--tint)}'
-  + '.side nav a[aria-current]{background:var(--fill);color:var(--on-fill)}'
+  + '.side nav{position:relative}'
+  + '.side nav a{position:relative;z-index:1;transition:color .25s}'
+  + '.side nav a[aria-current]{color:var(--on-fill)}'
+  + '.side nav a[aria-current]:hover{background:transparent}'
+  + '.sthumb{position:absolute;left:10px;right:10px;top:0;height:0;border-radius:12px;background:var(--fill);box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .32s cubic-bezier(.4,0,.2,1),height .32s cubic-bezier(.4,0,.2,1)}'
+  + '.tthumb{position:absolute;top:0;left:0;width:52px;height:26px;border-radius:999px;background:var(--fill);transition:transform .32s cubic-bezier(.4,0,.2,1)}'
+  + '.still .sthumb,.still .tthumb{transition:none !important}'
+  /* 換頁時整頁淡入淡出，選單本身不動（支援的瀏覽器才有） */
+  + '@view-transition{navigation:auto}'
+  + '.tabbar{view-transition-name:tabbar}.side{view-transition-name:side}'
+  + '::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}'
   + '.side nav a[aria-current] svg,.side nav a[aria-current] small{color:var(--on-fill)}'
   + '.side .foot{margin-top:auto;padding:14px 18px 18px;font-size:12px;line-height:1.6;color:var(--muted);white-space:normal}'
   + '.menubtn{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--rule);background:var(--tint);color:var(--ink);cursor:pointer;padding:0}'
@@ -69,10 +79,10 @@
   +   '.side,.scrim,header.top .menubtn{display:none !important}'
   +   'body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}'
   +   '.tabbar{display:flex;position:fixed;z-index:40;left:0;right:0;bottom:0;background:var(--sheet);border-top:1px solid var(--rule);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.06)}'
-  +   '.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;color:var(--muted);text-decoration:none;font-size:11px;font-weight:500}'
-  +   '.tabbar a svg{width:22px;height:22px}'
+  +   '.tabbar a{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;color:var(--muted);text-decoration:none;font-size:11px;font-weight:500;transition:color .25s}'
+  +   '.tabbar a svg{width:52px;height:26px;padding:2px 14px;box-sizing:border-box;transition:color .25s}'
   +   '.tabbar a[aria-current]{color:var(--accent);font-weight:700}'
-  +   '.tabbar a[aria-current] svg{background:var(--fill);color:var(--on-fill);border-radius:999px;padding:2px 14px;width:52px;box-sizing:border-box}'
+  +   '.tabbar a[aria-current] svg{color:var(--on-fill)}'
   + '}'
   + '@media (prefers-reduced-motion: reduce){.side,.scrim,body{transition:none !important}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
@@ -81,13 +91,13 @@
   var side = document.createElement('aside');
   side.className = 'side'; side.id = 'appSide'; side.setAttribute('aria-label', '主選單');
   side.innerHTML = '<div class="sb"><button type="button" class="menubtn" id="sideToggle" aria-label="收合選單" title="收合／展開選單">'+burger+'</button><b>股市動能排行</b></div>'
-    + '<nav>'+ITEMS.map(function(it){
+    + '<nav><i class="sthumb" aria-hidden="true"></i>'+ITEMS.map(function(it){
         return '<a id="nav-'+it.id+'" href="'+pageUrl(it.href)+'" title="'+it.label+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+it.icon+'</svg><span><b>'+it.label+'</b><small>'+it.sub+'</small></span></a>';
       }).join('')+'</nav>'
     + '<div class="foot">資料來源：證交所、櫃買中心、永豐金證券、Polygon。僅供參考，不構成投資建議。</div>';
   var tabs = document.createElement('nav');
   tabs.className = 'tabbar'; tabs.setAttribute('aria-label', '主選單');
-  tabs.innerHTML = ITEMS.map(function(it){
+  tabs.innerHTML = '<i class="tthumb" aria-hidden="true"></i>'+ITEMS.map(function(it){
     return '<a id="tab-'+it.id+'" href="'+pageUrl(it.href)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+it.icon+'</svg>'+it.short+'</a>';
   }).join('');
   document.body.appendChild(tabs);
@@ -123,12 +133,42 @@
   side.addEventListener('click', function(e){ if(e.target.closest('nav a') && !wide()) setOpen(false); });
 
   /* 目前在哪一頁：頁面可以呼叫 navMark('rank'|'us'|'live') 改亮起來的項目 */
-  window.navMark = function(id){
+  var CUR = null;
+  function placeThumbs(still){                       /* 把滑塊移到目前的項目，跟頁面上的滑動切換鈕同一種動畫 */
+    var t = document.getElementById('tab-'+CUR), tt = tabs.querySelector('.tthumb');
+    var a = document.getElementById('nav-'+CUR), st = side.querySelector('.sthumb');
+    [tabs, side].forEach(function(el){ if(still) el.classList.add('still'); });
+    if(t && t.offsetWidth){
+      var r = t.querySelector('svg').getBoundingClientRect(), base = tabs.getBoundingClientRect();
+      tt.style.transform = 'translate('+(r.left-base.left)+'px,'+(r.top-base.top)+'px)';
+    }
+    if(a && a.offsetHeight){ st.style.height = a.offsetHeight+'px'; st.style.transform = 'translateY('+a.offsetTop+'px)'; }
+    if(still){ void tabs.offsetWidth; void side.offsetWidth; requestAnimationFrame(function(){ tabs.classList.remove('still'); side.classList.remove('still'); }); }
+  }
+  window.navMark = function(id, still){
+    CUR = id;
     ITEMS.forEach(function(it){ ['nav-','tab-'].forEach(function(pre){
       var a = document.getElementById(pre+it.id); if(!a) return;
       if(it.id===id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
     }); });
+    placeThumbs(still);
   };
+  window.addEventListener('resize', function(){ placeThumbs(true); });
+  /* 點選單：同一頁裡切換（成交值、籌碼、美股）直接換；要換到另一頁時，先讓滑塊滑過去再換頁 */
+  function onNav(e){
+    var a = e.target.closest('a[id^="nav-"],a[id^="tab-"]');
+    if(!a || e.defaultPrevented || e.button!==0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var id = a.id.replace(/^(nav|tab)-/, '');
+    if(id===CUR){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); return; }
+    var sameDoc = isRank && id!=='live';
+    if(sameDoc) return;                               /* 交給網址的 # 切換，頁面自己會換內容 */
+    e.preventDefault();
+    window.navMark(id);
+    var href = a.href;
+    setTimeout(function(){ location.href = href; }, 260);
+  }
+  tabs.addEventListener('click', onNav); side.addEventListener('click', onNav);
   var isRank = /rank\.html/.test(location.pathname + location.search);
-  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : 'live');
+  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : 'live', true);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ placeThumbs(true); });
 })();
