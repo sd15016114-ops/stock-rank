@@ -230,7 +230,7 @@ footer p{margin:0 0 6px;max-width:50em}
     <p class="lead" id="secLead"></p>
     <div class="tools">
       <div class="seg" id="kindSeg" role="group" aria-label="分類"><i class="thumb"></i><button type="button" data-v="ind" aria-pressed="true">產業</button><button type="button" data-v="th" aria-pressed="false">概念股</button></div>
-      <div class="seg" id="sortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="fn" aria-pressed="true">淨流入</button><button type="button" data-v="fn5" aria-pressed="false">近 5 分鐘</button><button type="button" data-v="v" aria-pressed="false">成交值</button><button type="button" data-v="r" aria-pressed="false">比平常</button></div>
+      <div class="seg" id="sortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="fn" aria-pressed="true">淨流入</button><button type="button" data-v="fn5" aria-pressed="false">近 5 分鐘</button><button type="button" data-v="v" aria-pressed="false">成交值</button><button type="button" data-v="y" aria-pressed="false">比昨天</button></div>
       <div class="seg" id="viewSeg" role="group" aria-label="檢視"><i class="thumb"></i><button type="button" data-v="list" aria-pressed="true">列表</button><button type="button" data-v="heat" aria-pressed="false">熱力圖</button></div>
     </div>
     <div class="card" id="sec"></div>
@@ -300,6 +300,7 @@ function syncSeg(seg, still){
 }
 var STATE = {kind:'ind', sort:'fn', rkind:'ind', view:'list'};
 try{ Object.assign(STATE, JSON.parse(localStorage.getItem('stock-rank-home')||'{}')); }catch(e){}
+if(STATE.sort==='r') STATE.sort = 'y';   /* 「比平常」改成「比昨天」 */
 function segBind(id, key, after){
   var seg = $(id);
   seg.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===STATE[key] ? 'true' : 'false'); });
@@ -404,6 +405,15 @@ function renderStory(){
 /* ===== 板塊資金（盤中每分鐘；收盤後是當天最後的結果） ===== */
 var OPEN = null, SHOWALL = false;
 function ratioOf(g){ return g.a ? g.s/g.a : null; }
+/* 昨天（盤中資料那天的前一個交易日）收盤時，這個板塊占全市場成交值的比重；從資金輪動的資料拿 */
+function yShare(kind, name){
+  if(!ROT || !LIVE) return null;
+  var i = -1; ROT.dates.forEach(function(d,k){ if(d < LIVE.date) i = k; });
+  var s = ROT[kind] && ROT[kind][name];
+  return i>=0 && s ? s[i] : null;
+}
+function yDiff(g, kind){ var y = yShare(kind, g.n); return y==null ? null : g.s - y; }
+function ptsTxt(v){ return v==null ? '—' : (v>0?'+':v<0?'−':'')+fix(Math.abs(v), Math.abs(v)>=1 ? 1 : 2)+'%'; }
 function netBars(g, d){
   var h = g.hn || [], ts = d.ts || [], st = [];
   for(var i=0; i<h.length; i++) st.push(h[i]-(i ? h[i-1] : 0));
@@ -415,7 +425,7 @@ function netBars(g, d){
     + '<div class="axis"><span>09:00</span><span>'+(ts[ts.length-1]||'')+'</span></div>';
 }
 function secDetail(g, d){
-  var cells = [['板塊漲跌', '<span class="'+cls(g.p)+'">'+pctTxt(g.p)+'</span>'], ['成交值', yi(g.v)+' 億元'], ['占全市場', fix(g.s,1)+'%'], ['平常占比', g.a!=null ? fix(g.a,1)+'%' : '—']];
+  var cells = [['板塊漲跌', '<span class="'+cls(g.p)+'">'+pctTxt(g.p)+'</span>'], ['成交值', yi(g.v)+' 億元'], ['占全市場', fix(g.s,1)+'%'], ['昨天占比', yShare(STATE.kind, g.n)!=null ? fix(yShare(STATE.kind, g.n),1)+'%' : '—']];
   if(g.fn!=null) cells.push(['流入', '<span class="up">'+yi(g.fi)+' 億元</span>'], ['流出', '<span class="down">'+yi(g.fo)+' 億元</span>']);
   cells.push(['上漲／下跌', '<span class="up">'+g.up+'</span>／<span class="down">'+g.dn+'</span> 檔']);
   var top = (g.top||[]).slice(0, 8);
@@ -429,7 +439,7 @@ function renderSectors(){
   if(!d){ $('sec').innerHTML = '<div class="empty">盤中資料載入中…</div>'; return; }
   var open = liveOpen();
   $('secWhen').innerHTML = open ? '<span class="badge on">盤中 '+hm(d.t)+'</span>' : tradeDay(d.date)+' 收盤';
-  $('secLead').textContent = '上市櫃全部股票依'+KN+'加總。「淨流入」是每檔股票每分鐘新增的成交值，價格上漲算流入、下跌算流出；「比平常」是占全市場成交值的比重除以前 '+(d.base_days||20)+' 日平均。點任一列可以看資金進出的節奏與主要個股。'
+  $('secLead').textContent = '上市櫃全部股票依'+KN+'加總。「淨流入」是每檔股票每分鐘新增的成交值，價格上漲算流入、下跌算流出；「比昨天」是占全市場成交值的比重，跟昨天收盤時的比重相比增加或減少多少。點任一列可以看資金進出的節奏與主要個股。'
     + (open ? '' : ' 現在不是交易時間，顯示的是最近一個交易日收盤時的結果。');
   var list = (d[kind]||[]).filter(function(g){ return g.v>0; });
   var heatOn = STATE.view==='heat';
@@ -442,11 +452,11 @@ function renderSectors(){
   var M = {fn:{h:'淨流入', dv:true, val:function(g){ return g.fn||0; }, txt:function(g){ return yiS(g.fn||0)+' 億'; }},
            fn5:{h:'近 5 分鐘淨流入', dv:true, val:function(g){ return g.fn5||0; }, txt:function(g){ return yiS(g.fn5||0)+' 億'; }},
            v:{h:'成交值', val:function(g){ return g.v; }, txt:function(g){ return yi(g.v)+' 億'; }},
-           r:{h:'比平常', val:function(g){ var r = ratioOf(g); return r==null || g.s<0.05 ? 0 : r; }, txt:function(g){ var r = ratioOf(g); return r==null ? '—' : fix(r, r>=10?0:1)+'×'; }}}[sort];
+           y:{h:'比昨天（占比增減）', dv:true, val:function(g){ return yDiff(g, kind)||0; }, txt:function(g){ return ptsTxt(yDiff(g, kind)); }}}[sort];
   list.sort(function(a,b){ return M.val(b)-M.val(a); });
   var top = Math.max.apply(null, list.map(function(g){ return Math.abs(M.val(g)); }).concat(0)) || 1;
   $('sec').innerHTML = !list.length ? '<div class="empty">還沒有成交資料。</div>'
-    : '<table class="tbl"><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="l">'+M.h+'<span class="lkey">'+(M.dv ? '<i class="up"></i>流入 <i class="down"></i>流出' : '<i class="up"></i>漲 <i class="down"></i>跌')+'</span></th></tr>'
+    : '<table class="tbl"><tr><th class="l" colspan="2">名次／'+KN+'</th><th class="l">'+M.h+'<span class="lkey">'+(sort==='y' ? '<i class="up"></i>比重增加 <i class="down"></i>比重減少' : M.dv ? '<i class="up"></i>流入 <i class="down"></i>流出' : '<i class="up"></i>漲 <i class="down"></i>跌')+'</span></th></tr>'
     + list.map(function(g,i){ g._no = i+1; return g; }).filter(function(g,i){ return SHOWALL || (M.dv && list.length>12 ? (i<6 || i>=list.length-6) : i<12); }).map(function(g,i,arr){
       var k = kind+':'+g.n, isOpen = OPEN===k, w = M.val(g)/top;
       var gap = i>0 && arr[i-1]._no!==g._no-1 ? '<tr class="gap"><td colspan="3">⋯ 中間 '+(g._no-arr[i-1]._no-1)+' 個'+KN+' ⋯</td></tr>' : '';
