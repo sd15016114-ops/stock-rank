@@ -337,9 +337,8 @@ function hotSector(kind){
   var best = null;
   Object.keys(ROT[kind]).forEach(function(n){
     if(n==='ETF' || n==='其他') return;
-    /* 比昨天：最新一天的占比減掉前一天，增加最多的 */
-    var s = ROT[kind][n], last = s[s.length-1], y = s[s.length-2];
-    if(y!=null && last>=0.5 && (!best || last-y > best.d)) best = {n:n, s:last, y:y, d:last-y};
+    var s = ROT[kind][n], last = s[s.length-1], prev = s.slice(0,-1), avg = prev.length ? prev.reduce(function(a,b){ return a+b; },0)/prev.length : 0;
+    if(last>=1 && avg>0 && (!best || last/avg > best.r)) best = {n:n, s:last, a:avg, r:last/avg};
   });
   return best;
 }
@@ -377,8 +376,8 @@ function renderStory(){
     var p1 = '<b>'+tradeDay(d.date)+'</b> 台股成交 <b>'+yi(tot)+' 億元</b>'
       + (diff!=null ? '，比近 '+prevTot.length+' 日平均<b class="'+cls(diff)+'">'+(diff>=0?'多 ':'少 ')+fix(Math.abs(diff),0)+'%</b>' : '')+'。';
     if(big) p1 += '資金最集中在 <b>'+esc(big.n)+'</b>（占 '+fix(big.s,0)+'%）';
-    if(hot) p1 += (big?'，':'')+'比昨天比重增加最多的是 <b>'+esc(hot.n)+'</b>（占 '+fix(hot.s,1)+'%，昨天 '+fix(hot.y,1)+'%）';
-    if(hotTh) p1 += '；概念股裡比重增加最多的是 <b>'+esc(hotTh.n)+'</b>（'+ptsTxt(hotTh.d)+'）';
+    if(hot) p1 += (big?'，':'')+'比平常增加最多的是 <b>'+esc(hot.n)+'</b>（占 '+fix(hot.s,1)+'%，平常 '+fix(hot.a,1)+'%）';
+    if(hotTh) p1 += '；概念股裡最熱的是 <b>'+esc(hotTh.n)+'</b>（平常的 '+fix(hotTh.r,1)+' 倍）';
     p1 += '。';
     var p2 = '';
     if(hasInst){
@@ -393,7 +392,7 @@ function renderStory(){
     html += '<p>'+p1+'</p><p>'+p2+'</p>';
     cards.push(['大盤成交值', yi(tot)+'<small>億元</small>', diff!=null ? '比近 '+prevTot.length+' 日平均'+(diff>=0?'多 ':'少 ')+fix(Math.abs(diff),0)+'%' : '']);
     if(hasInst){ var a2 = sumOf('all'); cards.push(['三大法人', '<span class="'+cls(a2)+'">'+yiS(a2)+'</span><small>億元</small>', '外資 '+yiS(sumOf('f'))+'、投信 '+yiS(sumOf('t'))+'、自營 '+yiS(sumOf('d'))]); }
-    if(hot) cards.push(['比重增加最多的產業', esc(hot.n), '占 '+fix(hot.s,1)+'%，昨天 '+fix(hot.y,1)+'%（'+ptsTxt(hot.d)+'）', true]);
+    if(hot) cards.push(['比平常最熱的產業', esc(hot.n), '占 '+fix(hot.s,1)+'%，平常 '+fix(hot.a,1)+'%（'+fix(hot.r,1)+'×）', true]);
     if(amp) cards.push(['放量最明顯', esc(amp.name), esc(amp.code)+'・成交 '+yi(amp.value)+' 億，平常的 '+fix(amp.ratio, amp.ratio>=10?0:1)+' 倍', true]);
     $('meta').innerHTML = (liveOpen() ? '<span class="badge on">盤中每分鐘更新</span>' : '')+'<span>盤後資料：'+tradeDay(d.date)+' 收盤</span>';
   }else{
