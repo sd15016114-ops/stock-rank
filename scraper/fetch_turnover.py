@@ -269,8 +269,29 @@ def full_dates():
     return sorted((f.stem for f in full_dir().glob("*.json") if re.match(r"^\d{4}-\d\d-\d\d$", f.stem)), reverse=True)
 
 
+def save_names(rows):
+    """全市場股票名稱（個股卡片、連續訊號用）→ data/names_tw.json，新的蓋舊的。rows 可以是排行的列或 {代號: 名稱}"""
+    p = DATA / "names_tw.json"
+    names = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    names.update(rows if isinstance(rows, dict) else {r["code"]: r["name"] for r in rows if r.get("name")})
+    p.write_text(json.dumps(dict(sorted(names.items())), ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+
+
+def save_full_chips(date, inst):
+    """全市場每天的三大法人買賣超（張）→ data/full/chips/日期.json：{代號: [外資, 投信, 自營商]}，保留 KEEP_FULL 天"""
+    if not date or not inst:
+        return
+    folder = DATA / "full" / "chips"
+    folder.mkdir(parents=True, exist_ok=True)
+    slim = {c: v[:3] for c, v in sorted(inst.items())}
+    (folder / ("%s.json" % date)).write_text(json.dumps(slim, separators=(",", ":")) + "\n", encoding="utf-8")
+    for old in sorted((f.stem for f in folder.glob("*.json")), reverse=True)[KEEP_FULL:]:
+        (folder / ("%s.json" % old)).unlink()
+
+
 def save_full(date, trows, orows):
     full_dir().mkdir(parents=True, exist_ok=True)
+    save_names(trows + orows)
     slim = lambda rows: [[r["code"], r["close"], r["value"]] for r in sorted(rows, key=lambda r: r["code"])]
     text = json.dumps({"date": date, "上市": slim(trows), "上櫃": slim(orows)}, ensure_ascii=False, separators=(",", ":"))
     (full_dir() / ("%s.json" % date)).write_text(text + "\n", encoding="utf-8")
@@ -603,6 +624,9 @@ def attach_chips(snap, inst, mg, names=None, sums=None):
         if r["code"] in mg:
             r["mg"] = mg[r["code"]]
     snap["chips"] = {"inst": bool(inst), "mg": bool(mg)}
+    save_full_chips(snap.get("date"), inst)
+    if names:
+        save_names({c: n for c, n in names.items() if n})
     if sums:
         snap["inst_sum"] = sums
     rank = chip_rank(snap.get("date"), inst, names or {}) if snap.get("date") else None
@@ -637,7 +661,8 @@ def backfill_chips(force=False):
         for f in sorted(folder.glob("*.json"), reverse=True):
             snap = json.loads(f.read_text(encoding="utf-8"))
             have = snap.get("chips") or {}
-            if not force and have.get("inst") and have.get("mg") and snap.get("chip_rank") and len(snap.get("inst_sum") or {}) == 2:
+            if not force and have.get("inst") and have.get("mg") and snap.get("chip_rank") and len(snap.get("inst_sum") or {}) == 2 \
+                    and (DATA / "full" / "chips" / ("%s.json" % snap["date"])).exists():
                 continue
             inst, mg, names, sums = fetch_chips(snap["date"])
             if not inst and not mg:

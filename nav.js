@@ -7,6 +7,8 @@
   var ITEMS = [
     {id:'live', short:'盤中資金', label:'盤中資金', sub:'板塊資金流向、熱力圖', href:'index.html',
      icon:'<path d="M3 17l5-6 4 3 6-8 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="6" r="1.6" fill="currentColor"/>'},
+    {id:'sig', short:'連續訊號', label:'連續訊號', sub:'連續放量、法人連買', href:'signals.html',
+     icon:'<circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 6.5h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 17.5h13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/>'},
     {id:'rank', short:'成交值', label:'成交值排行', sub:'台股成交值、放大倍數', href:'rank.html',
      icon:'<path d="M5 20V11M12 20V5M19 20v-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'},
     {id:'chips', short:'法人籌碼', label:'法人籌碼', sub:'三大法人買賣超', href:'rank.html#chips',
@@ -237,7 +239,7 @@
     if(!a || e.defaultPrevented || e.button!==0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     var id = a.id.replace(/^(nav|tab)-/, '');
     if(id===CUR){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); return; }
-    var sameDoc = isRank && id!=='live';
+    var sameDoc = isRank && id!=='live' && id!=='sig';
     if(sameDoc) return;                               /* 交給網址的 # 切換，頁面自己會換內容 */
     e.preventDefault();
     window.navMark(id);
@@ -247,6 +249,7 @@
   tabs.addEventListener('click', onNav); side.addEventListener('click', onNav);
   pressable(tabs, '.tabbar'); pressable(side, '.side nav');
   var isRank = /rank\.html/.test(location.pathname + location.search);
-  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : 'live', true);
+  var isSig = /signals\.html/.test(location.pathname + location.search);
+  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : isSig ? 'sig' : 'live', true);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ placeThumbs(true); });
 })();

@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, holidays, probe, probe-live, probe-inst, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, intraday, intraday-tw, logos]
+        options: [update, holidays, probe, probe-live, probe-inst, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, signals, intraday, intraday-tw, logos]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -79,7 +79,7 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-inst' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips'
+        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-inst' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips' && inputs.task != 'signals'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }} ${{ inputs.task == 'holidays' && 'holidays' || '' }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
@@ -99,6 +99,13 @@ jobs:
         id: backfillchips
         if: inputs.task == 'backfill-chips'
         run: python scraper/fetch_turnover.py backfill-chips ${{ inputs.days }}
+        continue-on-error: true
+      - name: 連續訊號與個股卡片
+        if: steps.which.outputs.market != 'us' && (github.event_name == 'schedule' || inputs.task == 'update' || inputs.task == 'backfill-chips' || inputs.task == 'signals')
+        run: python scraper/signals.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         continue-on-error: true
       - name: 重建美股歷史排行
         id: backfillus

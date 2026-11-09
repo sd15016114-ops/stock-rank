@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>try{ var t = localStorage.getItem('stock-rank-theme'); if(t==='light'||t==='dark') document.documentElement.setAttribute('data-theme', t); }catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>連續訊號｜股市動能排行</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+:root{
+  --paper:#FFFFFF; --sheet:#FFFFFF; --tint:#F2F9FE; --ink:#16242F; --muted:#5F7180;
+  --rule:#D5E6F3; --fill:#89CFF0; --on-fill:#0C3350; --accent:#1F7FBF; --soft:#E3F3FC; --seal:#D23B3B;
+  --up:#D23B3B; --down:#16885A;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:"Noto Serif TC","PMingLiU","Songti TC",serif;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#000000; --sheet:#0E0E0E; --tint:#161616; --ink:#F2EDE8; --muted:#A39A91;
+    --rule:#2B2620; --fill:#FFC48A; --on-fill:#2B1600; --accent:#FFC48A; --soft:#2E2013; --seal:#FF8A75;
+    --up:#FF8A75; --down:#62D6A0;
+  }
+}
+:root[data-theme="dark"]{
+    --paper:#000000; --sheet:#0E0E0E; --tint:#161616; --ink:#F2EDE8; --muted:#A39A91;
+    --rule:#2B2620; --fill:#FFC48A; --on-fill:#2B1600; --accent:#FFC48A; --soft:#2E2013; --seal:#FF8A75;
+    --up:#FF8A75; --down:#62D6A0;
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.up{color:var(--up)} .down{color:var(--down)}
+
+/* 頁首 */
+header.top{display:flex;justify-content:space-between;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:18px 0 0}
+.brand{font-family:var(--serif);font-weight:900;font-size:22px;color:var(--accent);text-decoration:none}
+.theme{position:relative;flex:none;width:68px;height:34px;padding:0;border:0;border-radius:999px;background:var(--fill);cursor:pointer}
+.theme span{position:absolute;top:0;width:34px;height:34px;display:grid;place-items:center;font-size:15px;color:var(--on-fill);opacity:.75}
+.theme .sun{left:0} .theme .moon{right:0}
+.theme i{position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:var(--sheet);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.theme[aria-checked=true] i{transform:translateX(34px)}
+.right{position:relative;display:flex;align-items:center;gap:10px}
+.hero{padding:34px 0 0}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.25;margin:0 0 10px}
+.tag{margin:-4px 0 10px;color:var(--muted);font-size:16px;max-width:46em}
+.meta{font-size:14px;color:var(--muted);margin-bottom:18px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
+.seg{position:relative;display:inline-flex;max-width:100%;padding:4px;border-radius:999px;background:var(--tint);border:1px solid var(--rule);overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:0;width:0;border-radius:999px;background:var(--fill);box-shadow:0 1px 3px rgba(0,0,0,.18);transition:transform .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1)}
+.seg.still .thumb{transition:none}
+.seg button{position:relative;flex:none;font:inherit;font-size:15px;font-weight:500;line-height:1.4;color:var(--muted);background:transparent;border:0;border-radius:999px;padding:6px 16px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed=true]{color:var(--on-fill);font-weight:700}
+.card{background:var(--sheet);border:1px solid var(--rule)}
+.empty{padding:20px 16px;color:var(--muted)}
+.list .it{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--rule)}
+.list .it[data-stock]{cursor:pointer}
+.list .it:last-child{border-bottom:0}
+.list .it[data-stock]:hover{background:var(--tint)}
+.list .no{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--muted)}
+.list .it:nth-child(-n+3) .no{color:var(--accent)}
+.list .nm b{font-weight:700} .list .nm small{color:var(--muted);font-size:13px;margin-left:6px}
+.badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:1px}
+.badge.r{background:color-mix(in srgb,var(--up) 14%,transparent);color:var(--up)}
+.badge.b{background:var(--soft);color:var(--accent)}
+.dots{display:flex;gap:4px;margin-top:4px}
+.dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--rule)}
+.dots i.on{background:var(--up);border-color:var(--up)}
+.dots i.on.b{background:var(--accent);border-color:var(--accent)}
+.list .rt{text-align:right;white-space:nowrap}
+.list .rt b{display:block;font-weight:700}
+.list .rt small{font-size:13px;color:var(--muted)}
+.fine{font-size:13px;color:var(--muted);margin-top:10px}
+footer{padding:48px 0 40px;font-size:13px;color:var(--muted)}
+footer p{margin:0 0 6px;max-width:50em}
+@media (max-width:599px){ .list .nm small{display:block;margin-left:0} .badge{margin-left:0;margin-top:2px} .seg button{padding:6px 12px;font-size:14px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./">股市動能排行</a>
+    <div class="right">
+      <button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
+    </div>
+  </header>
+<script src="nav.js?v=202611091830"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="card.js?v=202611091830"></script>
+
+  <section class="hero">
+    <h1>連續訊號</h1>
+    <p class="tag">每天收盤後自動整理：哪些股票連續好幾天放量、被外資或投信連續買進，哪些板塊資金連續增加。圓點是最近 10 個交易日，實心代表那天符合條件。點任一檔可以打開個股卡片。</p>
+    <div class="meta" id="meta">資料載入中…</div>
+  </section>
+
+  <div class="tools">
+    <div class="seg" id="kindSeg" role="group" aria-label="訊號"><i class="thumb"></i><button type="button" data-v="vol" aria-pressed="true">連續放量</button><button type="button" data-v="f" aria-pressed="false">外資連買</button><button type="button" data-v="t" aria-pressed="false">投信連買</button><button type="button" data-v="ft" aria-pressed="false">外資投信同步買</button><button type="button" data-v="sec" aria-pressed="false">板塊連續增加</button></div>
+    <div class="seg" id="minSeg" role="group" aria-label="至少幾天"><i class="thumb"></i><button type="button" data-v="3" aria-pressed="true">3 天以上</button><button type="button" data-v="5" aria-pressed="false">5 天以上</button><button type="button" data-v="10" aria-pressed="false">10 天以上</button></div>
+  </div>
+  <div class="card list" id="list"></div>
+  <p class="fine" id="note"></p>
+
+  <footer>
+    <p>資料來源：臺灣證券交易所、證券櫃檯買賣中心。每個交易日盤後更新，法人資料約晚上 9 點半齊全。只列最新一天成交值 5,000 萬以上的股票（不含 ETF），每一種訊號最多 80 檔。</p>
+    <p>本站僅整理公開資訊供參考，不構成任何投資建議。</p>
+  </footer>
+</div>
+
+<script>
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function fix(n,d){ return n.toLocaleString('zh-TW',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function yi(n){ var v=Math.abs(n)/1e8; return fix(v, v>=100?0:v>=10?1:2); }
+function lots(n){ return (n>0?'+':n<0?'−':'')+Math.abs(n).toLocaleString('zh-TW'); }
+function pct(p){ return p==null?'—':(p>0?'▲ ':p<0?'▼ ':'')+fix(Math.abs(p),2)+'%'; }
+function cls(n){ return n>0?'up':n<0?'down':''; }
+function tradeDay(s){ var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(s||''); if(!m) return '';
+  return (+m[2])+'/'+(+m[3])+'（'+'日一二三四五六'.charAt(new Date(+m[1],m[2]-1,+m[3]).getDay())+'）'; }
+function getJSON(url){ return fetch(url, {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
+var REPO = (function(){
+  var h = location.hostname, m = h.match(/^([^.]+)\.github\.io$/);
+  if(h==='htmlpreview.github.io'){ var g = /github\.com\/([^/]+)\/([^/]+)/.exec(location.search); return g ? g[1]+'/'+g[2] : null; }
+  return m && location.pathname.split('/')[1] ? m[1]+'/'+location.pathname.split('/')[1] : null;
+})();
+var BRANCH = (/github\.com\/[^/]+\/[^/]+\/blob\/([^/]+)\//.exec(location.search)||[])[1];
+var BUST = '';
+function load(file){
+  var local = 'data/'+file, raw = function(ref){ return getJSON('https://raw.githubusercontent.com/'+REPO+'/'+ref+'/data/'+file+BUST); };
+  if(!REPO) return getJSON(local);
+  return raw('main').catch(function(){ return BRANCH ? raw(BRANCH) : Promise.reject(); }).catch(function(){ return getJSON(local); });
+}
+function syncSeg(seg, still){
+  var on = seg.querySelector('button[aria-pressed=true]'), th = seg.querySelector('.thumb');
+  if(!on || !th || !on.offsetWidth) return;
+  if(window.jelly) jelly(th, on.offsetLeft, on.offsetLeft+on.offsetWidth, still);
+  else{ th.style.width = on.offsetWidth+'px'; th.style.transform = 'translateX('+on.offsetLeft+'px)'; }
+}
+var STATE = {kind:'vol', min:'3'};
+try{ Object.assign(STATE, JSON.parse(localStorage.getItem('stock-rank-sig')||'{}')); }catch(e){}
+function segBind(id, key){
+  var seg = $(id);
+  seg.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===STATE[key] ? 'true' : 'false'); });
+  seg.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b || b.dataset.v===STATE[key]) return;
+    STATE[key] = b.dataset.v;
+    seg.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true' : 'false'); });
+    syncSeg(seg);
+    try{ localStorage.setItem('stock-rank-sig', JSON.stringify(STATE)); }catch(err){}
+    render();
+  });
+}
+segBind('kindSeg','kind'); segBind('minSeg','min');
+function syncAll(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); }
+window.addEventListener('resize', syncAll);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncAll);
+syncAll();
+
+var D = null;
+function render(){
+  if(!D) return;
+  var K = STATE.kind, MIN = +STATE.min, html = '', items;
+  if(K==='sec'){
+    items = (D.sec||[]).filter(function(x){ return x.n >= (MIN===3 ? 2 : MIN); });   /* 板塊很少連很多天，3 天選項放寬到 2 天 */
+    html = items.map(function(x,i){
+      return '<div class="it"><span class="no">'+(i+1)+'</span><div class="nm"><b>'+esc(x.name)+'</b><small>'+(x.kind==='th'?'概念股':'產業')+'</small>'
+        +'<span class="badge r">連 '+x.n+' 天增加</span><div class="dots">'+x.dots.map(function(o){ return '<i class="'+(o?'on':'')+'"></i>'; }).join('')+'</div></div>'
+        +'<div class="rt"><b>占 '+fix(x.share,1)+'%</b><small class="up">'+x.n+' 天 +'+fix(x.chg,2)+'%</small></div></div>';
+    }).join('');
+    $('note').textContent = '板塊連續增加：每天占全市場成交值的比重都比前一天高（「3 天以上」這裡放寬成 2 天）。';
+  }else{
+    items = ((D.sig||{})[K]||[]).filter(function(x){ return x.n>=MIN; });
+    var lab = {vol:'連 N 天放量', f:'外資連 N 買', t:'投信連 N 買', ft:'同步買 N 天'}[K];
+    html = items.map(function(x,i){
+      var right = K==='vol' ? '<b>'+yi(x.value)+' 億</b><small>平常的 '+fix(x.ratio,1)+' 倍</small>'
+        : K==='ft' ? '<b class="up">外 '+lots(x.amt)+'</b><small>投 '+lots(x.amt_t)+' 張</small>'
+        : '<b class="up">'+lots(x.amt)+' 張</b><small>連續期間累計</small>';
+      return '<div class="it" data-stock="'+esc(x.code)+'" data-name="'+esc(x.name)+'" tabindex="0" role="button"><span class="no">'+(i+1)+'</span><div class="nm"><b>'+esc(x.name)+'</b><small>'+esc(x.code)+(x.ind?'・'+esc(x.ind):'')+'　<span class="'+cls(x.pct)+'">'+pct(x.pct)+'</span></small>'
+        +'<span class="badge '+(K==='vol'?'b':'r')+'">'+lab.replace('N',x.n)+'</span><div class="dots">'+x.dots.map(function(o){ return '<i class="'+(o?'on':'')+(K==='vol'?' b':'')+'"></i>'; }).join('')+'</div></div>'
+        +'<div class="rt">'+right+'</div></div>';
+    }).join('');
+    $('note').textContent = {vol:'放量：當天成交值是前 60 日平均的 1.5 倍以上（上市不到 60 個交易日的新股不列）。', f:'外資連買：外資（不含外資自營商）當天買超。', t:'投信連買：投信當天買超。', ft:'同步買：外資和投信同一天都買超；右邊是連續期間各自累計的張數。'}[K];
+  }
+  var noChips = K!=='vol' && K!=='sec' && D.chip_days===0;
+  $('list').innerHTML = html || '<div class="empty">'+(noChips ? '法人資料還在補齊，今晚更新後就會有。' : '目前沒有符合條件的。')+'</div>';
+}
+document.addEventListener('keydown', function(e){
+  var it = (e.key==='Enter' || e.key===' ') && e.target.closest && e.target.closest('.it[data-stock]');
+  if(it){ e.preventDefault(); openStockCard(it.dataset.stock, {name: it.dataset.name}); }
+});
+function fetchAll(){
+  return load('signals_tw.json').then(function(d){
+    D = d;
+    $('meta').textContent = tradeDay(d.date)+' 收盤後的資料'+(d.updated ? '・'+d.updated.slice(5,10).replace('-','/')+' '+d.updated.slice(11,16)+' 更新' : '');
+    render();
+  }, function(){ $('meta').textContent = '資料載入失敗，請稍後再試。'; });
+}
+window.pageRefresh = function(){ BUST = '?t='+Date.now(); return fetchAll(); };
+fetchAll();
+
+function isDark(){ var t = document.documentElement.getAttribute('data-theme'); return t ? t==='dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
+function paintTheme(){ $('theme').setAttribute('aria-checked', isDark() ? 'true' : 'false'); }
+$('theme').addEventListener('click', function(){ var n = isDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('stock-rank-theme', n); }catch(e){} paintTheme(); });
+paintTheme();
+</script>
+</body>
+</html>

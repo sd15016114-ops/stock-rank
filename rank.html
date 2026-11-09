@@ -278,7 +278,7 @@ footer a{color:var(--accent)}
       </button><button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
       <div class="calpanel" id="calPanel" hidden></div>
     </div></header>
-<script src="nav.js?v=202611091416"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="nav.js?v=202611091830"></script><script src="card.js?v=202611091830" defer></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 
   <section class="intro">
     <h1>成交值排行</h1>
@@ -557,7 +557,8 @@ function detail(r, d){
   if(MODE==='tw') cells.push(['市場', r.market+(r.etf?' ETF':'')]);
   var ind = MODE==='tw' ? (r.ind && r.ind!=='ETF' ? r.ind : '') : (r.sector||'');
   if(ind) cells.push(['產業', esc(ind)]);
-  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>'+chipBlock(r, d)+'</div>';
+  return '<div class="box">'+trendChart(r, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>'+chipBlock(r, d)
+    + (MODE!=='us' ? '<button type="button" class="histbtn" data-stock="'+esc(r.code)+'" data-name="'+esc(r.name)+'">看 60 天資金歷史（成交值、外資、投信）→</button>' : '')+'</div>';
 }
 function toggleRow(tr){
   var k = MODE+tr.dataset.code;

@@ -216,7 +216,7 @@ footer p{margin:0 0 6px;max-width:50em}
       <div class="calpanel" id="calPanel" hidden></div>
     </div>
   </header>
-<script src="nav.js?v=202611091416"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="nav.js?v=202611091830"></script><script src="card.js?v=202611091830" defer></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 
   <section class="hero">
     <h1>盤中資金</h1>
@@ -434,7 +434,7 @@ function secDetail(g, d){
   var top = (g.top||[]).slice(0, 8);
   return '<div class="box">'+netBars(g, d)+'<div class="stats">'+cells.map(function(c){ return '<div><small>'+c[0]+'</small><b>'+c[1]+'</b></div>'; }).join('')+'</div>'
     + (top.length ? '<table class="ltop"><tr class="lh"><td class="l">成交值前 '+top.length+' 檔</td><td>成交價</td><td>漲跌</td><td>成交值</td><td>'+(top[0][5]!=null?'淨流入':'')+'</td></tr>'+top.map(function(t){
-      return '<tr><td class="l"><b>'+esc(t[1])+'</b><small>'+esc(t[0])+'</small></td><td>'+price(t[4])+'</td><td class="'+cls(t[3])+'">'+pctTxt(t[3])+'</td><td>'+yi(t[2])+' 億</td><td class="'+cls(t[5])+'">'+(t[5]!=null?yiS(t[5]):'')+'</td></tr>'; }).join('')+'</table>' : '')+'</div>';
+      return '<tr class="stocklink" data-stock="'+esc(t[0])+'" data-name="'+esc(t[1])+'" title="看 '+esc(t[1])+' 的資金歷史"><td class="l"><b>'+esc(t[1])+'</b><small>'+esc(t[0])+'</small></td><td>'+price(t[4])+'</td><td class="'+cls(t[3])+'">'+pctTxt(t[3])+'</td><td>'+yi(t[2])+' 億</td><td class="'+cls(t[5])+'">'+(t[5]!=null?yiS(t[5]):'')+'</td></tr>'; }).join('')+'</table>' : '')+'</div>';
 }
 function renderSectors(){
   var d = LIVE, kind = STATE.kind, KN = kind==='th' ? '概念股' : '產業';
@@ -583,7 +583,7 @@ function renderLiveStocks(d, open){
   $('sec').innerHTML = '<table class="tbl"><tr><th class="l" colspan="2">名次／股票</th><th>成交價</th><th class="l">'+M.h+'<span class="lkey">'+(M.dv ? '<i class="up"></i>流入 <i class="down"></i>流出' : '<i class="up"></i>漲 <i class="down"></i>跌')+'</span></th></tr>'
     + shown.map(function(r,i){
       var w = M.val(r)/top, gap = i>0 && shown[i-1]._no!==r._no-1 ? '<tr class="gap"><td colspan="4">⋯ 中間 '+(r._no-shown[i-1]._no-1)+' 檔 ⋯</td></tr>' : '';
-      return gap+'<tr class="'+(r._no<=3?'top3':'')+'"><td class="no l">'+r._no+'</td>'
+      return gap+'<tr class="stocklink'+(r._no<=3?' top3':'')+'" data-stock="'+esc(r.code)+'" data-name="'+esc(r.name)+'" tabindex="0" title="看 '+esc(r.name)+' 的資金歷史"><td class="no l">'+r._no+'</td>'
         + '<td class="who l"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+(r.ind && r.ind!=='其他' ? '・'+esc(r.ind) : '')+'</small></td>'
         + '<td><span style="display:block;font-weight:700">'+price(r.c)+'</span><span class="'+cls(r.p)+'" style="font-size:13px">'+pctTxt(r.p)+'</span></td>'
         + '<td class="lb">'+(M.dv
