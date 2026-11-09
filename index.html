@@ -216,7 +216,7 @@ footer p{margin:0 0 6px;max-width:50em}
       <div class="calpanel" id="calPanel" hidden></div>
     </div>
   </header>
-<script src="nav.js?v=202611061046"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="nav.js?v=202611091416"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 
   <section class="hero">
     <h1>盤中資金</h1>
@@ -280,8 +280,9 @@ var REPO = (function(){
   return m && location.pathname.split('/')[1] ? m[1]+'/'+location.pathname.split('/')[1] : null;
 })();
 var BRANCH = (/github\.com\/[^/]+\/[^/]+\/blob\/([^/]+)\//.exec(location.search)||[])[1];   /* 預覽網址裡的分支 */
+var BUST = '';   /* 手動重新整理時加在網址後面，跳過 GitHub 的快取 */
 function load(file){
-  var local = 'data/'+file, raw = function(ref){ return getJSON('https://raw.githubusercontent.com/'+REPO+'/'+ref+'/data/'+file); };
+  var local = 'data/'+file, raw = function(ref){ return getJSON('https://raw.githubusercontent.com/'+REPO+'/'+ref+'/data/'+file+BUST); };
   if(!REPO) return getJSON(local);
   return raw('main').catch(function(){ return BRANCH ? raw(BRANCH) : Promise.reject(); }).catch(function(){ return getJSON(local); });
 }
@@ -626,6 +627,13 @@ Promise.all([load('tw.json').catch(nul), load('rotation_tw.json').catch(nul), fe
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); });
 });
 setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchLive().then(function(){ renderStory(); renderSectors(); }); }, 60000);
+/* 右上角的重新整理按鈕：重抓盤中、盤後、資金輪動三份資料再畫一次 */
+window.pageRefresh = function(){
+  BUST = '?t='+Date.now();
+  return Promise.all([load('tw.json').catch(nul), load('rotation_tw.json').catch(nul), fetchLive()]).then(function(res){
+    if(res[0]) TW = res[0]; if(res[1]) ROT = res[1]; renderAll();
+  });
+};
 
 var MODE = 'tw';   /* 結算日曆的預設市場 */
 /* ===== 期權結算日曆 =====

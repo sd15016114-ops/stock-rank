@@ -100,7 +100,17 @@
   /* 底部分頁列：半透明毛玻璃，後面的內容隱約透出來 */
   + '@media (max-width:599px){.tabbar{background:color-mix(in srgb,var(--sheet) 72%,transparent) !important;-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}'
   +   '.tthumb{box-shadow:0 1px 4px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35)}}'
-  + '@media (prefers-reduced-motion: reduce){.seg .thumb,.tthumb,.sthumb{transition-timing-function:ease !important;transition-delay:0s !important}}';
+  + '@media (prefers-reduced-motion: reduce){.seg .thumb,.tthumb,.sthumb{transition-timing-function:ease !important;transition-delay:0s !important}}'
+  /* 手動重新整理按鈕與完成提示 */
+  + '.refbtn{flex:none;width:38px;height:38px;display:grid;place-items:center;border-radius:999px;border:1px solid var(--rule);background:var(--tint);color:var(--ink);cursor:pointer;padding:0}'
+  + '.refbtn:hover{background:var(--soft)}'
+  + '.refbtn svg{width:18px;height:18px}'
+  + '.refbtn.spin svg{animation:refspin .8s linear infinite}'
+  + '@keyframes refspin{to{transform:rotate(360deg)}}'
+  + '.reftoast{position:fixed;z-index:60;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:var(--paper);font-size:14px;font-weight:500;padding:8px 16px;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .25s,transform .35s var(--spring)}'
+  + '.reftoast.on{opacity:1;transform:translate(-50%,0)}'
+  + '@media (max-width:599px){.reftoast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}'
+  + '@media (prefers-reduced-motion: reduce){.refbtn.spin svg{animation-duration:2s}}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   /* 把滑塊的兩個邊移到 a～b。往哪邊走，那一邊先動、另一邊晚 70ms 才跟上，看起來就像果凍被拉長再彈回去 */
@@ -173,6 +183,30 @@
   scrim.addEventListener('click', function(){ setOpen(false); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && document.body.classList.contains('side-open')) setOpen(false); });
   side.addEventListener('click', function(e){ if(e.target.closest('nav a') && !wide()) setOpen(false); });
+
+  /* 手動重新整理：頁面有定義 window.pageRefresh 就只重抓資料（不閃畫面），沒有的話整頁重新載入 */
+  var holder = head && (head.querySelector('.right') || head.querySelector('.tops'));
+  if(holder){
+    var rb = document.createElement('button');
+    rb.type = 'button'; rb.className = 'refbtn'; rb.id = 'refreshBtn'; rb.title = '重新整理資料'; rb.setAttribute('aria-label', '重新整理資料');
+    rb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    holder.insertBefore(rb, holder.firstChild);
+    var toast = document.createElement('div'); toast.className = 'reftoast'; toast.setAttribute('role', 'status'); document.body.appendChild(toast);
+    var busy = false, tt;
+    rb.addEventListener('click', function(){
+      if(busy) return;
+      if(!window.pageRefresh){ location.reload(); return; }
+      busy = true; rb.classList.add('spin');
+      var t0 = Date.now();
+      Promise.resolve(window.pageRefresh()).then(function(){ return '已更新'; }, function(){ return '更新失敗，請稍後再試'; }).then(function(msg){
+        setTimeout(function(){                       /* 至少轉半圈，不然太快看不出有按到 */
+          busy = false; rb.classList.remove('spin');
+          var n = new Date(); toast.textContent = msg + '　' + ('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
+          toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('on'); }, 1800);
+        }, Math.max(0, 500 - (Date.now() - t0)));
+      });
+    });
+  }
 
   /* 目前在哪一頁：頁面可以呼叫 navMark('rank'|'us'|'live') 改亮起來的項目 */
   var CUR = null;
