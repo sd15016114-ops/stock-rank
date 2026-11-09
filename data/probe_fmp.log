@@ -1,0 +1,18 @@
+13:43:14（美東 00:43）  /stable/batch-exchange-quote?exchange=NASDAQ            HTTP 401  0.2 秒  回應：{
+  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
+}
+13:43:14（美東 00:43）  /stable/batch-exchange-quote?exchange=NYSE&short=false  HTTP 401  0.2 秒  回應：{
+  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
+}
+13:43:14（美東 00:43）  /stable/quote?symbol=AAPL                               HTTP 401  0.2 秒  回應：{
+  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
+}
+13:43:14（美東 00:43）  /stable/batch-quote?symbols=AAPL,NVDA,MSFT              HTTP 401  0.2 秒  回應：{
+  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
+}
+13:43:14（美東 00:43）  /api/v3/quotes/nasdaq                                   HTTP 401  0.3 秒  回應：{
+  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
+}
+13:43:15（美東 00:43）  /api/v3/quote/AAPL                                      HTTP 401  0.2 秒  回應：{
+  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
+}
