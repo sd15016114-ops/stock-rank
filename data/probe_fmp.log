@@ -1,19 +1,10 @@
-13:43:54（美東 00:43）  金鑰長度 105 個字元，開頭 htt…（只印前 3 碼確認有讀到）
-13:43:55（美東 00:43）  /stable/batch-exchange-quote?exchange=NASDAQ            HTTP 401  0.5 秒  回應：{
-  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
-}
-13:43:55（美東 00:43）  /stable/batch-exchange-quote?exchange=NYSE&short=false  HTTP 401  0.4 秒  回應：{
-  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
-}
-13:43:55（美東 00:43）  /stable/quote?symbol=AAPL                               HTTP 401  0.3 秒  回應：{
-  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
-}
-13:43:56（美東 00:43）  /stable/batch-quote?symbols=AAPL,NVDA,MSFT              HTTP 401  0.4 秒  回應：{
-  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
-}
-13:43:56（美東 00:43）  /api/v3/quotes/nasdaq                                   HTTP 401  0.3 秒  回應：{
-  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
-}
-13:43:56（美東 00:43）  /api/v3/quote/AAPL                                      HTTP 401  0.4 秒  回應：{
-  "Error Message": "Invalid API KEY. Feel free to create a Free API Key or visit https://site.financialmodelingprep.com/faqs?search=why-is-my-api-key-invalid for more information."
-}
+13:44:36（美東 00:44）  金鑰長度 32 個字元（確認有讀到）
+13:44:36（美東 00:44）  /stable/batch-exchange-quote?exchange=NASDAQ            HTTP 402  0.4 秒  回應：Restricted Endpoint: This endpoint is not available under your current subscription please visit our subscription page to upgrade your plan at https://financialmodelingprep.com/
+13:44:37（美東 00:44）  /stable/batch-exchange-quote?exchange=NYSE&short=false  HTTP 402  0.3 秒  回應：Restricted Endpoint: This endpoint is not available under your current subscription please visit our subscription page to upgrade your plan at https://financialmodelingprep.com/
+13:44:37（美東 00:44）  /stable/quote?symbol=AAPL                               HTTP 200  0.3 秒  0 KB  1 筆  欄位：symbol,name,price,changePercentage,change,volume,dayLow,dayHigh,yearHigh,yearLow,marketCap,priceAvg50,priceAvg200,exchange,open,previousClose,timestamp
+13:44:37（美東 00:44）      範例：{"symbol": "AAPL", "name": "Apple Inc.", "price": 342.37, "changePercentage": -0.523, "change": -1.8, "volume": 44703806, "dayLow": 338.3, "dayHigh": 345.79, "yearHigh": 355.38, "yearLow": 243.42, "marketCap": 4996616254000, "priceAvg50": 336.0138, "priceAvg200": 298.8052, "exchange": "NASDAQ", "open": 338.73, "previousClose": 344.17, "timestamp": 1793998801}
+13:44:37（美東 00:44）  /stable/batch-quote?symbols=AAPL,NVDA,MSFT              HTTP 402  0.3 秒  回應：Restricted Endpoint: This endpoint is not available under your current subscription please visit our subscription page to upgrade your plan at https://financialmodelingprep.com/
+13:44:38（美東 00:44）  /api/v3/quotes/nasdaq                                   HTTP 403  0.3 秒  回應：{
+  "Error Message": "Legacy Endpoint : Due to Legacy endpoints being no longer supported - This endpoint is only available for legacy users who have valid subscriptions prior August 31, 2025. Please 
+13:44:38（美東 00:44）  /api/v3/quote/AAPL                                      HTTP 403  0.3 秒  回應：{
+  "Error Message": "Legacy Endpoint : Due to Legacy endpoints being no longer supported - This endpoint is only available for legacy users who have valid subscriptions prior August 31, 2025. Please 
