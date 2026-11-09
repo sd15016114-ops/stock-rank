@@ -12,7 +12,7 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-KEY = os.environ.get("FMP_API_KEY", "")
+KEY = os.environ.get("FMP_API_KEY", "").strip().strip("\"'")   # 去掉不小心貼到的空白、換行或引號
 BASE = "https://financialmodelingprep.com"
 TPE, ET = timezone(timedelta(hours=8)), timezone(timedelta(hours=-5))
 WATCH = ["AAPL", "NVDA", "MSFT", "TSLA", "AMZN", "META", "AMD", "PLTR"]
@@ -94,6 +94,7 @@ def watch(minutes):
 if __name__ == "__main__":
     if not KEY:
         raise SystemExit("沒有設定 FMP_API_KEY")
+    log("金鑰長度 %d 個字元，開頭 %s…（只印前 3 碼確認有讀到）" % (len(KEY), KEY[:3]))
     m = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     probe_once() if m == 0 else watch(m)
     out = Path(__file__).resolve().parent.parent / "data" / "probe_fmp.log"
