@@ -109,6 +109,7 @@ p.lead{margin:0 0 14px;color:var(--muted);font-size:15px;max-width:46em}
 .card{background:var(--sheet);border:1px solid var(--rule)}
 .empty{padding:20px 16px;color:var(--muted)}
 .fine{font-size:13px;color:var(--muted);margin:10px 0 0;max-width:46em}
+#sec .tbl td.lb{width:100%}
 .tbl tr.gap td{text-align:center;font-size:13px;color:var(--muted);padding:6px;background:var(--tint)}
 .showall{display:block;width:100%;font:inherit;font-size:14px;font-weight:700;color:var(--accent);background:var(--tint);border:0;border-top:1px solid var(--rule);padding:10px;cursor:pointer}
 .more{display:inline-block;margin-top:12px;font-size:15px;font-weight:700;text-decoration:none}
@@ -226,10 +227,10 @@ footer p{margin:0 0 6px;max-width:50em}
   </section>
 
   <section class="block" id="secBlock">
-    <h2>板塊資金 <small id="secWhen"></small></h2>
+    <h2><span id="secTitle">板塊資金</span> <small id="secWhen"></small></h2>
     <p class="lead" id="secLead"></p>
     <div class="tools">
-      <div class="seg" id="kindSeg" role="group" aria-label="分類"><i class="thumb"></i><button type="button" data-v="ind" aria-pressed="true">產業</button><button type="button" data-v="th" aria-pressed="false">概念股</button></div>
+      <div class="seg" id="kindSeg" role="group" aria-label="分類"><i class="thumb"></i><button type="button" data-v="ind" aria-pressed="true">產業</button><button type="button" data-v="th" aria-pressed="false">概念股</button><button type="button" data-v="stk" aria-pressed="false">個股</button></div>
       <div class="seg" id="sortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="fn" aria-pressed="true">淨流入</button><button type="button" data-v="fn5" aria-pressed="false">近 5 分鐘</button><button type="button" data-v="v" aria-pressed="false">成交值</button><button type="button" data-v="y" aria-pressed="false">比昨天</button></div>
       <div class="seg" id="viewSeg" role="group" aria-label="檢視"><i class="thumb"></i><button type="button" data-v="list" aria-pressed="true">列表</button><button type="button" data-v="heat" aria-pressed="false">熱力圖</button></div>
     </div>
@@ -442,6 +443,12 @@ function renderSectors(){
   $('secWhen').innerHTML = open ? '<span class="badge on">盤中 '+hm(d.t)+'</span>' : tradeDay(d.date)+' 收盤';
   $('secLead').textContent = '上市櫃全部股票依'+KN+'加總。「淨流入」是每檔股票每分鐘新增的成交值，價格上漲算流入、下跌算流出；「比昨天」是占全市場成交值的比重，跟昨天收盤時的比重相比增加或減少多少。點任一列可以看資金進出的節奏與主要個股。'
     + (open ? '' : ' 現在不是交易時間，顯示的是最近一個交易日收盤時的結果。');
+  var isStk = kind==='stk';
+  $('secTitle').textContent = isStk ? '個股資金' : '板塊資金';
+  $('viewSeg').style.display = isStk ? 'none' : '';                       /* 個股沒有熱力圖 */
+  var yBtn = $('sortSeg').querySelector('[data-v="y"]'); yBtn.style.display = isStk ? 'none' : '';
+  syncSeg($('sortSeg'), true);
+  if(isStk){ renderLiveStocks(d, open); return; }
   var list = (d[kind]||[]).filter(function(g){ return g.v>0; });
   var heatOn = STATE.view==='heat';
   syncSeg($('viewSeg'), true);
@@ -552,6 +559,35 @@ document.addEventListener('click', function(e){
   var t = e.target.closest('#heat.zoomable .ind');
   if(t){ ZOOM = {kind:STATE.kind, name:t.dataset.name}; renderSectors(); $('zoom').scrollIntoView({block:'nearest'}); }
 });
+
+/* ===== 盤中個股資金排行 ===== */
+function renderLiveStocks(d, open){
+  $('sortSeg').style.display = ''; $('sec').style.display = ''; $('heatWrap').hidden = true;
+  $('secLead').textContent = '上市櫃個股盤中的資金排行，每分鐘更新：成交值前 100 檔，加上淨流入、流出最多的股票。「淨流入」是每分鐘新增的成交值，價格上漲算流入、下跌算流出；「近 5 分鐘」看最近 5 分鐘錢往哪幾檔跑。'
+    + (open ? '' : ' 現在不是交易時間，顯示的是最近一個交易日收盤時的結果。');
+  var rows = (d.stocks||[]).map(function(r){ return {code:r[0], name:r[1], ind:r[2], v:r[3], p:r[4], c:r[5], fn:r[6], fn5:r[7]}; });
+  if(!rows.length){ $('sec').innerHTML = '<div class="empty">個股排行從盤中程式更新後的下一個交易日開始提供。</div>'; return; }
+  var sort = STATE.sort==='y' ? 'v' : STATE.sort, hasFlow = rows[0].fn!=null;
+  if(!hasFlow && (sort==='fn' || sort==='fn5')) sort = 'v';
+  var M = {fn:{h:'淨流入', dv:true, val:function(r){ return r.fn||0; }, txt:function(r){ return yiS(r.fn||0)+' 億'; }},
+           fn5:{h:'近 5 分鐘淨流入', dv:true, val:function(r){ return r.fn5||0; }, txt:function(r){ return yiS(r.fn5||0)+' 億'; }},
+           v:{h:'成交值', val:function(r){ return r.v; }, txt:function(r){ return yi(r.v)+' 億'; }}}[sort];
+  rows.sort(function(a,b){ return M.val(b)-M.val(a); });
+  var top = Math.max.apply(null, rows.map(function(r){ return Math.abs(M.val(r)); }).concat(0)) || 1, N = rows.length;
+  rows.forEach(function(r,i){ r._no = i+1; });
+  var shown = rows.filter(function(r,i){ return SHOWALL || (M.dv ? (i<10 || i>=N-10) : i<20); });
+  $('sec').innerHTML = '<table class="tbl"><tr><th class="l" colspan="2">名次／股票</th><th>成交價</th><th class="l">'+M.h+'<span class="lkey">'+(M.dv ? '<i class="up"></i>流入 <i class="down"></i>流出' : '<i class="up"></i>漲 <i class="down"></i>跌')+'</span></th></tr>'
+    + shown.map(function(r,i){
+      var w = M.val(r)/top, gap = i>0 && shown[i-1]._no!==r._no-1 ? '<tr class="gap"><td colspan="4">⋯ 中間 '+(r._no-shown[i-1]._no-1)+' 檔 ⋯</td></tr>' : '';
+      return gap+'<tr class="'+(r._no<=3?'top3':'')+'"><td class="no l">'+r._no+'</td>'
+        + '<td class="who l"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+(r.ind && r.ind!=='其他' ? '・'+esc(r.ind) : '')+'</small></td>'
+        + '<td><span style="display:block;font-weight:700">'+price(r.c)+'</span><span class="'+cls(r.p)+'" style="font-size:13px">'+pctTxt(r.p)+'</span></td>'
+        + '<td class="lb">'+(M.dv
+          ? '<div class="lbar dv"><div class="neg">'+(w<0?'<i class="down" style="width:'+(-w*100).toFixed(2)+'%"></i>':'')+'</div><div class="pos">'+(w>0?'<i class="up" style="width:'+(w*100).toFixed(2)+'%"></i>':'')+'</div><span class="'+cls(w)+'">'+M.txt(r)+'</span></div>'
+          : '<div class="lbar"><i class="'+(cls(r.p)||'flat')+'" style="width:calc((100% - 78px) * '+w.toFixed(4)+')"></i><span>'+M.txt(r)+'</span></div>')+'</td></tr>';
+    }).join('')+'</table>'
+    + (N>20 ? '<button type="button" class="showall" id="showAll">'+(SHOWALL ? '收合' : '顯示全部 '+N+' 檔')+'</button>' : '');
+}
 
 /* ===== 資金輪動 ===== */
 function heat(r){   /* 比平常的倍數 → 底色：多於平常是紅、少於平常是綠 */

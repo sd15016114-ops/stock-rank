@@ -172,7 +172,31 @@ def group_net(io, groups):
     return out
 
 
-def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, themes=None, io=None, past_net=None):
+STOCK_TOP = 100          # 個股排行：成交值前 100 檔
+STOCK_FLOW = 50          # 再加上淨流入、流出、近 5 分鐘流入流出各前 50 檔（重複的只留一份）
+
+
+def stock_rank(quotes, names, groups, io, past_io=None):
+    """盤中個股資金排行：[代號, 名稱, 產業, 累積成交值, 漲跌幅, 成交價, 淨流入, 近 FLOW_MIN 分鐘淨流入]"""
+    net = {c: x[0] - x[1] for c, x in (io or {}).items()}
+    live = [c for c, q in quotes.items() if q["v"] > 0]
+    f5 = {c: net.get(c, 0) - past_io.get(c, 0) for c in live} if past_io is not None else {}
+    pick = set(sorted(live, key=lambda c: -quotes[c]["v"])[:STOCK_TOP])
+    if net:
+        by = sorted(live, key=lambda c: net.get(c, 0))
+        pick |= set(by[:STOCK_FLOW]) | set(by[-STOCK_FLOW:])
+    if f5:
+        by = sorted(live, key=lambda c: f5[c])
+        pick |= set(by[:STOCK_FLOW]) | set(by[-STOCK_FLOW:])
+    rows = []
+    for c in sorted(pick, key=lambda c: -quotes[c]["v"]):
+        q = quotes[c]
+        rows.append([c, names.get(c, c), groups(c)[0], q["v"], q.get("p"), q.get("c"),
+                     net.get(c) if net else None, f5.get(c) if f5 else None])
+    return rows
+
+
+def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, themes=None, io=None, past_net=None, past_io=None):
     """把每檔的快照整理成網頁用的格式。
     quotes：{代號: {"v": 累積成交值(元), "p": 漲跌幅(%), "c": 成交價, "m": 市場}}
     past：FLOW_MIN 分鐘前的 (板塊成交值, 全市場成交值)，用來算近幾分鐘的資金流向
@@ -233,7 +257,8 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
             "up": sum(1 for q in quotes.values() if (q.get("p") or 0) > 0),
             "dn": sum(1 for q in quotes.values() if (q.get("p") or 0) < 0),
             "base_days": base.get("days"), "base_total": base.get("total"),
-            "ts": (hist or {}).get("ts", []), "ind": out["ind"], "th": out["th"]}
+            "ts": (hist or {}).get("ts", []), "ind": out["ind"], "th": out["th"],
+            "stocks": stock_rank(quotes, names, groups, io, past_io)}
 
 
 def add_sample(hist, at, gv, kinds_names, gn=None):
@@ -391,15 +416,15 @@ def run():
             flows.update(quotes)
             gn = group_net(flows.io, groups)
             total = sum(q["v"] for q in quotes.values())
-            past = past_net = None
-            for (m, g, t, n) in recent:              # 找最接近 FLOW_MIN 分鐘前的那一筆
+            past = past_net = past_io = None
+            for (m, g, t, n, sn) in recent:          # 找最接近 FLOW_MIN 分鐘前的那一筆
                 if (at - m).total_seconds() >= FLOW_MIN * 60 - 5:
-                    past, past_net = (g, t), n
-            recent.append((at, gv, total, gn))
+                    past, past_net, past_io = (g, t), n, sn
+            recent.append((at, gv, total, gn, {c: x[0] - x[1] for c, x in flows.io.items()}))
             if at.minute % SAMPLE_MIN == 0 or not hist["ts"] or (at.time() >= CLOSE_T and hist["ts"][-1] < "13:30"):
                 add_sample(hist, at, gv, {"th": list(themes)}, gn)
             phase = "closed" if at.time() >= CLOSE_T else "open"
-            last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes, flows.io, past_net)
+            last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes, flows.io, past_net, past_io)
             save_local(last)
             ok = sb_put(last)
             log("%s 全市場 %.0f 億%s %s" % (phase, total / 1e8, "" if ok else "（未寫入 Supabase）", usage(api) if at.minute % 30 == 0 else ""))
@@ -551,17 +576,18 @@ def mock(date=None):
     day = datetime.fromisoformat(cur["date"]).replace(tzinfo=TPE)
     end_m = 122                                    # 11:02
     hist = {"ts": [], "ind": {}, "th": {}}
-    flows, past, past_net = Flows(), None, None
+    flows, past, past_net, past_io = Flows(), None, None, None
     for m in range(1, end_m + 1):                  # 每分鐘跑一次，跟正式執行一樣累積流入流出
         q = quotes_at(m)
         flows.update(q)
         if m == end_m - FLOW_MIN:
             past = (group_values(q, groups), sum(x["v"] for x in q.values()))
             past_net = group_net(flows.io, groups)
+            past_io = {c: x[0] - x[1] for c, x in flows.io.items()}
         if m % SAMPLE_MIN == 0 and m < end_m:
             add_sample(hist, day + timedelta(hours=9, minutes=m), group_values(q, groups), {"th": list(themes)}, group_net(flows.io, groups))
     at = day + timedelta(hours=9, minutes=end_m)
-    payload = aggregate(quotes_at(end_m), names, groups, base, at, "open", past, hist, themes, flows.io, past_net)
+    payload = aggregate(quotes_at(end_m), names, groups, base, at, "open", past, hist, themes, flows.io, past_net, past_io)
     payload["mock"] = True
     out = DATA / "live_tw_mock.json"
     out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")

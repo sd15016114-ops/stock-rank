@@ -73,4 +73,12 @@ p2 = L.aggregate(quotes, {}, groups, base, at, "open", past, None, themes, {"233
 semi = p2["ind"][0]
 assert semi["fi"] == 500 and semi["fo"] == 300 and semi["fn"] == 200 and semi["fn5"] == 50, semi
 assert semi["top"][0][5] == 400 and semi["top"][1][5] == -200 and p2["fi"] == 500 and p2["fo"] == 300
+
+# 盤中個股排行
+st = L.stock_rank(quotes, {"2330": "台積電"}, groups, {"2330": [500, 100], "2303": [0, 200]}, {"2330": 300, "2303": -150})
+assert [r[0] for r in st][:2] == ["2330", "2303"] and "6488" not in [r[0] for r in st], st      # 依成交值排，沒成交的不列
+r0 = st[0]
+assert r0[1:4] == ["台積電", "半導體", 600] and r0[6] == 400 and r0[7] == 100, r0               # 淨流入 400、近 5 分鐘 400-300
+assert next(r for r in st if r[0] == "2303")[6:] == [-200, -50]
+assert L.stock_rank(quotes, {}, groups, {}, None)[0][6:] == [None, None]                        # 還沒有流入流出資料
 print("全部通過")
