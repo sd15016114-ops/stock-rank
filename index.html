@@ -447,7 +447,10 @@ function renderSectors(){
   $('secTitle').textContent = isStk ? '個股資金' : '板塊資金';
   $('viewSeg').style.display = isStk ? 'none' : '';                       /* 個股沒有熱力圖 */
   var yBtn = $('sortSeg').querySelector('[data-v="y"]'); yBtn.style.display = isStk ? 'none' : '';
-  syncSeg($('sortSeg'), true);
+  /* 個股沒有「比昨天」：原本選它的話，按鈕和滑塊改停在「成交值」，不然滑塊會停在藏起來的按鈕位置、露出一點邊 */
+  var shownSort = isStk && STATE.sort==='y' ? 'v' : STATE.sort;
+  $('sortSeg').querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===shownSort ? 'true' : 'false'); });
+  syncSeg($('sortSeg'));
   if(isStk){ renderLiveStocks(d, open); return; }
   var list = (d[kind]||[]).filter(function(g){ return g.v>0; });
   var heatOn = STATE.view==='heat';
