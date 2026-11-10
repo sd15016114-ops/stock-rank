@@ -198,6 +198,7 @@
     rb.addEventListener('click', function(){
       if(busy) return;
       if(!window.pageRefresh){ location.reload(); return; }
+      if(window.tickRefresh) window.tickRefresh();
       busy = true; rb.classList.add('spin');
       var t0 = Date.now();
       Promise.resolve(window.pageRefresh()).then(function(){ return '已更新'; }, function(){ return '更新失敗，請稍後再試'; }).then(function(msg){
@@ -209,6 +210,105 @@
       });
     });
   }
+
+  /* ===== 大盤常駐：電腦在左側選單最上面，平板與手機是頁首下面一條（往下滑收起、往上滑出現） ===== */
+  (function(){
+    var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
+    var tcss = ''
+    + '.tick{display:block;margin:0 10px 8px;padding:10px 12px;border-radius:12px;background:var(--tint);color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums;flex:none}'
+    + '.tick:hover{background:var(--soft)}'
+    + '.tick .tw{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px}'
+    + '.tick .tr{display:grid;grid-template-columns:30px minmax(0,1fr) 34px;align-items:center;gap:6px;padding:3px 0}'
+    + '.tick .tr small{font-size:12px;color:var(--muted)}'
+    + '.tick .tr span{display:flex;flex-direction:column;line-height:1.25;min-width:0}'
+    + '.tick .tr b{font-size:14px;font-weight:700}'
+    + '.tick .tr em{font-style:normal;font-size:11.5px;font-weight:700}'
+    + '.tick svg{width:34px;height:20px;display:block;overflow:visible}'
+    + '.tick .up{color:var(--up)}.tick .down{color:var(--down)}'
+    + '.tick.old .tr b{color:var(--muted)}'
+    + '.tstrip{display:none}'
+    + '@media (min-width:900px){body.side-mini .tick{display:none}}'
+    + '@media (max-width:899px){'
+    +   '.side .tick{display:none}'
+    +   '.tstrip{display:flex;position:sticky;top:0;z-index:30;gap:10px;margin:0 -20px;padding:6px 20px;background:color-mix(in srgb,var(--paper) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border-bottom:1px solid var(--rule);transition:transform .28s ease,opacity .28s ease}'
+    +   '.tstrip[hidden]{display:none}'
+    +   '.tstrip.float{position:fixed;left:0;right:0;margin:0 !important}'
+    +   '.tstrip.away{transform:translateY(-110%);opacity:0;pointer-events:none}'
+    +   '.tstrip a{flex:1;min-width:0;display:flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}'
+    +   '.tstrip a small{color:var(--muted);font-size:12px}'
+    +   '.tstrip a b{font-weight:700}'
+    +   '.tstrip a em{font-style:normal;font-weight:700;font-size:12px}'
+    +   '.tstrip svg{width:30px;height:16px;flex:none;overflow:visible}'
+    +   '.tstrip .up{color:var(--up)}.tstrip .down{color:var(--down)}'
+    +   '.tstrip.old b{color:var(--muted)}'
+    + '}'
+    + '@media (max-width:700px){.tstrip{margin:0 -16px;padding:6px 16px}}'
+    + '@media (min-width:600px) and (max-width:899px){.tstrip.float{left:var(--side-mini)}}';
+    var ts = document.createElement('style'); ts.textContent = tcss; document.head.appendChild(ts);
+
+    var home = pageUrl('index.html'), onHome = !/rank\.html|signals\.html/.test(location.pathname + location.search);
+    var box = document.createElement('a'); box.className = 'tick'; box.href = home; box.hidden = true; box.title = '看大盤走勢（盤中資金）';
+    side.insertBefore(box, side.querySelector('nav'));
+    var strip = document.createElement('div'); strip.className = 'tstrip'; strip.hidden = true; strip.setAttribute('aria-label', '大盤');
+    if(head && head.parentNode) head.parentNode.insertBefore(strip, head.nextSibling);
+    if(onHome) strip.classList.add('float', 'away');   /* 盤中資金頁上面已經有大盤卡片：浮在最上面，捲過卡片才出現，不佔版面 */
+
+    function fx(n,d){ return n.toLocaleString('zh-TW',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+    function cl(n){ return n>0 ? 'up' : n<0 ? 'down' : ''; }
+    function short(n){ return n==='加權指數' ? '加權' : n==='櫃買指數' ? '櫃買' : n; }
+    function spark(x){
+      var p = (x.pts||[]).map(function(v,i){ return v==null ? null : [i, v]; }).filter(Boolean);
+      if(p.length < 2) return '<svg viewBox="0 0 100 40" aria-hidden="true"></svg>';
+      var vs = p.map(function(q){ return q[1]; }).concat([x.ref]), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs), rg = (hi-lo)||1;
+      function Y(v){ return (1-(v-lo)/rg)*36+2; }
+      return '<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="100" y1="'+Y(x.ref)+'" y2="'+Y(x.ref)+'" stroke="var(--muted)" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".6"/>'
+        + '<polyline fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" points="'+p.map(function(q){ return (q[0]/269*100).toFixed(1)+','+Y(q[1]).toFixed(1); }).join(' ')+'"/></svg>';
+    }
+    function tpeToday(){ var d = new Date(), t = new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000); return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
+    function paint(d){
+      if(!d || !d.ix || !d.ix.length){ box.hidden = strip.hidden = true; return; }
+      var live = d.date===tpeToday() && d.phase==='open' && !d.mock;
+      var hm = (/T(\d\d:\d\d)/.exec(d.t||'')||[])[1] || '';
+      var when = live ? '盤中 '+hm : (+d.date.slice(5,7))+'/'+(+d.date.slice(8))+' 收盤';
+      box.classList.toggle('old', !live); strip.classList.toggle('old', !live);
+      box.innerHTML = '<div class="tw"><span>大盤</span><span>'+when+'</span></div>' + d.ix.map(function(x){
+        return '<div class="tr"><small>'+short(x.n)+'</small><span><b class="'+(live?cl(x.chg):'')+'">'+fx(x.c,2)+'</b><em class="'+cl(x.chg)+'">'+(x.chg>0?'▲':x.chg<0?'▼':'')+fx(Math.abs(x.chg),2)+'　'+(x.pct>0?'+':'')+fx(x.pct,2)+'%</em></span><i class="'+cl(x.chg)+'">'+spark(x)+'</i></div>';
+      }).join('');
+      box.setAttribute('aria-label', '大盤 '+when+'：'+d.ix.map(function(x){ return short(x.n)+' '+fx(x.c,2)+'，'+(x.pct>0?'漲':'跌')+' '+fx(Math.abs(x.pct),2)+'%'; }).join('；'));
+      strip.innerHTML = d.ix.map(function(x){
+        return '<a href="'+home+'" title="'+when+'"><small>'+short(x.n)+'</small><b class="'+(live?cl(x.chg):'')+'">'+fx(x.c, x.c>=1000?0:2)+'</b><em class="'+cl(x.chg)+'">'+(x.pct>0?'+':'')+fx(x.pct,2)+'%</em><i class="'+cl(x.chg)+'">'+spark(x)+'</i></a>';
+      }).join('');
+      box.hidden = false; strip.hidden = false;
+    }
+    var mock = /[?&]mock\b/.test(location.search);
+    function fetchTick(){
+      var p = mock ? fetch('data/live_tw_mock.json').then(function(r){ return r.json(); })
+        : fetch(SB.url+'/rest/v1/live?id=eq.tw&select=date:data->>date,t:data->>t,phase:data->>phase,ix:data->ix', {headers:{apikey:SB.key}, cache:'no-store'})
+            .then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){ return j[0]; });
+      return p.then(paint, function(){});
+    }
+    window.tickRefresh = fetchTick;
+    fetchTick();
+    function inSession(){ var d = new Date(), t = new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000), m = t.getHours()*60+t.getMinutes(); return t.getDay()>0 && t.getDay()<6 && m>=535 && m<=816; }
+    setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchTick(); }, 60000);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible' && inSession()) fetchTick(); });
+
+    /* 手機與平板：往下滑收起、往上滑出現；在盤中資金頁，大盤卡片還看得到時不用重複顯示 */
+    var lastY = window.scrollY, panelVisible = false;
+    if(onHome && 'IntersectionObserver' in window){
+      var watch = function(){ var m = document.getElementById('mkt'); if(!m){ return setTimeout(watch, 300); }
+        new IntersectionObserver(function(es){ panelVisible = es[0].isIntersecting && !m.hidden; upd(); }).observe(m); };
+      watch();
+    }
+    function upd(){
+      var y = window.scrollY, down = y > lastY + 4, up = y < lastY - 4;
+      if(panelVisible) strip.classList.add('away');
+      else if(down && y > 120) strip.classList.add('away');
+      else if(up || y < 120) strip.classList.remove('away');
+      if(down || up) lastY = y;
+    }
+    window.addEventListener('scroll', upd, {passive:true});
+  })();
 
   /* 目前在哪一頁：頁面可以呼叫 navMark('rank'|'us'|'live') 改亮起來的項目 */
   var CUR = null;
