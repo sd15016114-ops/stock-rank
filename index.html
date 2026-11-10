@@ -86,6 +86,39 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:12p
 .story p{margin:0 0 10px}
 .story b{font-weight:700}
 .story .live{padding:12px 16px;border-left:4px solid var(--up);background:var(--tint);border-radius:0 8px 8px 0;font-size:16px;margin-bottom:14px}
+.mkt{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr);gap:14px;margin-top:18px}
+.mkt[hidden]{display:none}
+.ix{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:14px 16px 10px;min-width:0}
+.ix .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;color:var(--muted)}
+.ix .hd b{color:var(--ink);font-weight:700;font-size:15px}
+.ix .hd span{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ix .px{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 10px;margin-top:2px}
+.ix .px strong{font-family:var(--serif);font-weight:900;font-size:32px;line-height:1.2;font-variant-numeric:tabular-nums}
+.ix .px em{font-style:normal;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.ix svg{display:block;width:100%;height:76px;margin:6px 0 4px;touch-action:pan-y}
+.ix .ohl{display:grid;grid-template-columns:repeat(4,auto);justify-content:space-between;gap:2px 10px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ix .ohl b{display:block;color:var(--ink);font-weight:500;font-size:13px}
+.brd .bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:14px 0 10px;background:var(--rule)}
+.brd .bar i{display:block;height:100%}
+.brd .cnt{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.brd .cnt b{display:block;font-family:var(--serif);font-weight:900;font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}
+.brd .cnt div:nth-child(2){text-align:center}.brd .cnt div:last-child{text-align:right}
+.brd .lim{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.brd .lim span{font-size:13px;font-weight:700;border-radius:8px;padding:4px 9px;background:var(--tint)}
+.brd .tot{font-size:13px;color:var(--muted);margin-top:10px}
+.brd .tot b{color:var(--ink);font-weight:700}
+@media (max-width:899px){ .mkt{grid-template-columns:1fr 1fr} .brd{grid-column:1/-1} }
+@media (max-width:599px){
+  .mkt{grid-template-columns:1fr;gap:10px}
+  .ix{padding:12px 14px}
+  .ix:not(.brd){display:grid;grid-template-columns:minmax(0,1fr) 40%;column-gap:12px}
+  .ix .hd{font-size:12px} .ix .hd b{font-size:14px}
+  .ix .hd,.ix .px{grid-column:1} .ix .px strong{font-size:26px} .ix .px em{font-size:14px}
+  .ix svg{grid-column:2;grid-row:1/3;height:64px;margin:0;align-self:center}
+  .ix .ohl{grid-column:1/-1;margin-top:8px;font-size:11px} .ix .ohl b{font-size:12px}
+  .brd .cnt b{font-size:22px}
+  .brd .bar{margin:10px 0 8px}
+}
 .sums{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:22px}
 .sum{background:var(--sheet);border:1px solid var(--rule);border-top:4px solid var(--fill);padding:14px 16px}
 .sum .k{font-size:14px;color:var(--muted)}
@@ -222,6 +255,7 @@ footer p{margin:0 0 6px;max-width:50em}
     <h1>盤中資金</h1>
     <p class="tag">今天的錢流向哪裡：交易時間每分鐘更新，收盤後保留當天的結果。</p>
     <div class="meta" id="meta">資料載入中…</div>
+    <div class="mkt" id="mkt" hidden></div>
     <div class="story" id="story"></div>
     <div class="sums" id="sums"></div>
   </section>
@@ -351,6 +385,71 @@ function bigSector(kind){
   Object.keys(ROT[kind]).forEach(function(n){ if(n==='ETF' || n==='其他') return; var l = rotLast(kind, n); if(!best || l>best.s) best = {n:n, s:l}; });
   return best;
 }
+
+/* ===== 大盤：加權、櫃買指數與漲跌家數 ===== */
+function renderMarket(){
+  var box = $('mkt'), ix = LIVE && LIVE.ix;
+  if(!ix || !ix.length){ box.hidden = true; return; }
+  var when = liveOpen() ? '盤中 '+hm(LIVE.t) : (LIVE.phase==='closed' || !liveToday() ? tradeDay(LIVE.date)+' 收盤' : hm(LIVE.t));
+  var html = ix.map(function(x){
+    var c = cls(x.chg), arrow = x.chg>0 ? '▲' : x.chg<0 ? '▼' : '';
+    return '<div class="ix" data-k="'+x.k+'"><div class="hd"><b>'+esc(x.n)+'</b><span class="when">'+when+'</span></div>'
+      + '<div class="px"><strong class="'+c+'">'+fix(x.c,2)+'</strong><em class="'+c+'">'+arrow+' '+fix(Math.abs(x.chg),2)+'　'+(x.pct>0?'+':'')+fix(x.pct,2)+'%</em></div>'
+      + ixChart(x)
+      + '<div class="ohl"><div>開盤<b>'+fix(x.o,2)+'</b></div><div>最高<b class="up">'+fix(x.h,2)+'</b></div><div>最低<b class="down">'+fix(x.l,2)+'</b></div><div>成交值<b>'+yi(x.v)+' 億</b></div></div></div>';
+  }).join('');
+  var b = LIVE.br;
+  if(b){
+    var all = (b.up+b.dn+b.eq)||1, tot = ix.reduce(function(a,x){ return a+(x.v||0); },0);
+    html += '<div class="ix brd"><div class="hd"><b>漲跌家數</b><span>上市櫃（不含 ETF）</span></div>'
+      + '<div class="bar" role="img" aria-label="上漲 '+b.up+' 家、平盤 '+b.eq+' 家、下跌 '+b.dn+' 家"><i style="width:'+(b.up/all*100)+'%;background:var(--up)"></i><i style="width:'+(b.eq/all*100)+'%;background:var(--muted);opacity:.35"></i><i style="width:'+(b.dn/all*100)+'%;background:var(--down)"></i></div>'
+      + '<div class="cnt"><div>上漲<b class="up">'+b.up+'</b></div><div>平盤<b>'+b.eq+'</b></div><div>下跌<b class="down">'+b.dn+'</b></div></div>'
+      + '<div class="lim"><span class="up">漲停 '+b.lu+'</span><span class="down">跌停 '+b.ld+'</span></div>'
+      + (tot ? '<div class="tot">上市櫃成交值 <b>'+yi(tot)+' 億元</b>'+(LIVE.base_total && liveOpen() ? '，平常一整天約 '+yi(LIVE.base_total)+' 億' : '')+'</div>' : '')+'</div>';
+  }
+  box.innerHTML = html; box.hidden = false;
+}
+/* 走勢圖：橫軸固定 9:00–13:30，虛線是昨天收盤，高於昨收的部分紅色、低於綠色 */
+function ixChart(x){
+  var W = 300, H = 76, pts = x.pts||[], N = 270, vals = pts.filter(function(v){ return v!=null; }).concat([x.ref]);
+  if(!vals.length) return '';
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = (hi-lo)*0.08 || x.ref*0.002;
+  lo -= pad; hi += pad;
+  function X(i){ return (i+1)/N*W; } function Y(v){ return (1-(v-lo)/(hi-lo))*H; }
+  var line = '', yr = Y(x.ref).toFixed(1), first = null, lastI = 0;
+  pts.forEach(function(v,i){ if(v==null) return; line += (first==null?'M':'L')+X(i).toFixed(1)+' '+Y(v).toFixed(1); if(first==null) first = i; lastI = i; });
+  var area = line ? line+'L'+X(lastI).toFixed(1)+' '+yr+'L'+X(first).toFixed(1)+' '+yr+'Z' : '';
+  var id = 'ixc'+x.k;
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+esc(x.n)+'今日走勢" data-k="'+x.k+'">'
+    + '<defs><clipPath id="'+id+'u"><rect x="0" y="0" width="'+W+'" height="'+yr+'"/></clipPath><clipPath id="'+id+'d"><rect x="0" y="'+yr+'" width="'+W+'" height="'+(H-yr)+'"/></clipPath></defs>'
+    + [60,120,180,240].map(function(m){ return '<line x1="'+X(m-1)+'" x2="'+X(m-1)+'" y1="0" y2="'+H+'" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>'; }).join('')
+    + '<line x1="0" x2="'+W+'" y1="'+yr+'" y2="'+yr+'" stroke="var(--muted)" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".7"/>'
+    + '<g clip-path="url(#'+id+'u)"><path d="'+area+'" fill="var(--up)" opacity=".12"/><path d="'+line+'" fill="none" stroke="var(--up)" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></g>'
+    + '<g clip-path="url(#'+id+'d)"><path d="'+area+'" fill="var(--down)" opacity=".12"/><path d="'+line+'" fill="none" stroke="var(--down)" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></g>'
+    + '<line class="cur" x1="0" x2="0" y1="0" y2="'+H+'" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0"/></svg>';
+}
+/* 滑過（手機按住拖曳）走勢圖：右上角顯示那一分鐘的點數 */
+(function(){
+  function show(e){
+    var svg = e.target.closest && e.target.closest('#mkt svg[data-k]'); if(!svg || !LIVE || !LIVE.ix) return;
+    var x = LIVE.ix.filter(function(r){ return r.k===svg.dataset.k; })[0], r = svg.getBoundingClientRect();
+    var i = Math.max(0, Math.min(269, Math.round((e.clientX - r.left)/r.width*270) - 1));
+    if(!x || !x.pts || i >= x.pts.length){ return; }
+    while(i>0 && x.pts[i]==null) i--;
+    var v = x.pts[i], m = i+1, t = (9+Math.floor(m/60))+':'+('0'+m%60).slice(-2);
+    var card = svg.closest('.ix'), lab = card.querySelector('.when'), cur = svg.querySelector('.cur');
+    if(lab.dataset.def==null) lab.dataset.def = lab.textContent;
+    lab.innerHTML = t+'　<b class="'+cls(v - x.ref)+'">'+fix(v,2)+'</b>';
+    cur.setAttribute('x1', (i+1)/270*300); cur.setAttribute('x2', (i+1)/270*300); cur.setAttribute('opacity', .5);
+  }
+  function hide(e){
+    var svg = e.target.closest && e.target.closest('#mkt svg[data-k]'); if(!svg) return;
+    var lab = svg.closest('.ix').querySelector('.when'); if(lab.dataset.def!=null){ lab.textContent = lab.dataset.def; delete lab.dataset.def; }
+    svg.querySelector('.cur').setAttribute('opacity', 0);
+  }
+  document.addEventListener('pointermove', show); document.addEventListener('pointerdown', show);
+  document.addEventListener('pointerout', hide); document.addEventListener('pointerup', function(e){ if(e.pointerType!=='mouse') hide(e); });
+})();
 
 /* ===== 今日摘要：自動產生的幾句話 ===== */
 function renderStory(){
@@ -618,7 +717,7 @@ function renderRotation(){
 }
 
 /* ===== 啟動 ===== */
-function renderAll(){ renderStory(); renderSectors(); renderRotation(); }
+function renderAll(){ renderMarket(); renderStory(); renderSectors(); renderRotation(); }
 segBind('kindSeg', 'kind', renderSectors); segBind('sortSeg', 'sort', renderSectors);
 segBind('rkindSeg', 'rkind', renderRotation); segBind('viewSeg', 'view', renderSectors);
 function nul(){ return null; }
@@ -626,7 +725,7 @@ Promise.all([load('tw.json').catch(nul), load('rotation_tw.json').catch(nul), fe
   TW = res[0]; ROT = res[1]; renderAll();
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); });
 });
-setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchLive().then(function(){ renderStory(); renderSectors(); }); }, 60000);
+setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchLive().then(function(){ renderMarket(); renderStory(); renderSectors(); }); }, 60000);
 /* 右上角的重新整理按鈕：重抓盤中、盤後、資金輪動三份資料再畫一次 */
 window.pageRefresh = function(){
   BUST = '?t='+Date.now();

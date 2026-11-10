@@ -34,6 +34,8 @@ FLOW_MIN = 5            # 「近 5 分鐘」的資金
 LOGIN_T, OPEN_T, CLOSE_T, END_T = dtime(8, 50), dtime(9, 0), dtime(13, 30), dtime(13, 36)
 CHUNK = 500             # Shioaji 一次最多查 500 檔快照
 MAX_RELOGIN = 3
+INDEXES = (("tse", "IX0001", "加權指數", "上市"), ("otc", "IX0043", "櫃買指數", "上櫃"))   # 永豐的指數代號
+LIMIT_P = 9.5           # 漲跌幅 9.5% 以上算漲停／跌停（台股上限 10%，價格跳動單位會讓實際漲停略低於 10%）
 
 
 def now():
@@ -196,7 +198,72 @@ def stock_rank(quotes, names, groups, io, past_io=None):
     return rows
 
 
-def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, themes=None, io=None, past_net=None, past_io=None):
+class Indexes:
+    """加權、櫃買指數：每分鐘一筆，pts[i] 是 9:00 之後第 i+1 分鐘的收盤點數。
+    第一次抓的時候用今天的分K把開盤到現在補齊（排程晚啟動或重新登入也不會缺一段）"""
+    def __init__(self):
+        self.cons, self.data, self.filled = {}, {}, set()
+
+    def connect(self, api):
+        self.cons = {}
+        for key, code, _, _ in INDEXES:
+            try:
+                c = get_contract(api, code)
+                if c is not None:
+                    self.cons[key] = c
+            except Exception as e:                 # noqa: BLE001
+                log("拿不到指數 %s：%s" % (code, e))
+
+    def backfill(self, api, key, today):
+        try:
+            kb = api.kbars(self.cons[key], start=today.isoformat(), end=today.isoformat())
+        except Exception as e:                     # noqa: BLE001
+            log("指數分K 補資料失敗：%s" % e)
+            return
+        pts = self.data[key].setdefault("pts", [])
+        for ts, c in zip(kb.ts, kb.Close):
+            t = datetime.fromtimestamp(ts / 1e9, timezone.utc)        # 永豐的時間戳是台灣時間當成 UTC
+            i = (t.hour - 9) * 60 + t.minute - 1
+            if 0 <= i < 270:
+                while len(pts) <= i:
+                    pts.append(None)
+                pts[i] = round(float(c), 2)
+        self.filled.add(key)
+
+    def update(self, api, at):
+        if not self.cons:
+            return
+        snaps = {s.code: s for s in api.snapshots(list(self.cons.values()))}
+        for key, code, name, mk in INDEXES:
+            s = snaps.get(code)
+            if not s or not s.close:
+                continue
+            c, chg = float(s.close), float(s.change_price or 0)
+            d = self.data.setdefault(key, {"pts": []})
+            d.update({"n": name, "mk": mk, "c": round(c, 2), "chg": round(chg, 2), "pct": round(float(s.change_rate or 0), 2),
+                      "ref": round(c - chg, 2), "o": round(float(s.open or 0), 2), "h": round(float(s.high or 0), 2),
+                      "l": round(float(s.low or 0), 2), "v": int(s.total_amount or 0), "vr": float(getattr(s, "volume_ratio", 0) or 0) or None})
+            if key not in self.filled:
+                self.backfill(api, key, at.date())
+            i = min((at.hour - 9) * 60 + at.minute - 1, 269)
+            if i >= 0:
+                pts = d["pts"]
+                while len(pts) <= i:
+                    pts.append(pts[-1] if pts else None)    # 中間漏抓的分鐘先用前一筆補
+                pts[i] = d["c"]
+
+    def payload(self):
+        return [dict(self.data[k], k=k) for k, _, _, _ in INDEXES if k in self.data]
+
+
+def breadth(quotes):
+    """漲跌家數（不含 ETF）：上漲、下跌、平盤、漲停、跌停"""
+    ps = [q["p"] for c, q in quotes.items() if q.get("p") is not None and not is_etf(c)]
+    return {"up": sum(1 for p in ps if p > 0), "dn": sum(1 for p in ps if p < 0), "eq": sum(1 for p in ps if p == 0),
+            "lu": sum(1 for p in ps if p >= LIMIT_P), "ld": sum(1 for p in ps if p <= -LIMIT_P)}
+
+
+def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, themes=None, io=None, past_net=None, past_io=None, ix=None):
     """把每檔的快照整理成網頁用的格式。
     quotes：{代號: {"v": 累積成交值(元), "p": 漲跌幅(%), "c": 成交價, "m": 市場}}
     past：FLOW_MIN 分鐘前的 (板塊成交值, 全市場成交值)，用來算近幾分鐘的資金流向
@@ -257,6 +324,7 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
             "up": sum(1 for q in quotes.values() if (q.get("p") or 0) > 0),
             "dn": sum(1 for q in quotes.values() if (q.get("p") or 0) < 0),
             "base_days": base.get("days"), "base_total": base.get("total"),
+            "ix": ix or [], "br": breadth(quotes),
             "ts": (hist or {}).get("ts", []), "ind": out["ind"], "th": out["th"],
             "stocks": stock_rank(quotes, names, groups, io, past_io)}
 
@@ -405,7 +473,8 @@ def run():
     api, relogin = sj_login(), 0
     cons, names = sj_contracts(api, uni)
     hist, recent, scale, fails, last = {"ts": [], "ind": {}, "th": {}}, deque(maxlen=FLOW_MIN + 3), None, 0, None
-    flows = Flows()
+    flows, idx = Flows(), Indexes()
+    idx.connect(api)
     wait_until(datetime.combine(today, OPEN_T, TPE) + timedelta(seconds=20))
     while now().time() < END_T:
         at = now().replace(second=0, microsecond=0)
@@ -424,7 +493,11 @@ def run():
             if at.minute % SAMPLE_MIN == 0 or not hist["ts"] or (at.time() >= CLOSE_T and hist["ts"][-1] < "13:30"):
                 add_sample(hist, at, gv, {"th": list(themes)}, gn)
             phase = "closed" if at.time() >= CLOSE_T else "open"
-            last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes, flows.io, past_net, past_io)
+            try:
+                idx.update(api, at)
+            except Exception as e:                 # noqa: BLE001
+                log("指數這一輪沒抓到：%s" % e)
+            last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes, flows.io, past_net, past_io, idx.payload())
             save_local(last)
             ok = sb_put(last)
             log("%s 全市場 %.0f 億%s %s" % (phase, total / 1e8, "" if ok else "（未寫入 Supabase）", usage(api) if at.minute % 30 == 0 else ""))
@@ -441,6 +514,7 @@ def run():
                 time.sleep(30)
                 api = sj_login()
                 cons, names = sj_contracts(api, uni)
+                idx.connect(api)
                 fails = 0
         wait_until(at + timedelta(seconds=60 + 3))
     try:
@@ -645,7 +719,14 @@ def mock(date=None):
         if m % SAMPLE_MIN == 0 and m < end_m:
             add_sample(hist, day + timedelta(hours=9, minutes=m), group_values(q, groups), {"th": list(themes)}, group_net(flows.io, groups))
     at = day + timedelta(hours=9, minutes=end_m)
-    payload = aggregate(quotes_at(end_m), names, groups, base, at, "open", past, hist, themes, flows.io, past_net, past_io)
+    ix = []
+    for key, code, name, mk in INDEXES:                # 假的指數走勢：前一天收盤附近上下波動
+        ref = 23000.0 if key == "tse" else 260.0
+        pts = [round(ref * (1 + 0.004 * math.sin(m / 23) + 0.006 * math.sin(m / 61 + (1 if key == "otc" else 0)) + 0.002 * m / 120), 2) for m in range(1, end_m + 1)]
+        c = pts[-1]
+        ix.append({"k": key, "n": name, "mk": mk, "c": c, "chg": round(c - ref, 2), "pct": round((c / ref - 1) * 100, 2), "ref": ref,
+                   "o": pts[0], "h": max(pts), "l": min(pts), "v": int(sum(x["v"] for x in quotes_at(end_m).values() if x["m"] == mk)), "vr": 1.1, "pts": pts})
+    payload = aggregate(quotes_at(end_m), names, groups, base, at, "open", past, hist, themes, flows.io, past_net, past_io, ix)
     payload["mock"] = True
     out = DATA / "live_tw_mock.json"
     out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
