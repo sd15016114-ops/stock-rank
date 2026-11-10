@@ -500,6 +500,49 @@ def probe():
                 log("公開金鑰寫入被擋下（%d），權限正確" % e.code)
 
 
+def probe_index():
+    """試抓加權指數、櫃買指數：合約怎麼拿、快照有哪些欄位、分K能不能補今天的走勢"""
+    api = sj_login()
+    log("登入成功。%s" % usage(api))
+    try:
+        ix = api.Contracts.Indexs
+        log("Indexs 底下：%s" % [a for a in dir(ix) if not a.startswith("_")])
+        for ex in ("TSE", "OTC"):
+            grp = getattr(ix, ex)
+            keys = [k for k in dir(grp) if not k.startswith("_")][:15]
+            log("%s 前幾個：%s" % (ex, keys))
+    except Exception as e:                         # noqa: BLE001
+        log("Indexs 讀取失敗：%s" % e)
+    for code in ("001", "101", "TSE001", "OTC101"):
+        for how, fn in (("contracts.get", lambda c: api.contracts.get(c)),
+                        ("Indexs.TSE", lambda c: api.Contracts.Indexs.TSE[c]),
+                        ("Indexs.OTC", lambda c: api.Contracts.Indexs.OTC[c])):
+            try:
+                c = fn(code)
+                if c is not None:
+                    log("%s 用 %s 拿到：%s" % (code, how, c))
+            except Exception as e:                 # noqa: BLE001
+                log("%s 用 %s 失敗：%s" % (code, how, str(e)[:80]))
+    cons = []
+    for ex, code in (("TSE", "001"), ("OTC", "101")):
+        try:
+            cons.append(getattr(api.Contracts.Indexs, ex)[code])
+        except Exception as e:                     # noqa: BLE001
+            log("拿不到 %s %s：%s" % (ex, code, e))
+    if cons:
+        for s in api.snapshots(cons):
+            log("快照：%s" % {k: getattr(s, k) for k in dir(s) if not k.startswith("_") and not callable(getattr(s, k))})
+        try:
+            today = now().date().isoformat()
+            kb = api.kbars(cons[0], start=today, end=today)
+            log("分K 欄位：%s，筆數 %d" % ([a for a in dir(kb) if not a.startswith("_")][:20], len(kb.Close)))
+            log("前 3 筆：ts=%s close=%s；最後：ts=%s close=%s" % (kb.ts[:3], kb.Close[:3], kb.ts[-1:], kb.Close[-1:]))
+        except Exception as e:                     # noqa: BLE001
+            log("分K 失敗：%s" % e)
+    log(usage(api))
+    api.logout()
+
+
 # ---------------------------------------------------------------- 資金輪動
 ROTATION_DAYS = 20
 
@@ -600,6 +643,8 @@ if __name__ == "__main__":
         run()
     elif cmd == "probe":
         probe()
+    elif cmd == "probe-index":
+        probe_index()
     elif cmd == "rotation":
         rotation()
     elif cmd == "mock":
