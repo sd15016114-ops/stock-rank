@@ -504,39 +504,54 @@ def probe_index():
     """試抓加權指數、櫃買指數：合約怎麼拿、快照有哪些欄位、分K能不能補今天的走勢"""
     api = sj_login()
     log("登入成功。%s" % usage(api))
+    cc = api.contracts
+    log("api.contracts 型別 %s，方法：%s" % (type(cc).__name__, [a for a in dir(cc) if not a.startswith("_")]))
+    for name in [a for a in dir(cc) if not a.startswith("_")]:
+        try:
+            v = getattr(cc, name)
+            if callable(v):
+                log("  %s%s  %s" % (name, inspect.signature(v) if not isinstance(v, type) else "", (v.__doc__ or "").strip()[:200]))
+            else:
+                log("  %s = %s" % (name, str(v)[:200]))
+        except Exception as e:                     # noqa: BLE001
+            log("  %s 讀不到：%s" % (name, e))
     try:
         ix = api.Contracts.Indexs
-        log("Indexs 底下：%s" % [a for a in dir(ix) if not a.startswith("_")])
+        log("Indexs 型別 %s：%s" % (type(ix).__name__, [a for a in dir(ix) if not a.startswith("_")]))
         for ex in ("TSE", "OTC"):
-            grp = getattr(ix, ex)
-            keys = [k for k in dir(grp) if not k.startswith("_")][:15]
-            log("%s 前幾個：%s" % (ex, keys))
-    except Exception as e:                         # noqa: BLE001
-        log("Indexs 讀取失敗：%s" % e)
-    for code in ("001", "101", "TSE001", "OTC101"):
-        for how, fn in (("contracts.get", lambda c: api.contracts.get(c)),
-                        ("Indexs.TSE", lambda c: api.Contracts.Indexs.TSE[c]),
-                        ("Indexs.OTC", lambda c: api.Contracts.Indexs.OTC[c])):
+            g = getattr(ix, ex)
+            log("%s 型別 %s：%s" % (ex, type(g).__name__, [a for a in dir(g) if not a.startswith("_")][:40]))
             try:
-                c = fn(code)
-                if c is not None:
-                    log("%s 用 %s 拿到：%s" % (code, how, c))
+                items = list(g)[:5]
+                log("  前 5 個：%s" % items)
             except Exception as e:                 # noqa: BLE001
-                log("%s 用 %s 失敗：%s" % (code, how, str(e)[:80]))
-    cons = []
-    for ex, code in (("TSE", "001"), ("OTC", "101")):
+                log("  無法列舉：%s" % e)
+    except Exception as e:                         # noqa: BLE001
+        log("Indexs 失敗：%r" % e)
+    found = {}
+    tries = []
+    for code in ("001", "101", "TSE001", "OTC101", "IX0001", "IX0043"):
+        tries.append(("contracts.get(%s)" % code, lambda c=code: cc.get(c)))
+        for kw in ("security_type", "exchange"):
+            for val in ("IND", "TSE", "OTC"):
+                tries.append(("contracts.get(%s,%s=%s)" % (code, kw, val), lambda c=code, k=kw, v=val: cc.get(c, **{k: v})))
+    for label, fn in tries:
         try:
-            cons.append(getattr(api.Contracts.Indexs, ex)[code])
+            c = fn()
+            if c is not None:
+                log("%s → %s" % (label, c))
+                found.setdefault(getattr(c, "code", label) + str(getattr(c, "exchange", "")), c)
         except Exception as e:                     # noqa: BLE001
-            log("拿不到 %s %s：%s" % (ex, code, e))
+            if "unexpected keyword" not in str(e):
+                log("%s 失敗：%s" % (label, str(e)[:100]))
+    cons = list(found.values())[:4]
     if cons:
         for s in api.snapshots(cons):
             log("快照：%s" % {k: getattr(s, k) for k in dir(s) if not k.startswith("_") and not callable(getattr(s, k))})
         try:
             today = now().date().isoformat()
             kb = api.kbars(cons[0], start=today, end=today)
-            log("分K 欄位：%s，筆數 %d" % ([a for a in dir(kb) if not a.startswith("_")][:20], len(kb.Close)))
-            log("前 3 筆：ts=%s close=%s；最後：ts=%s close=%s" % (kb.ts[:3], kb.Close[:3], kb.ts[-1:], kb.Close[-1:]))
+            log("分K 筆數 %d；前 3 筆 ts=%s close=%s；最後 ts=%s close=%s" % (len(kb.Close), kb.ts[:3], kb.Close[:3], kb.ts[-1:], kb.Close[-1:]))
         except Exception as e:                     # noqa: BLE001
             log("分K 失敗：%s" % e)
     log(usage(api))
