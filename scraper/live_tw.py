@@ -256,6 +256,42 @@ class Indexes:
         return [dict(self.data[k], k=k) for k, _, _, _ in INDEXES if k in self.data]
 
 
+LAG_HOT = 6            # 最多列幾個熱門板塊
+LAG_MIN_P = 1.0        # 板塊平均漲幅至少 1% 才算「在漲」
+LAG_GAP = 1.5          # 個股漲幅比板塊平均少 1.5 個百分點以上才算落後
+LAG_MIN_V = 3e7        # 個股今天至少成交 3,000 萬，太冷門的不列
+LAG_N = 5              # 每個板塊列幾檔
+
+
+def laggards(out, quotes, names, io):
+    """熱門板塊裡還沒漲的：板塊在漲、資金淨流入最多，但個股漲幅明顯落後板塊平均、自己也有資金流入的股票"""
+    if not io:
+        return []
+    hot = [(kind, g) for kind in ("ind", "th") for g in out[kind]
+           if g["n"] not in ("ETF", "其他") and (g.get("fn") or 0) > 0 and (g.get("p") or 0) >= LAG_MIN_P]
+    hot.sort(key=lambda x: -x[1]["fn"])
+    res, seen = [], set()
+    for kind, g in hot:
+        rows = []
+        for c in g["_codes"]:
+            q = quotes[c]
+            fn = io[c][0] - io[c][1] if c in io else 0
+            if is_etf(c) or q.get("p") is None or q["v"] < LAG_MIN_V or fn <= 0 or q["p"] > g["p"] - LAG_GAP:
+                continue
+            rows.append([c, names.get(c, c), q["p"], q["v"], fn, q.get("c")])
+        if not rows:
+            continue
+        key = tuple(sorted(r[0] for r in rows))
+        if key in seen:                            # 概念股常常跟產業的成員一樣，重複的不列兩次
+            continue
+        seen.add(key)
+        rows.sort(key=lambda r: -r[4])
+        res.append({"k": kind, "n": g["n"], "p": g["p"], "fn": g["fn"], "up": g["up"], "cnt": g["k"], "rows": rows[:LAG_N]})
+        if len(res) >= LAG_HOT:
+            break
+    return res
+
+
 def breadth(quotes):
     """漲跌家數（不含 ETF）：上漲、下跌、平盤、漲停、跌停"""
     ps = [q["p"] for c, q in quotes.items() if q.get("p") is not None and not is_etf(c)]
@@ -312,8 +348,13 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
                 g["h"] = hist[kind][name]
             if hist and name in hist.get("net", {}).get(kind, {}):
                 g["hn"] = hist["net"][kind][name]
+            g["_codes"] = codes
             rows.append(g)
         out[kind] = sorted(rows, key=lambda g: -g["v"])
+    lag = laggards(out, quotes, names, io)
+    for kind in out:
+        for g in out[kind]:
+            g.pop("_codes", None)
     mk = {}
     for q in quotes.values():
         mk[q["m"]] = mk.get(q["m"], 0) + q["v"]
@@ -324,7 +365,7 @@ def aggregate(quotes, names, groups, base, at, phase, past=None, hist=None, them
             "up": sum(1 for q in quotes.values() if (q.get("p") or 0) > 0),
             "dn": sum(1 for q in quotes.values() if (q.get("p") or 0) < 0),
             "base_days": base.get("days"), "base_total": base.get("total"),
-            "ix": ix or [], "br": breadth(quotes),
+            "ix": ix or [], "br": breadth(quotes), "lag": lag,
             "ts": (hist or {}).get("ts", []), "ind": out["ind"], "th": out["th"],
             "stocks": stock_rank(quotes, names, groups, io, past_io)}
 
