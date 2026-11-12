@@ -24,7 +24,7 @@
   + '.sc-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:4px}'
   + '.sc-legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:3px;margin-right:4px}'
   + 'table.sc-t{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}'
-  + 'table.sc-t th,table.sc-t td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--rule);white-space:nowrap}'
+  + 'table.sc-t th,table.sc-t td{padding:6px 3px;text-align:right;border-bottom:1px solid var(--rule);white-space:nowrap}'
   + 'table.sc-t th{font-weight:400;color:var(--muted)}'
   + 'table.sc-t th:first-child,table.sc-t td:first-child{text-align:left}'
   + '@media (max-width:759px){table.sc-t .r{display:none}table.sc-t{font-size:12px}}'
@@ -104,6 +104,12 @@
     if(fr[1]>=2) keys.push('<span class="'+cls(fr[0])+'">外資連 '+fr[1]+' '+(fr[0]>0?'買':'賣')+'</span>');
     if(tr[1]>=2) keys.push('<span class="'+cls(tr[0])+'">投信連 '+tr[1]+' '+(tr[0]>0?'買':'賣')+'</span>');
     if(f.some(function(x){ return x!=null; })){ var s20 = sum(f,20); keys.push('<span class="'+cls(s20)+'">外資近 20 日 '+lots(s20)+' 張</span>'); }
+    var sb = c.sbl||[], dtr = c.dt||[];
+    if(sb[last]){
+      var pb = sb.slice(-21,-1).filter(function(x){ return x!=null; }), ab = pb.length ? pb.reduce(function(a,b){ return a+b; },0)/pb.length : 0;
+      if(!ab || sb[last] >= ab*3) keys.push('<span class="down">借券賣出 '+sb[last].toLocaleString('zh-TW')+' 張'+(ab ? '，平常的 '+fix(sb[last]/ab,1)+' 倍' : '')+'</span>');
+    }
+    if(dtr[last]!=null && dtr[last] >= 50) keys.push('<span>當沖比例 '+fix(dtr[last],0)+'%</span>');
     var p = c.pct[last], px = c.close[last];
     IN.innerHTML =
       '<div class="sc-top"><div><h2>'+esc(c.name)+'<small>'+esc(code)+(c.ind?'・'+esc(c.ind):'')+'</small></h2></div>'
@@ -145,9 +151,11 @@
     return s;
   }
   function table(c){
-    var n=c.dates.length, rows='', f=c.f||[], t=c.t||[];
+    var n=c.dates.length, rows='', f=c.f||[], t=c.t||[], sb=c.sbl||[], dtr=c.dt||[];
+    var hasX = sb.some(function(x){ return x!=null; }) || dtr.some(function(x){ return x!=null; });
     for(var i=n-1;i>=Math.max(0,n-10);i--){
-      rows+='<tr><td>'+md(c.dates[i])+'</td><td>'+(c.close[i]!=null?fix(c.close[i],2):'—')+'</td><td class="'+cls(c.pct[i])+'">'+pct(c.pct[i])+'</td><td>'+(c.value[i]!=null?yi(c.value[i]):'—')+'</td><td class="r">'+(c.ratio[i]!=null?fix(c.ratio[i],1)+'×':'—')+'</td><td class="'+cls(f[i])+'">'+(f[i]!=null?lots(f[i]):'—')+'</td><td class="'+cls(t[i])+'">'+(t[i]!=null?lots(t[i]):'—')+'</td></tr>'; }
-    return '<table class="sc-t"><tr><th>日期</th><th>收盤</th><th>漲跌</th><th>成交值（億）</th><th class="r">放大</th><th>外資（張）</th><th>投信（張）</th></tr>'+rows+'</table>';
+      rows+='<tr><td>'+md(c.dates[i])+'</td><td>'+(c.close[i]!=null?fix(c.close[i],2):'—')+'</td><td class="'+cls(c.pct[i])+'">'+pct(c.pct[i])+'</td><td>'+(c.value[i]!=null?yi(c.value[i]):'—')+'</td><td class="r">'+(c.ratio[i]!=null?fix(c.ratio[i],1)+'×':'—')+'</td><td class="'+cls(f[i])+'">'+(f[i]!=null?lots(f[i]):'—')+'</td><td class="'+cls(t[i])+'">'+(t[i]!=null?lots(t[i]):'—')+'</td>'
+        +(hasX?'<td class="r">'+(sb[i]!=null?sb[i].toLocaleString('zh-TW'):'—')+'</td><td class="r">'+(dtr[i]!=null?fix(dtr[i],0)+'%':'—')+'</td>':'')+'</tr>'; }
+    return '<table class="sc-t"><tr><th>日期</th><th>收盤</th><th>漲跌</th><th>成交值（億）</th><th class="r">放大</th><th>外資（張）</th><th>投信（張）</th>'+(hasX?'<th class="r">借券賣出</th><th class="r">當沖</th>':'')+'</tr>'+rows+'</table>';
   }
 })();

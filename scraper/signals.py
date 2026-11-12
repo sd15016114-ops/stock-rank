@@ -202,6 +202,7 @@ def signals(dates, stocks):
     sec.sort(key=lambda x: (-x["n"], -x["chg"]))
     chip_days = sum(1 for d in dates if (DATA / "full" / "chips" / ("%s.json" % d)).exists())
     return {"date": dates[-1], "updated": datetime.now(TPE).isoformat(timespec="seconds"), "chip_days": chip_days,
+            "extra_days": sum(1 for d in dates if (DATA / "full" / "dt" / ("%s.json" % d)).exists()),
             "rot_date": (rot.get("dates") or [None])[-1], "sig": out, "sec": sec[:40]}
 
 

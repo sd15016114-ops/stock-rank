@@ -54,6 +54,7 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:12p
 .seg.still .thumb{transition:none}
 .seg button{position:relative;flex:none;font:inherit;font-size:15px;font-weight:500;line-height:1.4;color:var(--muted);background:transparent;border:0;border-radius:999px;padding:6px 16px;cursor:pointer;white-space:nowrap}
 .seg button[aria-pressed=true]{color:var(--on-fill);font-weight:700}
+.seg[hidden]{display:none}
 .card{background:var(--sheet);border:1px solid var(--rule)}
 .empty{padding:20px 16px;color:var(--muted)}
 .list .it{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--rule)}
@@ -66,6 +67,8 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:12p
 .badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:1px}
 .badge.r{background:color-mix(in srgb,var(--up) 14%,transparent);color:var(--up)}
 .badge.b{background:var(--soft);color:var(--accent)}
+.badge.g{background:color-mix(in srgb,var(--down) 14%,transparent);color:var(--down)}
+.dots i.on.g{background:var(--down);border-color:var(--down)}
 .dots{display:flex;gap:4px;margin-top:4px}
 .dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--rule)}
 .dots i.on{background:var(--up);border-color:var(--up)}
@@ -93,11 +96,15 @@ footer p{margin:0 0 6px;max-width:50em}
 
   <section class="hero">
     <h1>連續訊號</h1>
-    <p class="tag">每天收盤後自動整理：哪些股票連續好幾天放量、被外資或投信連續買進，哪些板塊資金連續增加。圓點是最近 10 個交易日，實心代表那天符合條件。點任一檔可以打開個股卡片。</p>
+    <p class="tag">每天收盤後自動整理：哪些股票連續好幾天放量、被外資或投信連續買進，哪些板塊資金連續增加；另外列出借券賣出突然暴增、當沖比例特別高的股票。圓點是最近 10 個交易日，實心代表那天符合條件。點任一檔可以打開個股卡片。</p>
     <div class="meta" id="meta">資料載入中…</div>
   </section>
 
   <div class="tools">
+    <div class="seg" id="catSeg" role="group" aria-label="類別"><i class="thumb"></i><button type="button" data-v="streak" aria-pressed="true">連續訊號</button><button type="button" data-v="chip" aria-pressed="false">借券・當沖</button></div>
+  </div>
+  <div class="tools">
+    <div class="seg" id="chipSeg" role="group" aria-label="借券與當沖" hidden><i class="thumb"></i><button type="button" data-v="sbl" aria-pressed="true">借券賣出暴增</button><button type="button" data-v="sblb" aria-pressed="false">借券餘額連增</button><button type="button" data-v="dt" aria-pressed="false">當沖比例最高</button></div>
     <div class="seg" id="kindSeg" role="group" aria-label="訊號"><i class="thumb"></i><button type="button" data-v="vol" aria-pressed="true">連續放量</button><button type="button" data-v="f" aria-pressed="false">外資連買</button><button type="button" data-v="t" aria-pressed="false">投信連買</button><button type="button" data-v="ft" aria-pressed="false">外資投信同步買</button><button type="button" data-v="sec" aria-pressed="false">板塊連續增加</button></div>
     <div class="seg" id="minSeg" role="group" aria-label="至少幾天"><i class="thumb"></i><button type="button" data-v="3" aria-pressed="true">3 天以上</button><button type="button" data-v="5" aria-pressed="false">5 天以上</button><button type="button" data-v="10" aria-pressed="false">10 天以上</button></div>
   </div>
@@ -139,7 +146,7 @@ function syncSeg(seg, still){
   if(window.jelly) jelly(th, on.offsetLeft, on.offsetLeft+on.offsetWidth, still);
   else{ th.style.width = on.offsetWidth+'px'; th.style.transform = 'translateX('+on.offsetLeft+'px)'; }
 }
-var STATE = {kind:'vol', min:'3'};
+var STATE = {cat:'streak', kind:'vol', ckind:'sbl', min:'3'};
 try{ Object.assign(STATE, JSON.parse(localStorage.getItem('stock-rank-sig')||'{}')); }catch(e){}
 function segBind(id, key){
   var seg = $(id);
@@ -153,7 +160,15 @@ function segBind(id, key){
     render();
   });
 }
-segBind('kindSeg','kind'); segBind('minSeg','min');
+segBind('catSeg','cat'); segBind('kindSeg','kind'); segBind('chipSeg','ckind'); segBind('minSeg','min');
+function showSegs(){
+  var chip = STATE.cat==='chip';
+  $('kindSeg').hidden = chip; $('chipSeg').hidden = !chip;
+  $('minSeg').hidden = chip && STATE.ckind!=='sblb';
+  document.querySelectorAll('.seg').forEach(function(x){ if(!x.hidden) syncSeg(x, true); });
+}
+['catSeg','chipSeg'].forEach(function(id){ $(id).addEventListener('click', function(){ setTimeout(showSegs, 0); }); });
+showSegs();
 function syncAll(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); }
 window.addEventListener('resize', syncAll);
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncAll);
@@ -162,7 +177,32 @@ syncAll();
 var D = null;
 function render(){
   if(!D) return;
-  var K = STATE.kind, MIN = +STATE.min, html = '', items;
+  var K = STATE.cat==='chip' ? STATE.ckind : STATE.kind, MIN = +STATE.min, html = '', items;
+  if(STATE.cat==='chip'){
+    items = ((D.sig||{})[K]||[]).filter(function(x){ return K!=='sblb' || x.n>=MIN; });
+    html = items.map(function(x,i){
+      var badge, right, dots = '';
+      if(K==='sbl'){
+        badge = '<span class="badge g">'+(x.x ? '平常的 '+fix(x.x,1)+' 倍' : '平常沒有借券賣出')+'</span>';
+        right = '<b class="down">'+yi(x.amt)+' 億</b><small>借券賣出 '+x.lots.toLocaleString('zh-TW')+' 張</small>';
+      }else if(K==='sblb'){
+        badge = '<span class="badge g">餘額連 '+x.n+' 天增加</span>';
+        dots = '<div class="dots">'+x.dots.map(function(o){ return '<i class="'+(o?'on g':'')+'"></i>'; }).join('')+'</div>';
+        right = '<b class="down">+'+x.add.toLocaleString('zh-TW')+' 張</b><small>餘額 '+x.bal.toLocaleString('zh-TW')+' 張</small>';
+      }else{
+        badge = x.avg!=null ? '<span class="badge '+(x.r>=x.avg*1.3?'r':'b')+'">平常 '+fix(x.avg,0)+'%</span>' : '';
+        right = '<b>'+fix(x.r,1)+'%</b><small>成交值 '+yi(x.value)+' 億</small>';
+      }
+      return '<div class="it" data-stock="'+esc(x.code)+'" data-name="'+esc(x.name)+'" tabindex="0" role="button"><span class="no">'+(i+1)+'</span><div class="nm"><b>'+esc(x.name)+'</b><small>'+esc(x.code)+(x.ind?'・'+esc(x.ind):'')+'　<span class="'+cls(x.pct)+'">'+pct(x.pct)+'</span></small>'
+        + badge + dots + '</div><div class="rt">'+right+'</div></div>';
+    }).join('');
+    $('note').textContent = {sbl:'借券賣出暴增：當天借券賣出張數是前 20 個交易日平均的 3 倍以上，而且金額 3,000 萬以上。借券賣出多半是法人放空或避險，突然大增代表有人看壞或在避險。',
+      sblb:'借券餘額連增：借券賣出後還沒買回的餘額連續增加，代表空方部位在累積。',
+      dt:'當沖比例：當天當沖成交金額占全部成交值的比重（只列成交值 3 億以上）。比例很高代表短線客在炒，籌碼不穩；右邊「平常」是前 20 個交易日的平均。'}[K];
+    var noX = !(D.sig||{}).dt || D.extra_days===0;
+    $('list').innerHTML = html || '<div class="empty">'+(noX ? '借券與當沖資料還在補齊，今晚更新後就會有。' : '今天沒有符合條件的。')+'</div>';
+    return;
+  }
   if(K==='sec'){
     items = (D.sec||[]).filter(function(x){ return x.n >= (MIN===3 ? 2 : MIN); });   /* 板塊很少連很多天，3 天選項放寬到 2 天 */
     html = items.map(function(x,i){
