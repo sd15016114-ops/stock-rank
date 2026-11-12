@@ -261,6 +261,7 @@ LAG_MIN_P = 1.0        # 板塊平均漲幅至少 1% 才算「在漲」
 LAG_GAP = 1.5          # 個股漲幅比板塊平均少 1.5 個百分點以上才算落後
 LAG_MIN_V = 3e7        # 個股今天至少成交 3,000 萬，太冷門的不列
 LAG_N = 5              # 每個板塊列幾檔
+LAG_MIN_FN = 1e7       # 個股自己至少淨流入 1,000 萬
 
 
 def laggards(out, quotes, names, io):
@@ -276,7 +277,7 @@ def laggards(out, quotes, names, io):
         for c in g["_codes"]:
             q = quotes[c]
             fn = io[c][0] - io[c][1] if c in io else 0
-            if is_etf(c) or q.get("p") is None or q["v"] < LAG_MIN_V or fn <= 0 or q["p"] > g["p"] - LAG_GAP:
+            if is_etf(c) or q.get("p") is None or q["v"] < LAG_MIN_V or fn < LAG_MIN_FN or q["p"] > g["p"] - LAG_GAP:
                 continue
             rows.append([c, names.get(c, c), q["p"], q["v"], fn, q.get("c")])
         if not rows:

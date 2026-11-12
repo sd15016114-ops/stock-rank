@@ -25,8 +25,8 @@ MIN_STREAK = 3            # 至少連續 3 天才列入
 TOP = 80                  # 每一種訊號最多列幾檔
 MIN_VALUE = 5e7           # 最新一天成交值至少 5,000 萬，太冷門的不列
 TPE = timezone(timedelta(hours=8))
-SBL_HOT = 3.0             # 借券賣出是前 20 日平均的 3 倍以上
-SBL_MIN_AMT = 3e7         # 而且借券賣出金額至少 3,000 萬
+SBL_HOT = 2.0             # 借券賣出是前 20 日平均的 2 倍以上
+SBL_MIN_AMT = 2e7         # 而且借券賣出金額至少 2,000 萬
 DT_MIN_VALUE = 3e8        # 當沖比例只看成交值 3 億以上的
 DT_TOP = 60
 EXTRA_URLS = {
@@ -64,7 +64,7 @@ def parse_sbl(payload):
     fields, data = raw_table(payload, "當日賣出", "當日還券")
     if not fields or len(fields) < 13 or fields[9] != "當日賣出" or fields[10] != "當日還券" or fields[12] != "當日餘額":
         return {}
-    return {str(r[0]).strip(): [lots(r[9]) or 0, lots(r[10]) or 0, lots(r[12]) or 0] for r in data if len(r) >= 13}
+    return {str(r[0]).strip(): [lots(r[9]) or 0, lots(r[10]) or 0, lots(r[12]) or 0] for r in data if len(r) >= 13 and str(r[0]).strip()}
 
 
 def fetch_extra(dates):

@@ -216,7 +216,7 @@
     var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
     var tcss = ''
     + '.tick{display:block;margin:0 10px 8px;padding:10px 12px;border-radius:12px;background:var(--tint);color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums;flex:none}'
-    + '.tick:hover{background:var(--soft)}'
+    + '.tick:hover{background:var(--soft)}.tick[hidden]{display:none}'
     + '.tick .tw{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px}'
     + '.tick .tr{display:grid;grid-template-columns:30px minmax(0,1fr) 34px;align-items:center;gap:6px;padding:3px 0}'
     + '.tick .tr small{font-size:12px;color:var(--muted)}'

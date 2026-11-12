@@ -91,8 +91,8 @@ footer p{margin:0 0 6px;max-width:50em}
       <button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
     </div>
   </header>
-<script src="nav.js?v=202611101200"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
-<script src="card.js?v=202611091830"></script>
+<script src="nav.js?v=202611121600"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="card.js?v=202611121600"></script>
 
   <section class="hero">
     <h1>連續訊號</h1>
@@ -196,7 +196,7 @@ function render(){
       return '<div class="it" data-stock="'+esc(x.code)+'" data-name="'+esc(x.name)+'" tabindex="0" role="button"><span class="no">'+(i+1)+'</span><div class="nm"><b>'+esc(x.name)+'</b><small>'+esc(x.code)+(x.ind?'・'+esc(x.ind):'')+'　<span class="'+cls(x.pct)+'">'+pct(x.pct)+'</span></small>'
         + badge + dots + '</div><div class="rt">'+right+'</div></div>';
     }).join('');
-    $('note').textContent = {sbl:'借券賣出暴增：當天借券賣出張數是前 20 個交易日平均的 3 倍以上，而且金額 3,000 萬以上。借券賣出多半是法人放空或避險，突然大增代表有人看壞或在避險。',
+    $('note').textContent = {sbl:'借券賣出暴增：當天借券賣出張數是前 20 個交易日平均的 2 倍以上，而且金額 2,000 萬以上。借券賣出多半是法人放空或避險，突然大增代表有人看壞或在避險。',
       sblb:'借券餘額連增：借券賣出後還沒買回的餘額連續增加，代表空方部位在累積。',
       dt:'當沖比例：當天當沖成交金額占全部成交值的比重（只列成交值 3 億以上）。比例很高代表短線客在炒，籌碼不穩；右邊「平常」是前 20 個交易日的平均。'}[K];
     var noX = !(D.sig||{}).dt || D.extra_days===0;
