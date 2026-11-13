@@ -218,6 +218,18 @@
     rb.addEventListener('click', function(){ window.doRefresh(); });
   }
 
+  /* ===== 從主畫面打開時，不讓雙指縮放整個畫面（App 不會被縮放；熱力圖自己的縮放不受影響） ===== */
+  (function(){
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
+    if(!standalone) return;
+    ['gesturestart','gesturechange'].forEach(function(t){
+      document.addEventListener(t, function(e){ if(!(e.target.closest && e.target.closest('#heatWrap'))) e.preventDefault(); }, {passive:false});
+    });
+    document.addEventListener('touchmove', function(e){
+      if(e.touches.length > 1 && !(e.target.closest && e.target.closest('#heatWrap'))) e.preventDefault();
+    }, {passive:false});
+  })();
+
   /* ===== 下拉重新整理：只在從主畫面打開（全螢幕）時啟用，一般瀏覽器自己就有 ===== */
   (function(){
     var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;

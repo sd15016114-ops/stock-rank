@@ -79,3 +79,8 @@ strong,b{font-variant-numeric:tabular-nums}
 body.side-mini .side .sb b{display:none}
 .brand::before,.side .sb b::before{content:"";flex:none;width:30px;height:30px;border-radius:8px;background:url(icons/icon-192.png) center/cover no-repeat;box-shadow:0 0 0 1px var(--rule)}
 .side .sb b::before{width:26px;height:26px;border-radius:7px}
+
+/* 像 App 一樣固定：不會左右亂晃、到頂到底不會整頁彈來彈去、點兩下不會放大 */
+html,body{overscroll-behavior:none;overflow-x:clip}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+@media (max-width:899px){input,select,textarea{font-size:16px !important}}   /* iPhone 輸入框字小於 16px 會自動放大畫面 */
