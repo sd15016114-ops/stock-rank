@@ -78,7 +78,7 @@ def send(rows, make):
             continue
         try:
             webpush(r["sub"], json.dumps(msg, ensure_ascii=False), vapid_private_key=v,
-                    vapid_claims={"sub": SITE.rstrip("/")}, ttl=6 * 3600)
+                    vapid_claims={"sub": "https://sd15016114-ops.github.io"}, ttl=6 * 3600)
             ok += 1
         except WebPushException as e:
             code = getattr(e.response, "status_code", None)
