@@ -197,21 +197,93 @@
     holder.insertBefore(rb, holder.firstChild);
     var toast = document.createElement('div'); toast.className = 'reftoast'; toast.setAttribute('role', 'status'); document.body.appendChild(toast);
     var busy = false, tt;
-    rb.addEventListener('click', function(){
-      if(busy) return;
-      if(!window.pageRefresh){ location.reload(); return; }
+    /* 重新整理：按鈕和下拉都用這個，回傳 Promise（下拉的轉圈等它結束才收起來） */
+    window.doRefresh = function(){
+      if(busy) return Promise.resolve();
+      if(!window.pageRefresh){ location.reload(); return new Promise(function(){}); }
       if(window.tickRefresh) window.tickRefresh();
       busy = true; rb.classList.add('spin');
       var t0 = Date.now();
-      Promise.resolve(window.pageRefresh()).then(function(){ return '已更新'; }, function(){ return '更新失敗，請稍後再試'; }).then(function(msg){
-        setTimeout(function(){                       /* 至少轉半圈，不然太快看不出有按到 */
-          busy = false; rb.classList.remove('spin');
-          var n = new Date(); toast.textContent = msg + '　' + ('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
-          toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('on'); }, 1800);
-        }, Math.max(0, 500 - (Date.now() - t0)));
+      return Promise.resolve(window.pageRefresh()).then(function(){ return '已更新'; }, function(){ return '更新失敗，請稍後再試'; }).then(function(msg){
+        return new Promise(function(done){
+          setTimeout(function(){                     /* 至少轉半圈，不然太快看不出有按到 */
+            busy = false; rb.classList.remove('spin');
+            var n = new Date(); toast.textContent = msg + '　' + ('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
+            toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(function(){ toast.classList.remove('on'); }, 1800);
+            done();
+          }, Math.max(0, 500 - (Date.now() - t0)));
+        });
       });
-    });
+    };
+    rb.addEventListener('click', function(){ window.doRefresh(); });
   }
+
+  /* ===== 下拉重新整理：只在從主畫面打開（全螢幕）時啟用，一般瀏覽器自己就有 ===== */
+  (function(){
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
+    if(!standalone && !/[?&]ptr\b/.test(location.search)) return;
+    var css = '.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:65;width:36px;height:36px;margin-left:-18px;border-radius:50%;background:var(--paper);box-shadow:0 2px 10px rgba(0,0,0,.18);display:grid;place-items:center;color:var(--ink);transform:translateY(-60px);opacity:0;pointer-events:none}'
+      + '.ptr svg{width:20px;height:20px}'
+      + '.ptr.go{transition:transform .3s cubic-bezier(.2,.9,.25,1.05),opacity .3s}'
+      + '.ptr.spin svg{animation:ptrspin .8s linear infinite}'
+      + '@keyframes ptrspin{to{transform:rotate(360deg)}}';
+    var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+    var el = document.createElement('div'); el.className = 'ptr'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    document.body.appendChild(el);
+    var y0 = null, pull = 0, busy = false, LIMIT = 70;
+    function blocked(t){ return document.body.classList.contains('sc-open') || document.body.classList.contains('nt-open') || (t.closest && t.closest('#heatWrap, .seg, input, select, textarea')); }
+    function show(d){ var k = Math.min(d, LIMIT*1.6); el.style.transform = 'translateY('+(k*0.9 - 20)+'px) rotate('+(k*4)+'deg)'; el.style.opacity = Math.min(1, k/LIMIT); }
+    document.addEventListener('touchstart', function(e){
+      if(busy || e.touches.length!==1 || window.scrollY > 0 || blocked(e.target)){ y0 = null; return; }
+      y0 = e.touches[0].clientY; pull = 0; el.classList.remove('go');
+    }, {passive:true});
+    document.addEventListener('touchmove', function(e){
+      if(y0==null) return;
+      pull = e.touches[0].clientY - y0;
+      if(pull <= 0 || window.scrollY > 0){ show(0); return; }
+      show(pull * 0.6);
+    }, {passive:true});
+    document.addEventListener('touchend', function(){
+      if(y0==null) return;
+      y0 = null; el.classList.add('go');
+      if(pull * 0.6 >= LIMIT){
+        busy = true; el.classList.add('spin');
+        el.style.transform = 'translateY(44px)'; el.style.opacity = 1;
+        if(navigator.vibrate) navigator.vibrate(8);
+        Promise.resolve(window.doRefresh ? window.doRefresh() : location.reload()).then(function(){
+          el.classList.remove('spin'); el.style.transform = 'translateY(-60px)'; el.style.opacity = 0; busy = false;
+        });
+      }else{ el.style.transform = 'translateY(-60px)'; el.style.opacity = 0; }
+    });
+  })();
+
+  /* ===== 新版本提示：App 從背景回來時檢查網站有沒有更新，有就在下面提示 ===== */
+  (function(){
+    if(!('fetch' in window) || location.protocol==='file:') return;
+    var base = {}, shown = false, last = 0;
+    var urls = [location.pathname, location.pathname.replace(/[^/]*$/, '') + 'nav.js'];
+    function tag(u){ return fetch(u, {method:'HEAD', cache:'no-store'}).then(function(r){ return r.ok ? (r.headers.get('etag') || r.headers.get('last-modified') || '') : ''; }, function(){ return ''; }); }
+    Promise.all(urls.map(tag)).then(function(t){ urls.forEach(function(u, i){ base[u] = t[i]; }); last = Date.now(); });
+    var bar = document.createElement('button');
+    bar.type = 'button'; bar.className = 'newver'; bar.hidden = true; bar.innerHTML = '<b>有新版本</b>點這裡更新';
+    var css = '.newver{position:fixed;z-index:66;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:10px;align-items:center;border:0;border-radius:999px;padding:12px 20px;background:var(--ink);color:var(--paper);font:500 14px var(--sans);box-shadow:0 6px 24px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}'
+      + '.newver[hidden]{display:none}'
+      + '@media (max-width:599px){.newver{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}';
+    var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+    document.body.appendChild(bar);
+    bar.addEventListener('click', function(){ location.reload(); });
+    function check(){
+      if(shown || document.visibilityState!=='visible' || Date.now() - last < 60000 || !Object.keys(base).length) return;
+      last = Date.now();
+      Promise.all(urls.map(tag)).then(function(t){
+        if(urls.some(function(u, i){ return t[i] && base[u] && t[i]!==base[u]; })){ shown = true; bar.hidden = false; }
+      });
+    }
+    document.addEventListener('visibilitychange', check);
+    setInterval(check, 10 * 60000);
+    window.checkNewVersion = function(){ last = 0; check(); };
+  })();
 
   /* ===== 加到主畫面（PWA）：離線備援、狀態列顏色跟著日間／夜間 ===== */
   if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(function(){});

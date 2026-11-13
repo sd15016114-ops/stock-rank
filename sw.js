@@ -1,6 +1,6 @@
 /* 離線備援：一律先上網拿最新的，拿不到（沒網路、太慢）才用上次存下來的。
    行情資料（Supabase）不存，避免把舊的盤中數字當成最新的。 */
-var CACHE = 'stock-rank-v4';
+var CACHE = 'stock-rank-v5';
 var SHELL = ['./', 'index.html', 'signals.html', 'rank.html', 'watch.html', 'manifest.webmanifest', 'icons/icon-192.png'];
 self.addEventListener('install', function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(SHELL); }).catch(function(){}).then(function(){ return self.skipWaiting(); }));
