@@ -33,7 +33,7 @@
   var ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
   var supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-  function prefs(){ var p = lsGet(KP, {}); return {close: p.close!==false, signals: p.signals!==false, watch: window.Watch.list().map(function(x){ return x[0]; })}; }
+  function prefs(){ var p = lsGet(KP, {}); return {close: p.close!==false, signals: p.signals!==false, intraday: p.intraday!==false, watch: window.Watch.list().map(function(x){ return x[0]; })}; }
   function b64(s){ s = s.replace(/-/g,'+').replace(/_/g,'/'); s += '===='.slice(s.length%4 || 4); var r = atob(s), a = new Uint8Array(r.length); for(var i=0;i<r.length;i++) a[i] = r.charCodeAt(i); return a; }
   function reg(){ return navigator.serviceWorker.register('sw.js').then(function(){ return navigator.serviceWorker.ready; }); }
   function current(){ return supported ? reg().then(function(r){ return r.pushManager.getSubscription(); }) : Promise.resolve(null); }
@@ -121,6 +121,7 @@
       + '<div class="nt-msg" role="status">'+esc(msg)+'</div>'
       + '<div class="nt-sec"><h3>要收哪些</h3>'
       +   '<label class="nt-opt"><input type="checkbox" data-k="close" '+(p.close?'checked':'')+'><span>收盤摘要<small>約 13:35：加權指數、資金最熱的產業、漲跌家數，加上自選股今天的漲跌</small></span></label>'
+      +   '<label class="nt-opt"><input type="checkbox" data-k="intraday" '+(p.intraday?'checked':'')+'><span>盤中自選股提醒<small>盤中自選股大漲大跌（±5%、漲跌停）、5 分鐘內大量資金流入或流出、出現在「還沒漲的」名單時馬上通知；同一檔同一種狀況一天只通知一次</small></span></label>'
       +   '<label class="nt-opt"><input type="checkbox" data-k="signals" '+(p.signals?'checked':'')+'><span>盤後訊號<small>約晚上 9:40：今天新上榜的連續訊號、借券賣出暴增；自選股出現在任何名單會優先列出</small></span></label></div>'
       + '<div class="nt-sec"><h3>自選股 <small style="font-weight:400;color:var(--muted)">（'+w.length+' 檔）</small></h3>'
       +   '<form class="nt-add"><input inputmode="numeric" autocomplete="off" placeholder="輸入代號，例如 2330" aria-label="股票代號" maxlength="8"><button type="submit">加入</button></form>'

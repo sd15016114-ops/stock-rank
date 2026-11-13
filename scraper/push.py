@@ -173,7 +173,10 @@ def signals_msg():
         body = base
         if mine:
             body = "自選：" + "；".join("%s %s" % (names.get(c, c), "、".join(hits[c])) for c in mine[:6]) + "\n" + base
-        return {"title": "盤後訊號 %d/%d" % (m, dd), "body": body, "url": SITE + "signals.html", "tag": "signals-" + d}
+        msg = {"title": "盤後訊號 %d/%d" % (m, dd), "body": body, "url": SITE + ("watch.html" if mine else "signals.html"), "tag": "signals-" + d}
+        if mine:
+            msg["badge"] = len(mine)               # 主畫面圖示上的數字：今天有幾檔自選股上了名單
+        return msg
 
     make.done = lambda: STATE.write_text(json.dumps(dict(st, signals=d)) + "\n", encoding="utf-8")
     return make

@@ -506,6 +506,107 @@ def save_quotes(quotes, names):
     (DATA / "live_quotes_tw.json").write_text(json.dumps(q, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
+def quotes_row(quotes, names, io, past_io, at, phase):
+    """自選股頁用：全市場每檔 [價, 漲跌幅, 成交值, 淨流入, 近 5 分鐘淨流入]，鍵是 "s"+代號（數字開頭的鍵 Supabase 會當成陣列索引）"""
+    q = {}
+    for c, x in quotes.items():
+        if x.get("c") is None:
+            continue
+        net = io[c][0] - io[c][1] if c in io else 0
+        f5 = net - past_io.get(c, 0) if past_io is not None else None
+        q["s" + c] = [x["c"], x.get("p"), x["v"], net, f5, names.get(c, c)]
+    return {"date": at.date().isoformat(), "t": at.isoformat(), "phase": phase, "q": q}
+
+
+class WatchAlerts:
+    """盤中自選股提醒：每檔自選股每種狀況一天最多通知一次。
+      急漲急跌：漲跌幅第一次超過 ±5%，漲停／跌停（±9.5%）
+      資金急流入／流出：近 5 分鐘淨流入超過 2,000 萬，而且超過這檔平常一天成交值的 1/30
+      還沒漲的：出現在熱門板塊落後名單"""
+    def __init__(self):
+        self.subs, self.loaded, self.sent = [], None, set()
+        self.avg = self.avg_value()
+
+    @staticmethod
+    def avg_value():
+        files = sorted((DATA / "full" / "tw").glob("*.json"))[-20:]
+        tot, cnt = {}, {}
+        for f in files:
+            j = json.loads(f.read_text(encoding="utf-8"))
+            for mk in ("上市", "上櫃"):
+                for r in j.get(mk, []):
+                    tot[r[0]] = tot.get(r[0], 0) + (r[2] or 0)
+                    cnt[r[0]] = cnt.get(r[0], 0) + 1
+        return {c: tot[c] / cnt[c] for c in tot}
+
+    def refresh(self, at):
+        if self.loaded and (at - self.loaded).total_seconds() < 600:
+            return
+        self.loaded = at
+        try:
+            import push
+            self.subs = [r for r in push.subscribers() if (r.get("prefs") or {}).get("intraday") is not False and (r.get("prefs") or {}).get("watch")]
+        except Exception as e:                     # noqa: BLE001
+            log("讀取通知訂閱失敗：%s" % e)
+
+    def check(self, at, quotes, names, io, past_io, lag):
+        if at.time() < dtime(9, 3) or at.time() >= CLOSE_T:
+            return
+        self.refresh(at)
+        if not self.subs:
+            return
+        lagset = {r[0]: g["n"] for g in lag or [] for r in g["rows"]}
+        events = {}                                # 代號 → [(種類, 文字)]
+        codes = {c for r in self.subs for c in r["prefs"]["watch"]}
+        for c in codes:
+            x = quotes.get(c)
+            if not x or x.get("p") is None:
+                continue
+            p, ev = x["p"], []
+            if p >= LIMIT_P:
+                ev.append(("lu", "漲停"))
+            elif p >= 5:
+                ev.append(("u5", "大漲 %+.1f%%" % p))
+            if p <= -LIMIT_P:
+                ev.append(("ld", "跌停"))
+            elif p <= -5:
+                ev.append(("d5", "大跌 %.1f%%" % p))
+            if past_io is not None and c in io:
+                f5 = io[c][0] - io[c][1] - past_io.get(c, 0)
+                th = max(2e7, self.avg.get(c, 0) / 30)
+                if f5 >= th:
+                    ev.append(("fi", "5 分鐘資金流入 %.1f 億" % (f5 / 1e8)))
+                elif f5 <= -th:
+                    ev.append(("fo", "5 分鐘資金流出 %.1f 億" % (-f5 / 1e8)))
+            if c in lagset:
+                ev.append(("lag", "%s 族群在漲、這檔還沒漲" % lagset[c]))
+            if ev:
+                events[c] = ev
+        if not events:
+            return
+        import push
+
+        def make(prefs):
+            lines, n = [], 0
+            for c in prefs["watch"]:
+                for kind, text in events.get(c, []):
+                    key = (prefs.get("_ep"), c, kind)
+                    if key in self.sent:
+                        continue
+                    self.sent.add(key)
+                    lines.append("%s %s" % (names.get(c, c), text))
+                    n += 1
+            if not lines:
+                return None
+            return {"title": "自選股提醒 %s" % at.strftime("%H:%M"), "body": "\n".join(lines[:6]), "url": push.SITE + "watch.html",
+                    "tag": "watch-" + at.strftime("%H%M"), "badge": n}
+        rows = [dict(r, prefs=dict(r["prefs"], _ep=r["endpoint"])) for r in self.subs]
+        try:
+            push.send(rows, make)
+        except Exception as e:                     # noqa: BLE001
+            log("自選股提醒傳送失敗：%s" % e)
+
+
 def run():
     today = now().date()
     if not trading_day(today):
@@ -523,6 +624,12 @@ def run():
     hist, recent, scale, fails, last = {"ts": [], "ind": {}, "th": {}}, deque(maxlen=FLOW_MIN + 3), None, 0, None
     flows, idx = Flows(), Indexes()
     idx.connect(api)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    try:
+        alerts = WatchAlerts()
+    except Exception as e:                         # noqa: BLE001
+        log("自選股提醒無法啟用：%s" % e)
+        alerts = None
     wait_until(datetime.combine(today, OPEN_T, TPE) + timedelta(seconds=20))
     while now().time() < END_T:
         at = now().replace(second=0, microsecond=0)
@@ -549,6 +656,12 @@ def run():
             save_local(last)
             save_quotes(quotes, names)
             ok = sb_put(last)
+            try:
+                sb_put(quotes_row(quotes, names, flows.io, past_io, at, phase), row="q")
+            except Exception as e:                 # noqa: BLE001
+                log("自選股報價沒寫入：%s" % e)
+            if alerts:
+                alerts.check(at, quotes, names, flows.io, past_io, last.get("lag"))
             log("%s 全市場 %.0f 億%s %s" % (phase, total / 1e8, "" if ok else "（未寫入 Supabase）", usage(api) if at.minute % 30 == 0 else ""))
         except Exception as e:                     # noqa: BLE001
             fails += 1

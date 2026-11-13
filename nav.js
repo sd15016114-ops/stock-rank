@@ -7,6 +7,8 @@
   var ITEMS = [
     {id:'live', short:'盤中資金', label:'盤中資金', sub:'板塊資金流向、熱力圖', href:'index.html',
      icon:'<path d="M3 17l5-6 4 3 6-8 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="6" r="1.6" fill="currentColor"/>'},
+    {id:'watch', short:'自選', label:'我的自選', sub:'自選股盤中與訊號', href:'watch.html',
+     icon:'<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'},
     {id:'sig', short:'連續訊號', label:'連續訊號', sub:'連續放量、法人連買', href:'signals.html',
      icon:'<circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 6.5h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 17.5h13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/>'},
     {id:'rank', short:'成交值', label:'成交值排行', sub:'台股成交值、放大倍數', href:'rank.html',
@@ -213,6 +215,13 @@
 
   /* ===== 加到主畫面（PWA）：離線備援、狀態列顏色跟著日間／夜間 ===== */
   if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(function(){});
+  /* 打開 App 就把主畫面圖示上的數字清掉 */
+  function clearBadge(){
+    if(document.visibilityState!=='visible') return;
+    if(navigator.clearAppBadge) navigator.clearAppBadge().catch(function(){});
+    if(navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('clear-badge');
+  }
+  clearBadge(); document.addEventListener('visibilitychange', clearBadge);
   (function(){
     var meta = document.querySelector('meta[name=theme-color]'); if(!meta) return;
     function paint(){ var bg = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim() || '#FFFFFF'; meta.setAttribute('content', bg); }
@@ -256,7 +265,7 @@
     + '@media (min-width:600px) and (max-width:899px){.tstrip.float{left:var(--side-mini)}}';
     var ts = document.createElement('style'); ts.textContent = tcss; document.head.appendChild(ts);
 
-    var home = pageUrl('index.html'), onHome = !/rank\.html|signals\.html/.test(location.pathname + location.search);
+    var home = pageUrl('index.html'), onHome = !/rank\.html|signals\.html|watch\.html/.test(location.pathname + location.search);
     var box = document.createElement('a'); box.className = 'tick'; box.href = home; box.hidden = true; box.title = '看大盤走勢（盤中資金）';
     side.insertBefore(box, side.querySelector('nav'));
     var strip = document.createElement('div'); strip.className = 'tstrip'; strip.hidden = true; strip.setAttribute('aria-label', '大盤');
@@ -349,7 +358,7 @@
     if(!a || e.defaultPrevented || e.button!==0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     var id = a.id.replace(/^(nav|tab)-/, '');
     if(id===CUR){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); return; }
-    var sameDoc = isRank && id!=='live' && id!=='sig';
+    var sameDoc = isRank && id!=='live' && id!=='sig' && id!=='watch';
     if(sameDoc) return;                               /* 交給網址的 # 切換，頁面自己會換內容 */
     e.preventDefault();
     window.navMark(id);
@@ -359,7 +368,7 @@
   tabs.addEventListener('click', onNav); side.addEventListener('click', onNav);
   pressable(tabs, '.tabbar'); pressable(side, '.side nav');
   var isRank = /rank\.html/.test(location.pathname + location.search);
-  var isSig = /signals\.html/.test(location.pathname + location.search);
-  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : isSig ? 'sig' : 'live', true);
+  var isSig = /signals\.html/.test(location.pathname + location.search), isWatch = /watch\.html/.test(location.pathname + location.search);
+  window.navMark(isRank ? ({'#us':'us', '#chips':'chips'}[location.hash] || 'rank') : isSig ? 'sig' : isWatch ? 'watch' : 'live', true);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ placeThumbs(true); });
 })();
