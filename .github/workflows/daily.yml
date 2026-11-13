@@ -16,7 +16,7 @@ on:
         description: 要做什麼（一般更新選 update）
         type: choice
         default: update
-        options: [update, holidays, probe, probe-live, probe-index, probe-extra, push-key, push-test, probe-inst, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, signals, intraday, intraday-tw, logos]
+        options: [update, holidays, probe, probe-live, probe-index, probe-extra, push-key, push-test, push-list, probe-inst, probe-polygon, probe-fugle, probe-chips, probe-logo, backfill, backfill-us, backfill-chips, signals, intraday, intraday-tw, logos]
       days:
         description: backfill 要回補幾個交易日（後面加 force 代表已有的也重抓）
         default: "60"
@@ -54,8 +54,8 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           SUPABASE_PUBLIC_KEY: sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6   # 網頁上用的公開金鑰，只能讀
       - name: 推播金鑰／測試推播
-        if: inputs.task == 'push-key' || inputs.task == 'push-test'
-        run: python scraper/push.py ${{ inputs.task == 'push-key' && 'pubkey' || 'test' }}
+        if: inputs.task == 'push-key' || inputs.task == 'push-test' || inputs.task == 'push-list'
+        run: python scraper/push.py ${{ inputs.task == 'push-key' && 'pubkey' || inputs.task == 'push-list' && 'list' || 'test' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
@@ -95,7 +95,7 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
       - name: 抓取成交值排行
         id: fetch
-        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-index' && inputs.task != 'probe-extra' && inputs.task != 'push-key' && inputs.task != 'push-test' && inputs.task != 'probe-inst' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips' && inputs.task != 'signals'
+        if: inputs.task != 'probe' && inputs.task != 'probe-live' && inputs.task != 'probe-index' && inputs.task != 'probe-extra' && inputs.task != 'push-key' && inputs.task != 'push-test' && inputs.task != 'push-list' && inputs.task != 'probe-inst' && inputs.task != 'probe-polygon' && inputs.task != 'probe-fugle' && inputs.task != 'probe-chips' && inputs.task != 'probe-logo' && inputs.task != 'backfill' && inputs.task != 'intraday' && inputs.task != 'intraday-tw' && inputs.task != 'logos' && inputs.task != 'backfill-us' && inputs.task != 'backfill-chips' && inputs.task != 'signals'
         run: python scraper/fetch_turnover.py ${{ steps.which.outputs.market }} ${{ inputs.task == 'holidays' && 'holidays' || '' }}
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}

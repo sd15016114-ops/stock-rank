@@ -63,7 +63,7 @@ def sb(path, method="GET", body=None):
 
 
 def subscribers():
-    return sb("push_subs?select=endpoint,sub,prefs") or []
+    return sb("push_subs?select=endpoint,sub,prefs,updated_at&order=updated_at.asc") or []
 
 
 def send(rows, make):
@@ -184,6 +184,10 @@ def signals_msg():
 
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "test"
+    if cmd == "list":                              # 只列出每個訂閱存的設定（不印 endpoint）
+        for i, r in enumerate(subscribers()):
+            print("訂閱 %d：%s，更新於 %s" % (i + 1, json.dumps(r.get("prefs") or {}, ensure_ascii=False), r.get("updated_at", "")))
+        return
     if cmd == "pubkey":
         print("推播公開金鑰：" + pubkey())
         return
