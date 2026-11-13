@@ -143,6 +143,31 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
 .rh-row svg{width:72px;height:30px;display:block;overflow:visible}
 .rh-pill{border:0;border-radius:8px;height:36px;font:600 15px/36px Inter,"Noto Sans TC",sans-serif;color:#fff;text-align:center;cursor:pointer;padding:0 6px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .rh-pill.u{background:var(--rh-up)}.rh-pill.d{background:var(--rh-down)}.rh-pill.z{background:var(--rh-mute)}
+.rh-search{position:relative;margin:14px 0 6px}
+.rh-search input{width:100%;box-sizing:border-box;height:46px;border-radius:12px;border:0;background:var(--rh-press);color:var(--rh-ink);font:500 16px Inter,"Noto Sans TC",sans-serif;padding:0 14px 0 42px;outline:none}
+.rh-search input:focus{box-shadow:0 0 0 2px var(--rh-ink)}
+.rh-search svg{position:absolute;left:14px;top:14px;width:18px;height:18px;color:var(--rh-mute)}
+.rh-sug{position:absolute;left:0;right:0;top:52px;z-index:20;background:var(--rh-bg);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);overflow:hidden}
+.rh-sug[hidden]{display:none}
+.rh-sug button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;border:0;border-bottom:1px solid var(--rh-line);background:none;color:var(--rh-ink);font:inherit;font-size:15px;padding:12px 14px;text-align:left;cursor:pointer}
+.rh-sug button:last-child{border-bottom:0}
+.rh-sug button:hover,.rh-sug button.on{background:var(--rh-press)}
+.rh-sug b{font-weight:700}.rh-sug small{color:var(--rh-mute);margin-left:8px}
+.rh-sug span{font-size:13px;font-weight:700;color:var(--rh-up);white-space:nowrap}
+.rh-sug span.have{color:var(--rh-mute)}
+.rh-row .ed{display:flex;gap:6px;justify-content:flex-end;grid-column:2/4}
+.rh-row .ed button{width:38px;height:36px;border-radius:8px;border:0;background:var(--rh-press);color:var(--rh-ink);font-size:16px;cursor:pointer}
+.rh-row .ed button.del{color:#fff;background:var(--rh-up);width:56px;font-size:14px;font-weight:700}
+.rh-row .ed button:disabled{opacity:.3;cursor:default}
+.rh-sync{margin:30px 0 0;padding-top:16px;border-top:1px solid var(--rh-line)}
+.rh-sync h3{font-size:16px;font-weight:800;margin:0 0 6px}
+.rh-sync p{font-size:13px;color:var(--rh-mute);margin:0 0 12px;line-height:1.6}
+.rh-code{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rh-code b{font:700 22px Inter,monospace;letter-spacing:.08em}
+.rh-code button,.rh-link button{border:0;border-radius:999px;background:var(--rh-ink);color:var(--rh-bg);font:700 14px Inter,"Noto Sans TC",sans-serif;padding:9px 16px;cursor:pointer}
+.rh-link{display:flex;gap:8px;margin-top:14px}
+.rh-link input{flex:1;min-width:0;height:42px;border-radius:12px;border:0;background:var(--rh-press);color:var(--rh-ink);font:600 16px Inter,monospace;letter-spacing:.06em;padding:0 14px;text-transform:uppercase;outline:none}
+.rh-msg{font-size:13px;color:var(--rh-mute);min-height:1.2em;margin-top:8px}
 .rh-empty{padding:40px 0;color:var(--rh-mute);font-size:15px;line-height:1.7}
 .rh-empty button{display:block;margin-top:16px;border:0;border-radius:999px;background:var(--rh-ink);color:var(--rh-bg);font:700 15px Inter,"Noto Sans TC",sans-serif;padding:12px 22px;cursor:pointer}
 .rh-foot{font-size:12px;color:var(--rh-mute);margin:28px 0 40px;line-height:1.7}
@@ -163,7 +188,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
     </div>
   </header>
 <script src="nav.js?v=202611131515"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
-<script src="card.js?v=202611131300"></script><script src="notify.js?v=202611131440" defer></script>
+<script src="card.js?v=202611131300"></script><script src="notify.js?v=202611131530" defer></script>
   <main class="rh">
     <section class="rh-hero" aria-label="大盤">
       <div class="rh-k" id="ixTabs"><button type="button" data-k="tse" aria-pressed="true">加權指數</button><button type="button" data-k="otc" aria-pressed="false">櫃買指數</button></div>
@@ -173,9 +198,21 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
         <div class="rh-times"><span>9:00</span><span>11:15</span><span>13:30</span></div></div>
     </section>
     <div class="rh-sec"><h2>自選股<button type="button" class="rh-info" id="infoBtn" aria-expanded="false" aria-label="說明">?</button></h2>
-      <div class="acts" id="sortSeg"><button type="button" data-v="my" aria-pressed="true">自訂</button><button type="button" data-v="p" aria-pressed="false">漲跌</button><button type="button" data-v="fn" aria-pressed="false">資金</button><button type="button" class="edit" id="mng">編輯</button></div></div>
-    <p class="rh-help" id="help" hidden>右邊色塊點一下可以切換顯示漲跌幅、價格、今天資金淨流入。名字下面是這檔上了哪些訊號名單；灰色小線是近 60 天收盤走勢。點任一列看個股卡片。<span id="meta"></span></p>
+      <div class="acts" id="sortSeg"><button type="button" data-v="my" aria-pressed="true">自訂</button><button type="button" data-v="p" aria-pressed="false">漲跌</button><button type="button" data-v="fn" aria-pressed="false">資金</button><button type="button" class="edit" id="mng" aria-pressed="false">編輯</button></div></div>
+    <p class="rh-help" id="help" hidden>右邊色塊點一下可以切換顯示漲跌幅、價格、今天資金淨流入。按「編輯」可以調整順序或移除。名字下面是這檔上了哪些訊號名單；灰色小線是近 60 天收盤走勢。點任一列看個股卡片。<span id="meta"></span></p>
+    <form class="rh-search" id="srch" autocomplete="off" role="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <input id="q" type="search" placeholder="搜尋代號或名稱，加入自選" aria-label="搜尋股票" enterkeyhint="search">
+      <div class="rh-sug" id="sug" hidden role="listbox"></div>
+    </form>
     <div id="wl"></div>
+    <section class="rh-sync" aria-label="跨裝置同步">
+      <h3>在其他裝置看同一份自選</h3>
+      <p>這組同步碼代表你的自選清單。在電腦或另一支手機打開「我的自選」，在下面輸入這組碼，兩邊就會是同一份；任何一邊加減，另一邊重新打開或切回來時就會跟上。不要把同步碼給別人。</p>
+      <div class="rh-code"><b id="sid">—</b><button type="button" id="copyId">複製</button></div>
+      <form class="rh-link" id="linkF"><input id="linkIn" placeholder="輸入另一台的同步碼" maxlength="11" autocomplete="off" aria-label="同步碼"><button type="submit">同步</button></form>
+      <div class="rh-msg" id="syncMsg" role="status"></div>
+    </section>
     <p class="rh-foot">盤中資料：永豐金證券，每分鐘更新；資金流入流出是用每分鐘價格方向推估的近似值。收盤後資料：證交所、櫃買中心。僅供參考，不構成投資建議。</p>
   </main>
 </div>
@@ -223,7 +260,62 @@ $('sortSeg').addEventListener('click', function(e){
   render();
 });
 $('infoBtn').addEventListener('click', function(){ var h = $('help'); h.hidden = !h.hidden; this.setAttribute('aria-expanded', !h.hidden); });
-$('mng').addEventListener('click', function(){ if(window.openNotify) openNotify(); });
+var EDIT = false;
+$('mng').addEventListener('click', function(){
+  EDIT = !EDIT; this.textContent = EDIT ? '完成' : '編輯'; this.setAttribute('aria-pressed', EDIT);
+  $('sortSeg').querySelectorAll('button[data-v]').forEach(function(b){ b.hidden = EDIT; });      /* 編輯時照自訂順序排，排序按鈕先藏起來 */
+  render();
+});
+
+/* ===== 搜尋：代號或名稱，邊打邊出建議 ===== */
+var NAMES = null;
+function names(){ if(!NAMES) NAMES = load('names_tw.json').then(function(d){ return Object.keys(d).map(function(c){ return [c, d[c]]; }); }, function(){ return []; }); return NAMES; }
+var SUG = [], SI = 0;
+function suggest(){
+  var q = $('q').value.trim().toUpperCase();
+  if(!q){ $('sug').hidden = true; return; }
+  names().then(function(all){
+    var a = [], b = [];
+    all.forEach(function(x){ if(x[0].indexOf(q)===0) a.push(x); else if(x[1].toUpperCase().indexOf(q)>=0) b.push(x); });
+    a.sort(function(x,y){ return x[0].length - y[0].length || (x[0] < y[0] ? -1 : 1); });
+    SUG = a.concat(b).slice(0, 8); SI = 0;
+    $('sug').innerHTML = SUG.length ? SUG.map(function(x,i){ var have = window.Watch && Watch.has(x[0]);
+      return '<button type="button" role="option" data-i="'+i+'" class="'+(i===SI?'on':'')+'"><span style="color:inherit;font-weight:400"><b>'+esc(x[1])+'</b><small>'+esc(x[0])+'</small></span><span class="'+(have?'have':'')+'">'+(have?'已在自選':'＋ 加入')+'</span></button>'; }).join('')
+      : '<button type="button" disabled><span style="color:var(--rh-mute);font-weight:400">找不到「'+esc(q)+'」</span></button>';
+    $('sug').hidden = false;
+  });
+}
+function pick(i){
+  var x = SUG[i]; if(!x || !window.Watch) return;
+  if(!Watch.has(x[0])) Watch.toggle(x[0], x[1]);
+  $('q').value = ''; $('sug').hidden = true;
+}
+$('q').addEventListener('input', suggest);
+$('q').addEventListener('focus', function(){ names(); if(this.value) suggest(); });
+$('q').addEventListener('keydown', function(e){
+  if($('sug').hidden || !SUG.length) return;
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); SI = (SI + (e.key==='ArrowDown'?1:SUG.length-1)) % SUG.length;
+    $('sug').querySelectorAll('button').forEach(function(b,i){ b.classList.toggle('on', i===SI); }); }
+  if(e.key==='Escape'){ $('sug').hidden = true; }
+});
+$('srch').addEventListener('submit', function(e){ e.preventDefault(); if(SUG.length && !$('sug').hidden) pick(SI); });
+$('sug').addEventListener('click', function(e){ var b = e.target.closest('button[data-i]'); if(b) pick(+b.dataset.i); });
+document.addEventListener('click', function(e){ if(!e.target.closest('#srch')) $('sug').hidden = true; });
+
+/* ===== 跨裝置同步 ===== */
+function paintSync(){ if(window.Watch) $('sid').textContent = Watch.syncId(); }
+document.addEventListener('DOMContentLoaded', paintSync);
+$('copyId').addEventListener('click', function(){
+  var t = $('sid').textContent;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ $('syncMsg').textContent = '已複製同步碼。'; }, function(){ $('syncMsg').textContent = '請手動記下：'+t; });
+});
+$('linkF').addEventListener('submit', function(e){
+  e.preventDefault(); if(!window.Watch) return;
+  var v = $('linkIn').value;
+  $('syncMsg').textContent = '同步中…';
+  Watch.link(v).then(function(n){ $('linkIn').value = ''; paintSync(); $('syncMsg').textContent = '已同步，現在兩邊是同一份自選（'+n+' 檔）。'; },
+    function(err){ $('syncMsg').textContent = String(err && err.message)==='format' ? '同步碼是 10 個英數字，例如 ABCDE-FGH23。' : '找不到這組同步碼，請確認另一台裝置的「我的自選」頁顯示的碼。'; });
+});
 
 var Q = null, H = {}, SIG = null, LAG = null;
 function hits(code){
@@ -256,7 +348,7 @@ function pill(r){
 function render(){
   var wl = watchList();
   if(!wl.length){
-    $('wl').innerHTML = '<div class="rh-empty">還沒有自選股。<br>在任何一檔的個股卡片按「☆ 自選」，或從這裡輸入代號加入。<button type="button" onclick="window.openNotify&&openNotify()">加入自選股</button></div>';
+    $('wl').innerHTML = '<div class="rh-empty">還沒有自選股。在上面搜尋代號或名稱加入，或在任何一檔的個股卡片按「☆ 自選」。<br>已經在別的裝置加過了？在最下面輸入那台的同步碼。</div>';
     return;
   }
   var rows = wl.map(function(w, i){
@@ -264,6 +356,13 @@ function render(){
     var c = q ? q[0] : h.close && h.close[h.close.length-1], p = q ? q[1] : h.pct && h.pct[h.pct.length-1];
     return {i:i, code:code, name:(q && q[5]) || h.name || w[1], ind:h.ind, c:c, p:p, v:q ? q[2] : null, fn:q ? q[3] : null, f5:q ? q[4] : null, closes:h.close};
   });
+  if(EDIT){
+    $('wl').innerHTML = rows.map(function(r, k){
+      return '<div class="rh-row" style="cursor:default"><div class="n"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+'</small></div>'
+        + '<div class="ed"><button type="button" data-mv="-1" data-c="'+esc(r.code)+'" aria-label="上移" '+(k===0?'disabled':'')+'>↑</button><button type="button" data-mv="1" data-c="'+esc(r.code)+'" aria-label="下移" '+(k===rows.length-1?'disabled':'')+'>↓</button><button type="button" class="del" data-del="'+esc(r.code)+'">移除</button></div></div>';
+    }).join('');
+    return;
+  }
   if(SORT==='p') rows.sort(function(a,b){ return (b.p==null?-99:b.p) - (a.p==null?-99:a.p); });
   if(SORT==='fn') rows.sort(function(a,b){ return (b.fn||0) - (a.fn||0); });
   $('wl').innerHTML = rows.map(function(r){
@@ -274,6 +373,11 @@ function render(){
       + spark(r.closes, up) + pill(r) + '</div>';
   }).join('');
 }
+$('wl').addEventListener('click', function(e){
+  var m = e.target.closest('[data-mv]'), d = e.target.closest('[data-del]');
+  if(m) Watch.move(m.dataset.c, +m.dataset.mv);
+  if(d) Watch.toggle(d.dataset.del);
+});
 /* 點色塊：切換顯示（不要打開卡片） */
 window.addEventListener('click', function(e){            /* 掛在 window 的捕獲階段，比 card.js 先處理 */
   var b = e.target.closest && e.target.closest('.rh-pill'); if(!b) return;
@@ -357,7 +461,7 @@ window.pageRefresh = function(){ BUST = '?t='+Date.now(); return fetchAll(); };
 fetchAll();
 function inSession(){ var d = new Date(), t = new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000), m = t.getHours()*60+t.getMinutes(); return t.getDay()>0 && t.getDay()<6 && m>=540 && m<=816; }
 setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchAll(); }, 60000);
-document.addEventListener('DOMContentLoaded', function(){ if(window.Watch) Watch.onChange(function(){ fetchAll(); }); });
+document.addEventListener('DOMContentLoaded', function(){ if(window.Watch) Watch.onChange(function(){ render(); fetchAll(); }); });
 window.addEventListener('storage', function(e){ if(e.key==='stock-rank-watch') fetchAll(); });
 document.addEventListener('keydown', function(e){
   var it = (e.key==='Enter' || e.key===' ') && e.target.closest && e.target.closest('.w[data-stock]');

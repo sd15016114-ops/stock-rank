@@ -1,21 +1,48 @@
-/* 通知設定與自選股。右上角的鈴鐺打開設定面板：
-   開啟通知 → 瀏覽器訂閱推播 → 存到 Supabase（push_save 函式），GitHub 排程收盤後、盤後依設定傳通知。
-   自選股存在這台裝置（localStorage），開了通知的話也一起存到 Supabase，推播時會特別列出自選股的狀況。 */
+/* 自選股（跨裝置同步）與通知設定。
+   自選股：存在這台裝置，同時用「同步碼」存到 Supabase（watch_get／watch_put 函式）；
+           另一台裝置輸入同一組同步碼就會看到同一份清單，任何一台改了，其他台下次打開或切回來時會跟上。
+   通知：右上角鈴鐺 → 開啟通知 → 瀏覽器訂閱推播 → 存到 Supabase（push_save），GitHub 排程依設定傳通知。 */
 (function(){
   var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
   var VAPID = 'BNUZB1N8x1Uq6LVZx7TVEAht49iFsl1iWOXonjJRjRWxo8klTSuPWoVBO6kVaahRlFkPJU9Sa2h1GIPnDqgP2qc';
-  var KW = 'stock-rank-watch', KP = 'stock-rank-push';
+  var KW = 'stock-rank-watch', KP = 'stock-rank-push', KS = 'stock-rank-sync';
 
   function lsGet(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v==null ? d : v; }catch(e){ return d; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function rpc(fn, body){
-    return fetch(SB.url+'/rest/v1/rpc/'+fn, {method:'POST', headers:{apikey:SB.key, 'Content-Type':'application/json'}, body:JSON.stringify(body)})
-      .then(function(r){ if(!r.ok) throw new Error(r.status); });
+    return fetch(SB.url+'/rest/v1/rpc/'+fn, {method:'POST', headers:{apikey:SB.key, 'Content-Type':'application/json'}, body:JSON.stringify(body), cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); }).then(function(t){ return t ? JSON.parse(t) : null; });
   }
 
   /* ---------- 自選股 ---------- */
   var listeners = [];
+  function fire(){ listeners.forEach(function(f){ try{ f(); }catch(e){} }); }
+  function syncInfo(){ return lsGet(KS, {}); }
+  function newId(){
+    var abc = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', a = new Uint8Array(10), id = '';     /* 拿掉容易看錯的 0/O、1/I/L */
+    (window.crypto || window.msCrypto).getRandomValues(a);
+    for(var i=0;i<10;i++) id += abc[a[i] % abc.length];
+    return id.slice(0,5)+'-'+id.slice(5);
+  }
+  function ensureId(){ var s0 = syncInfo(); if(!s0.id){ s0 = {id:newId(), t:lsGet(KW, []).length ? Date.now() : 0}; lsSet(KS, s0); } return s0; }
+  function saveLocal(l){ lsSet(KW, l); var s0 = ensureId(); s0.t = Date.now(); lsSet(KS, s0); pushCloud(); sync(); fire(); }
+  var pushTimer = null;
+  function pushCloud(){
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(function(){ var s0 = ensureId(); rpc('watch_put', {wid:s0.id, w:{watch:lsGet(KW, []), t:s0.t}}).catch(function(){}); }, 400);
+  }
+  var lastPull = 0;
+  function pullCloud(force){
+    if(!force && Date.now() - lastPull < 15000) return Promise.resolve();
+    lastPull = Date.now();
+    var s0 = ensureId();
+    return rpc('watch_get', {wid:s0.id}).then(function(r){
+      if(!r || !r.watch){ if(lsGet(KW, []).length) pushCloud(); return; }      /* 雲端還沒有：把這台的傳上去 */
+      if((r.t||0) > (s0.t||0)){ lsSet(KW, r.watch); s0.t = r.t; lsSet(KS, s0); sync(); fire(); }
+      else if((r.t||0) < (s0.t||0)) pushCloud();
+    }).catch(function(){});
+  }
   window.Watch = {
     list: function(){ return lsGet(KW, []); },
     has: function(code){ return this.list().some(function(x){ return x[0]===code; }); },
@@ -23,11 +50,36 @@
       var l = this.list(), i = -1;
       l.forEach(function(x,k){ if(x[0]===code) i = k; });
       if(i>=0) l.splice(i,1); else l.push([code, name||code]);
-      lsSet(KW, l); sync(); listeners.forEach(function(f){ f(); });
+      saveLocal(l);
       return i<0;
     },
-    onChange: function(f){ listeners.push(f); }
+    move: function(code, d){
+      var l = this.list(), i = -1;
+      l.forEach(function(x,k){ if(x[0]===code) i = k; });
+      var j = i + d; if(i<0 || j<0 || j>=l.length) return;
+      var t = l[i]; l[i] = l[j]; l[j] = t; saveLocal(l);
+    },
+    onChange: function(f){ listeners.push(f); },
+    syncId: function(){ return ensureId().id; },
+    /* 輸入另一台裝置的同步碼：改用那組，兩邊的清單合併（那邊的順序在前） */
+    link: function(code){
+      var id = String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+      if(id.length!==10) return Promise.reject(new Error('format'));
+      id = id.slice(0,5)+'-'+id.slice(5);
+      return rpc('watch_get', {wid:id}).then(function(r){
+        if(!r || !r.watch) throw new Error('none');
+        var mine = lsGet(KW, []), have = {}, merged = r.watch.slice();
+        merged.forEach(function(x){ have[x[0]] = 1; });
+        mine.forEach(function(x){ if(!have[x[0]]) merged.push(x); });
+        lsSet(KS, {id:id, t:0}); saveLocal(merged);
+        return merged.length;
+      });
+    },
+    pull: function(){ return pullCloud(true); }
   };
+  pullCloud(true);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') pullCloud(); });
+  window.addEventListener('focus', function(){ pullCloud(); });
 
   /* ---------- 推播訂閱 ---------- */
   var ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
@@ -87,13 +139,13 @@
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   var scrim = document.createElement('div'); scrim.className = 'nt-scrim';
-  var sheet = document.createElement('aside'); sheet.className = 'nt-sheet'; sheet.setAttribute('role','dialog'); sheet.setAttribute('aria-modal','true'); sheet.setAttribute('aria-label','通知與自選股');
+  var sheet = document.createElement('aside'); sheet.className = 'nt-sheet'; sheet.setAttribute('role','dialog'); sheet.setAttribute('aria-modal','true'); sheet.setAttribute('aria-label','通知');
   sheet.innerHTML = '<div class="nt-in" id="ntIn"></div>';
   document.body.appendChild(scrim); document.body.appendChild(sheet);
   var IN = sheet.querySelector('#ntIn');
 
   var btn = document.createElement('button');
-  btn.type = 'button'; btn.className = 'refbtn ntbtn'; btn.title = '通知與自選股'; btn.setAttribute('aria-label', '通知與自選股');
+  btn.type = 'button'; btn.className = 'refbtn ntbtn'; btn.title = '通知'; btn.setAttribute('aria-label', '通知');
   btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function place(){
     var rb = document.getElementById('refreshBtn');
@@ -108,13 +160,13 @@
   refreshState();
 
   function render(){
-    var p = prefs(), w = window.Watch.list(), state, can = supported;
+    var p = prefs(), state, can = supported;
     if(!supported && ios && !standalone){ state = '<b>先把網站加到主畫面</b>iPhone 只有從主畫面的圖示打開，才能收通知：在 Safari 按分享 →「加入主畫面」，再從那個圖示打開這裡。'; can = false; }
     else if(!supported){ state = '<b>這個瀏覽器不支援通知</b>請改用 Chrome、Edge，或 iPhone 上加到主畫面的版本。'; }
     else if(Notification.permission==='denied'){ state = '<b>通知被擋住了</b>'+(ios ? '請到 iPhone「設定 → 通知 → Tide」打開允許通知。' : '請點網址列左邊的圖示，把「通知」改成允許。'); can = false; }
     else if(on){ state = '<b>通知已開啟</b>這台裝置會收到你勾選的通知。'; }
     else { state = '<b>通知還沒開</b>開啟後，收盤和盤後會把重點直接推到這台裝置。'; }
-    IN.innerHTML = '<h2>通知與自選股<button class="nt-x" aria-label="關閉">×</button></h2>'
+    IN.innerHTML = '<h2>通知<button class="nt-x" aria-label="關閉">×</button></h2>'
       + '<div class="nt-st">'+state+'</div>'
       + '<button class="nt-main'+(on?' off':'')+'" '+(can && !busy ? '' : 'disabled')+'>'+(busy ? '處理中…' : on ? '關閉這台裝置的通知' : '開啟通知')+'</button>'
       + (on ? '<button class="nt-test">在這台裝置顯示一則測試通知</button>' : '')
@@ -123,10 +175,7 @@
       +   '<label class="nt-opt"><input type="checkbox" data-k="close" '+(p.close?'checked':'')+'><span>收盤摘要<small>約 13:35：加權指數、資金最熱的產業、漲跌家數，加上自選股今天的漲跌</small></span></label>'
       +   '<label class="nt-opt"><input type="checkbox" data-k="intraday" '+(p.intraday?'checked':'')+'><span>盤中自選股提醒<small>盤中自選股大漲大跌（±5%、漲跌停）、5 分鐘內大量資金流入或流出、出現在「還沒漲的」名單時馬上通知；同一檔同一種狀況一天只通知一次</small></span></label>'
       +   '<label class="nt-opt"><input type="checkbox" data-k="signals" '+(p.signals?'checked':'')+'><span>盤後訊號<small>約晚上 9:40：今天新上榜的連續訊號、借券賣出暴增；自選股出現在任何名單會優先列出</small></span></label></div>'
-      + '<div class="nt-sec"><h3>自選股 <small style="font-weight:400;color:var(--muted)">（'+w.length+' 檔）</small></h3>'
-      +   '<form class="nt-add"><input inputmode="numeric" autocomplete="off" placeholder="輸入代號，例如 2330" aria-label="股票代號" maxlength="8"><button type="submit">加入</button></form>'
-      +   '<div class="nt-chips">'+(w.length ? w.map(function(x){ return '<span><b data-stock="'+esc(x[0])+'" data-name="'+esc(x[1])+'">'+esc(x[1])+'</b><small>'+esc(x[0])+'</small><button data-del="'+esc(x[0])+'" aria-label="移除 '+esc(x[1])+'">×</button></span>'; }).join('') : '<small style="color:var(--muted)">還沒有自選股。也可以在任何一檔的個股卡片按「☆ 自選」加入。</small>')+'</div></div>'
-      + '<p class="nt-fine">自選股存在這台裝置；開了通知的話也會一起存到伺服器，推播時才知道要列哪些。關閉通知就會從伺服器刪除。</p>';
+      + '<p class="nt-fine">自選股在「<a href="watch.html">我的自選</a>」頁管理，推播會列出它們的狀況。</p>';
   }
   function open(){ msg = ''; render(); document.body.classList.add('nt-open'); refreshState().then(render); }
   function close(){ document.body.classList.remove('nt-open'); }
@@ -137,9 +186,6 @@
 
   IN.addEventListener('click', function(e){
     if(e.target.closest('.nt-x')) return close();
-    if(e.target.closest('[data-stock]')){ close(); return; }          /* 點自選股名稱：交給 card.js 打開個股卡片 */
-    var del = e.target.closest('[data-del]');
-    if(del){ window.Watch.toggle(del.dataset.del); render(); return; }
     if(e.target.closest('.nt-test')){
       navigator.serviceWorker.ready.then(function(r){ r.showNotification('通知測試', {body:'看到這則就代表這台裝置可以收到通知。', icon:'icons/icon-192.png', tag:'local-test'}); });
       return;
@@ -154,18 +200,6 @@
   IN.addEventListener('change', function(e){
     var k = e.target.dataset && e.target.dataset.k; if(!k) return;
     var p = lsGet(KP, {}); p[k] = e.target.checked; lsSet(KP, p); sync();
-  });
-  IN.addEventListener('submit', function(e){
-    e.preventDefault();
-    var inp = IN.querySelector('.nt-add input'), code = (inp.value||'').trim().toUpperCase();
-    if(!code) return;
-    if(window.Watch.has(code)){ msg = '已經在自選股裡了。'; render(); return; }
-    fetch(SB.url+'/rest/v1/stock_hist?code=eq.'+encodeURIComponent(code)+'&select=name:data->>name', {headers:{apikey:SB.key}})
-      .then(function(r){ return r.json(); }).then(function(j){
-        if(!j || !j[0]){ msg = '找不到代號 '+code+'。'; render(); return; }
-        window.Watch.toggle(code, j[0].name); msg = '已加入 '+j[0].name+'。'; render();
-        var i2 = IN.querySelector('.nt-add input'); if(i2) i2.focus();
-      }, function(){ msg = '查不到這個代號，請稍後再試。'; render(); });
   });
   window.Watch.onChange(function(){ if(document.body.classList.contains('nt-open')) render(); });
 })();
