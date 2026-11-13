@@ -111,7 +111,7 @@
     var p = prefs(), w = window.Watch.list(), state, can = supported;
     if(!supported && ios && !standalone){ state = '<b>先把網站加到主畫面</b>iPhone 只有從主畫面的圖示打開，才能收通知：在 Safari 按分享 →「加入主畫面」，再從那個圖示打開這裡。'; can = false; }
     else if(!supported){ state = '<b>這個瀏覽器不支援通知</b>請改用 Chrome、Edge，或 iPhone 上加到主畫面的版本。'; }
-    else if(Notification.permission==='denied'){ state = '<b>通知被擋住了</b>'+(ios ? '請到 iPhone「設定 → 通知 → 動能排行」打開允許通知。' : '請點網址列左邊的圖示，把「通知」改成允許。'); can = false; }
+    else if(Notification.permission==='denied'){ state = '<b>通知被擋住了</b>'+(ios ? '請到 iPhone「設定 → 通知 → Tide」打開允許通知。' : '請點網址列左邊的圖示，把「通知」改成允許。'); can = false; }
     else if(on){ state = '<b>通知已開啟</b>這台裝置會收到你勾選的通知。'; }
     else { state = '<b>通知還沒開</b>開啟後，收盤和盤後會把重點直接推到這台裝置。'; }
     IN.innerHTML = '<h2>通知與自選股<button class="nt-x" aria-label="關閉">×</button></h2>'
