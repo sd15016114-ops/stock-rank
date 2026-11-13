@@ -128,6 +128,23 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:12p
 .sum .n{font-size:13px;color:var(--muted)}
 
 /* 區塊 */
+.lags{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.lagc{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+.lagc .lh{padding:12px 14px 10px;border-bottom:1px solid var(--rule);background:var(--tint)}
+.lagc .lh b{font-size:17px;font-weight:700}
+.lagc .lh small{font-size:12px;color:var(--muted);margin-left:6px}
+.lagc .lh div{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:13px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.lagc .lh div b{font-size:13px}
+.lagc .lr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--rule);cursor:pointer;font-variant-numeric:tabular-nums}
+.lagc .lr:last-child{border-bottom:0}
+.lagc .lr:hover{background:var(--tint)}
+.lagc .lr .nm b{font-weight:700}.lagc .lr .nm small{color:var(--muted);font-size:12px;margin-left:6px}
+.lagc .lr .gap{font-size:12px;color:var(--muted);text-align:right;line-height:1.3}
+.lagc .lr .gap b{display:block;font-size:14px}
+.lagc .lr .in{text-align:right;font-size:12px;color:var(--muted);line-height:1.3;min-width:62px}
+.lagc .lr .in b{display:block;font-size:14px;color:var(--up)}
+.lagbar{position:relative;height:4px;border-radius:2px;background:var(--rule);margin-top:5px;max-width:160px}
+.lagbar i{position:absolute;top:-2px;width:2px;height:8px;border-radius:1px}
 section.block{padding:44px 0 0}
 section.block h2{font-family:var(--serif);font-weight:900;font-size:26px;margin:0 0 4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 section.block h2 small{font-family:var(--sans);font-size:14px;font-weight:500;color:var(--muted)}
@@ -249,7 +266,7 @@ footer p{margin:0 0 6px;max-width:50em}
       <div class="calpanel" id="calPanel" hidden></div>
     </div>
   </header>
-<script src="nav.js?v=202611101200"></script><script src="card.js?v=202611091830" defer></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="nav.js?v=202611121600"></script><script src="card.js?v=202611121600" defer></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 
   <section class="hero">
     <h1>盤中資金</h1>
@@ -270,6 +287,12 @@ footer p{margin:0 0 6px;max-width:50em}
     </div>
     <div class="card" id="sec"></div>
     <div id="heatWrap" hidden><div class="zoombar" id="zoom"></div><div class="heat" id="heat"></div><div class="legend" id="heatLegend"></div></div>
+  </section>
+
+  <section class="block" id="lagBlock" hidden>
+    <h2>還沒漲的 <small id="lagWhen"></small></h2>
+    <p class="lead">資金淨流入最多、而且整個板塊在漲的族群裡，挑出漲幅明顯落後板塊平均（少 1.5 個百分點以上）、但自己也有資金流進來（1,000 萬以上）的股票。每列下面的橫條：灰色刻度是板塊平均漲幅、紅綠刻度是這一檔。不是推薦買進，是「錢已經進到這個族群、這幾檔還沒反應」的觀察名單。</p>
+    <div class="lags" id="lags"></div>
   </section>
 
   <section class="block">
@@ -450,6 +473,26 @@ function ixChart(x){
   document.addEventListener('pointermove', show); document.addEventListener('pointerdown', show);
   document.addEventListener('pointerout', hide); document.addEventListener('pointerup', function(e){ if(e.pointerType!=='mouse') hide(e); });
 })();
+
+/* ===== 還沒漲的：熱門板塊裡落後的股票 ===== */
+function renderLag(){
+  var lag = LIVE && LIVE.lag, blk = $('lagBlock');
+  if(!lag || !lag.length){ blk.hidden = true; return; }
+  $('lagWhen').textContent = liveOpen() ? '盤中 '+hm(LIVE.t) : tradeDay(LIVE.date)+' 收盤';
+  $('lags').innerHTML = lag.map(function(g){
+    var lo = Math.min.apply(null, g.rows.map(function(r){ return r[2]; }).concat([0])), hi = Math.max(g.p*1.25, 1), span = (hi-lo)||1;
+    function pos(p){ return ((p-lo)/span*100).toFixed(1)+'%'; }
+    return '<div class="lagc"><div class="lh"><b>'+esc(g.n)+'</b><small>'+(g.k==='th'?'概念股':'產業')+'</small>'
+      + '<div><span>板塊平均 <b class="'+cls(g.p)+'">'+(g.p>0?'+':'')+fix(g.p,2)+'%</b></span><span>淨流入 <b class="up">'+yiS(g.fn)+' 億</b></span><span>上漲 '+g.up+'／'+g.cnt+' 檔</span></div></div>'
+      + g.rows.map(function(r){
+          return '<div class="lr" data-stock="'+esc(r[0])+'" data-name="'+esc(r[1])+'" tabindex="0" role="button"><div class="nm"><b>'+esc(r[1])+'</b><small>'+esc(r[0])+'</small>'
+            + '<div class="lagbar" aria-hidden="true"><i style="left:'+pos(g.p)+';background:var(--muted)"></i><i style="left:'+pos(r[2])+';background:'+(r[2]>=0?'var(--up)':'var(--down)')+'"></i></div></div>'
+            + '<div class="gap"><b class="'+cls(r[2])+'">'+(r[2]>0?'+':'')+fix(r[2],2)+'%</b>落後 '+fix(g.p-r[2],1)+'</div>'
+            + '<div class="in"><b>'+yiS(r[4])+' 億</b>淨流入</div></div>';
+        }).join('') + '</div>';
+  }).join('');
+  blk.hidden = false;
+}
 
 /* ===== 今日摘要：自動產生的幾句話 ===== */
 function renderStory(){
@@ -717,7 +760,7 @@ function renderRotation(){
 }
 
 /* ===== 啟動 ===== */
-function renderAll(){ renderMarket(); renderStory(); renderSectors(); renderRotation(); }
+function renderAll(){ renderMarket(); renderStory(); renderLag(); renderSectors(); renderRotation(); }
 segBind('kindSeg', 'kind', renderSectors); segBind('sortSeg', 'sort', renderSectors);
 segBind('rkindSeg', 'rkind', renderRotation); segBind('viewSeg', 'view', renderSectors);
 function nul(){ return null; }
@@ -725,7 +768,7 @@ Promise.all([load('tw.json').catch(nul), load('rotation_tw.json').catch(nul), fe
   TW = res[0]; ROT = res[1]; renderAll();
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ document.querySelectorAll('.seg').forEach(function(s){ syncSeg(s, true); }); });
 });
-setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchLive().then(function(){ renderMarket(); renderStory(); renderSectors(); }); }, 60000);
+setInterval(function(){ if(document.visibilityState!=='hidden' && inSession()) fetchLive().then(function(){ renderMarket(); renderStory(); renderSectors(); renderLag(); }); }, 60000);
 /* 右上角的重新整理按鈕：重抓盤中、盤後、資金輪動三份資料再畫一次 */
 window.pageRefresh = function(){
   BUST = '?t='+Date.now();
