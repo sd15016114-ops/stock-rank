@@ -211,6 +211,16 @@
     });
   }
 
+  /* ===== 加到主畫面（PWA）：離線備援、狀態列顏色跟著日間／夜間 ===== */
+  if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(function(){});
+  (function(){
+    var meta = document.querySelector('meta[name=theme-color]'); if(!meta) return;
+    function paint(){ var bg = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim() || '#FFFFFF'; meta.setAttribute('content', bg); }
+    paint();
+    new MutationObserver(paint).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+    if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
+  })();
+
   /* ===== 大盤常駐：電腦在左側選單最上面，平板與手機是頁首下面一條（往下滑收起、往上滑出現） ===== */
   (function(){
     var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
