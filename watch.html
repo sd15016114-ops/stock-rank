@@ -192,7 +192,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
     </div>
   </header>
 <script src="nav.js?v=202611131515"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
-<script src="card.js?v=202611131300"></script><script src="notify.js?v=202611131600" defer></script>
+<script src="card.js?v=202611131300"></script><script src="notify.js?v=202611131540" defer></script>
   <main class="rh">
     <section class="rh-hero" aria-label="大盤">
       <div class="rh-k" id="ixTabs"><button type="button" data-k="tse" aria-pressed="true">加權指數</button><button type="button" data-k="otc" aria-pressed="false">櫃買指數</button></div>
@@ -210,10 +210,6 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
       <div class="rh-sug" id="sug" hidden role="listbox"></div>
     </form>
     <div id="wl"></div>
-    <section class="rh-sync" aria-label="帳號">
-      <div id="acct"></div>
-      <div class="rh-msg" id="syncMsg" role="status"></div>
-    </section>
     <p class="rh-foot">盤中資料：永豐金證券，每分鐘更新；資金流入流出是用每分鐘價格方向推估的近似值。收盤後資料：證交所、櫃買中心。僅供參考，不構成投資建議。</p>
   </main>
 </div>
@@ -303,53 +299,6 @@ $('srch').addEventListener('submit', function(e){ e.preventDefault(); if(SUG.len
 $('sug').addEventListener('click', function(e){ var b = e.target.closest('button[data-i]'); if(b) pick(+b.dataset.i); });
 document.addEventListener('click', function(e){ if(!e.target.closest('#srch')) $('sug').hidden = true; });
 
-/* ===== 帳號：email 驗證碼登入，自選股跟著帳號走 ===== */
-var STEP = 'email', EMAIL = '', COOL = 0, coolT = null;
-function paintAcct(){
-  var box = $('acct'); if(!window.Account) return;
-  var u = Account.user();
-  if(u){
-    box.innerHTML = '<h3>已登入</h3><p>自選股和通知設定會同步到所有登入這個帳號的裝置。</p>'
-      + '<div class="rh-code"><b style="font-size:16px;letter-spacing:0">'+esc(u.email)+'</b><button type="button" id="logout" class="ghost">登出</button></div>';
-    return;
-  }
-  if(STEP==='email'){
-    box.innerHTML = '<h3>登入，在每台裝置看同一份自選</h3><p>輸入 email，會收到一組驗證碼，輸入就登入，不用設密碼。手機和電腦登入同一個 email，自選股和通知設定就會一樣。</p>'
-      + '<form class="rh-link" id="mailF"><input id="mailIn" type="email" inputmode="email" autocomplete="email" placeholder="你的 email" style="text-transform:none;letter-spacing:0" required><button type="submit">寄驗證碼</button></form>';
-  }else{
-    box.innerHTML = '<h3>輸入驗證碼</h3><p>驗證碼已寄到 '+esc(EMAIL)+'，幾分鐘內有效。沒收到請看一下垃圾郵件。</p>'
-      + '<form class="rh-link" id="codeF"><input id="codeIn" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="驗證碼"><button type="submit">登入</button></form>'
-      + '<div class="rh-again"><button type="button" id="again" '+(COOL>0?'disabled':'')+'>'+(COOL>0?'重新寄送（'+COOL+' 秒）':'重新寄送')+'</button><button type="button" id="back">換一個 email</button></div>';
-    setTimeout(function(){ var c = $('codeIn'); if(c) c.focus(); }, 50);
-  }
-}
-function cool(){ COOL = 60; clearInterval(coolT); coolT = setInterval(function(){ COOL--; var b = $('again'); if(b){ b.disabled = COOL>0; b.textContent = COOL>0 ? '重新寄送（'+COOL+' 秒）' : '重新寄送'; } if(COOL<=0) clearInterval(coolT); }, 1000); }
-function say(t){ $('syncMsg').textContent = t; }
-function errText(e){
-  var m = String(e && e.message || ''), st = e && e.status;
-  if(st===429 || /rate|seconds/i.test(m)) return '寄太多次了，請過一會兒再試。';
-  if(/expired|invalid|otp/i.test(m) || st===403) return '驗證碼不對或已過期，請再試一次或重新寄送。';
-  return '沒有成功，請稍後再試。';
-}
-function sendCode(){
-  say('寄送中…');
-  return Account.sendCode(EMAIL).then(function(){ STEP = 'code'; cool(); paintAcct(); say(''); }, function(e){ say(errText(e)); });
-}
-$('acct').addEventListener('submit', function(e){
-  e.preventDefault();
-  if(e.target.id==='mailF'){ EMAIL = $('mailIn').value.trim(); if(EMAIL) sendCode(); }
-  if(e.target.id==='codeF'){
-    var c = $('codeIn').value.trim(); if(!c) return;
-    say('登入中…');
-    Account.verify(EMAIL, c).then(function(){ STEP = 'email'; say('已登入，自選股已同步。'); paintAcct(); }, function(err){ say(errText(err)); });
-  }
-});
-$('acct').addEventListener('click', function(e){
-  if(e.target.id==='again' && COOL<=0) sendCode();
-  if(e.target.id==='back'){ STEP = 'email'; say(''); paintAcct(); }
-  if(e.target.id==='logout'){ Account.logout(); say('已登出。這台裝置上的自選股還在，只是不再同步。'); }
-});
-document.addEventListener('DOMContentLoaded', function(){ paintAcct(); if(window.Account) Account.onChange(paintAcct); });
 
 var Q = null, H = {}, SIG = null, LAG = null;
 function hits(code){
@@ -382,7 +331,7 @@ function pill(r){
 function render(){
   var wl = watchList();
   if(!wl.length){
-    $('wl').innerHTML = '<div class="rh-empty">還沒有自選股。在上面搜尋代號或名稱加入，或在任何一檔的個股卡片按「☆ 自選」。<br>已經在別的裝置加過了？在最下面登入同一個 email 就會出現。</div>';
+    $('wl').innerHTML = '<div class="rh-empty">還沒有自選股。在上面搜尋代號或名稱加入，或在任何一檔的個股卡片按「☆ 自選」。</div>';
     return;
   }
   var rows = wl.map(function(w, i){
