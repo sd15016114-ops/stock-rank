@@ -31,6 +31,8 @@
   + '.sc-msg{padding:40px 0;text-align:center;color:var(--muted)}'
   + '.sc-fine{font-size:12px;color:var(--muted);margin-top:14px}'
   + '.sc-sheet .up{color:var(--up)}.sc-sheet .down{color:var(--down)}'
+  + '.sc-star{margin-top:8px;border:1px solid var(--rule);background:var(--tint);color:var(--ink);font:inherit;font-size:13px;font-weight:700;border-radius:999px;padding:5px 12px;cursor:pointer}'
+  + '.sc-star.on{background:var(--soft);color:var(--accent);border-color:var(--fill)}'
   + '.stocklink{cursor:pointer}.stocklink:hover td{background:var(--tint)}'
   + '.histbtn{display:block;width:100%;margin-top:12px;padding:10px 14px;border-radius:12px;border:1px solid var(--rule);background:var(--soft);color:var(--accent);font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-align:center}'
   + '.histbtn:hover{border-color:var(--fill)}';
@@ -62,7 +64,17 @@
   var y0 = null;
   sheet.addEventListener('touchstart', function(e){ y0 = sheet.scrollTop<=0 ? e.touches[0].clientY : null; }, {passive:true});
   sheet.addEventListener('touchmove', function(e){ if(y0!=null && e.touches[0].clientY - y0 > 90){ y0 = null; close(); } }, {passive:true});
-  IN.addEventListener('click', function(e){ if(e.target.closest('.sc-close')) close(); });
+  IN.addEventListener('click', function(e){
+    if(e.target.closest('.sc-close')) close();
+    var sb = e.target.closest('.sc-star');
+    if(sb && window.Watch){ var now = window.Watch.toggle(sb.dataset.code, sb.dataset.name); sb.outerHTML = star(sb.dataset.code, sb.dataset.name); }
+  });
+  /* 自選股按鈕（有載入 notify.js 才顯示） */
+  function star(code, name){
+    if(!window.Watch) return '';
+    var on = window.Watch.has(code);
+    return '<button type="button" class="sc-star'+(on?' on':'')+'" data-code="'+esc(code)+'" data-name="'+esc(name)+'" aria-pressed="'+on+'">'+(on?'★ 自選中':'☆ 自選')+'</button>';
+  }
 
   function fetchStock(code){
     if(CACHE[code]) return CACHE[code];
@@ -112,7 +124,7 @@
     if(dtr[last]!=null && dtr[last] >= 50) keys.push('<span>當沖比例 '+fix(dtr[last],0)+'%</span>');
     var p = c.pct[last], px = c.close[last];
     IN.innerHTML =
-      '<div class="sc-top"><div><h2>'+esc(c.name)+'<small>'+esc(code)+(c.ind?'・'+esc(c.ind):'')+'</small></h2></div>'
+      '<div class="sc-top"><div><h2>'+esc(c.name)+'<small>'+esc(code)+(c.ind?'・'+esc(c.ind):'')+'</small></h2>'+star(code, c.name)+'</div>'
       +'<div style="display:flex;gap:12px;align-items:flex-start"><div class="sc-px"><b>'+(px!=null?fix(px,2):'—')+'</b><span class="'+cls(p)+'">'+pct(p)+'</span></div><button class="sc-close" aria-label="關閉">×</button></div></div>'
       +'<div class="sc-keys">'+keys.join('')+'</div>'
       +'<div class="sc-sec"><h3>'+n+' 天成交值<small>長條紅漲綠跌・虛線是 60 日平均・折線是收盤價</small></h3>'+valueChart(c)+'</div>'

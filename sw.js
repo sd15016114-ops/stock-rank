@@ -1,6 +1,6 @@
 /* 離線備援：一律先上網拿最新的，拿不到（沒網路、太慢）才用上次存下來的。
    行情資料（Supabase）不存，避免把舊的盤中數字當成最新的。 */
-var CACHE = 'stock-rank-v1';
+var CACHE = 'stock-rank-v2';
 var SHELL = ['./', 'index.html', 'signals.html', 'rank.html', 'manifest.webmanifest', 'icons/icon-192.png'];
 self.addEventListener('install', function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(SHELL); }).catch(function(){}).then(function(){ return self.skipWaiting(); }));
@@ -23,4 +23,21 @@ self.addEventListener('fetch', function(e){
       return caches.match(key, {ignoreSearch: url.origin===location.origin}).then(function(r){ return r || caches.match('index.html'); });
     })
   );
+});
+
+/* 推播：收到就顯示，點了打開對應的頁面 */
+self.addEventListener('push', function(e){
+  var d = {};
+  try{ d = e.data ? e.data.json() : {}; }catch(err){ d = {title: '股市動能排行', body: e.data ? e.data.text() : ''}; }
+  e.waitUntil(self.registration.showNotification(d.title || '股市動能排行', {
+    body: d.body || '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: d.tag, data: {url: d.url || './'}
+  }));
+});
+self.addEventListener('notificationclick', function(e){
+  e.notification.close();
+  var url = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(clients.matchAll({type: 'window', includeUncontrolled: true}).then(function(list){
+    for(var i = 0; i < list.length; i++){ if('focus' in list[i]){ list[i].navigate(url).catch(function(){}); return list[i].focus(); } }
+    return clients.openWindow(url);
+  }));
 });
