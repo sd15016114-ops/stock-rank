@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FFFFFF">
 <title>我的自選｜股市動能排行</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap">
 <style>
 :root{
   --paper:#FFFFFF; --sheet:#FFFFFF; --tint:#F2F9FE; --ink:#16242F; --muted:#5F7180;
@@ -87,6 +87,48 @@ footer p{margin:0 0 6px;max-width:50em}
 @media (max-width:700px){ .wrap{padding:0 16px} }
 @media (max-width:599px){ .w{padding:12px 14px} .w .mid{grid-template-columns:90px minmax(0,1fr);gap:10px} .w svg{width:90px;height:30px} .w .nums{gap:2px 12px;font-size:12px} .seg button{padding:6px 12px;font-size:14px} }
 </style>
+<style>
+/* ===== Robinhood 風格：白底（夜間純黑）、無框無卡片、數字最大、漲跌色塊 ===== */
+:root{--rh-bg:#FFFFFF;--rh-ink:#0B0D0F;--rh-mute:#6A7178;--rh-line:#ECEEF0;--rh-up:#F2463A;--rh-down:#00A85A;--rh-press:#F5F6F7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--rh-bg:#000000;--rh-ink:#FFFFFF;--rh-mute:#8E949A;--rh-line:#1C1F22;--rh-up:#FF5A4F;--rh-down:#20D27A;--rh-press:#111315}}
+:root[data-theme="dark"]{--rh-bg:#000000;--rh-ink:#FFFFFF;--rh-mute:#8E949A;--rh-line:#1C1F22;--rh-up:#FF5A4F;--rh-down:#20D27A;--rh-press:#111315}
+body{background:var(--rh-bg);color:var(--rh-ink)}
+.tstrip{display:none !important}   /* 這頁上方已經有大盤，不用再顯示常駐那一條 */
+.rh{font-family:Inter,"Noto Sans TC",system-ui,sans-serif;font-variant-numeric:tabular-nums;max-width:720px}
+.rh .num{font-family:Inter,system-ui,sans-serif;letter-spacing:-.02em}
+.rh-hero{padding:28px 0 8px}
+.rh-k{display:flex;gap:18px;font-size:15px;font-weight:600}
+.rh-k button{border:0;background:none;padding:0 0 6px;font:inherit;color:var(--rh-mute);cursor:pointer;border-bottom:2px solid transparent}
+.rh-k button[aria-pressed=true]{color:var(--rh-ink);border-color:var(--rh-ink)}
+.rh-big{font-size:44px;font-weight:700;line-height:1.1;margin-top:14px}
+.rh-chg{font-size:15px;font-weight:600;margin-top:6px}
+.rh-chg span{color:var(--rh-mute);font-weight:500;margin-left:6px}
+.rh-chart{margin:18px 0 0;position:relative}
+.rh-chart svg{display:block;width:100%;height:200px;touch-action:pan-y;overflow:visible}
+.rh-times{display:flex;justify-content:space-between;font-size:12px;color:var(--rh-mute);margin-top:6px}
+.rh-sec{display:flex;justify-content:space-between;align-items:baseline;margin:34px 0 4px;padding-bottom:12px;border-bottom:1px solid var(--rh-line)}
+.rh-sec h2{font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em}
+.rh-sec .acts{display:flex;gap:18px;font-size:14px;font-weight:600}
+.rh-sec .acts button{border:0;background:none;padding:0;font:inherit;color:var(--rh-mute);cursor:pointer}
+.rh-sec .acts button[aria-pressed=true]{color:var(--rh-ink)}
+.rh-sec .acts .edit{color:var(--rh-up)}
+.rh-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 92px;gap:14px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--rh-line);cursor:pointer;margin:0 -4px}
+.rh-row:active,.rh-row:hover{background:var(--rh-press)}
+.rh-row .n b{display:block;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rh-row .n small{display:block;font-size:13px;color:var(--rh-mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rh-row .n small i{font-style:normal}
+.rh-row .n small .u{color:var(--rh-up)}.rh-row .n small .d{color:var(--rh-down)}
+.rh-row svg{width:72px;height:30px;display:block;overflow:visible}
+.rh-pill{border:0;border-radius:8px;height:36px;font:600 15px/36px Inter,"Noto Sans TC",sans-serif;color:#fff;text-align:center;cursor:pointer;padding:0 6px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rh-pill.u{background:var(--rh-up)}.rh-pill.d{background:var(--rh-down)}.rh-pill.z{background:var(--rh-mute)}
+.rh-empty{padding:40px 0;color:var(--rh-mute);font-size:15px;line-height:1.7}
+.rh-empty button{display:block;margin-top:16px;border:0;border-radius:999px;background:var(--rh-ink);color:var(--rh-bg);font:700 15px Inter,"Noto Sans TC",sans-serif;padding:12px 22px;cursor:pointer}
+.rh-foot{font-size:12px;color:var(--rh-mute);margin:28px 0 40px;line-height:1.7}
+.rh-info{border:0;background:none;color:var(--rh-mute);font-size:13px;cursor:pointer;padding:0;margin-left:8px;vertical-align:3px;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;line-height:16px;font-weight:700}
+.rh-help{font-size:13px;color:var(--rh-mute);line-height:1.7;margin:10px 0 0}
+.rh-help[hidden]{display:none}
+@media (max-width:599px){.rh-big{font-size:38px}.rh-row{grid-template-columns:minmax(0,1fr) 60px 86px;gap:10px}.rh-row svg{width:60px}.rh-chart svg{height:170px}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -98,20 +140,20 @@ footer p{margin:0 0 6px;max-width:50em}
   </header>
 <script src="nav.js?v=202611131300"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 <script src="card.js?v=202611131300"></script><script src="notify.js?v=202611131300" defer></script>
-    <section class="hero">
-    <h1>我的自選</h1>
-    <p class="tag">盤中每分鐘更新自選股的價格、資金流入流出；收盤後列出它們上了哪些訊號名單。點任一檔打開個股卡片，在卡片按「☆ 自選」或右上角鈴鐺管理自選股。</p>
-    <div class="meta" id="meta">資料載入中…</div>
-  </section>
-  <div class="tools">
-    <div class="seg" id="sortSeg" role="group" aria-label="排序"><i class="thumb"></i><button type="button" data-v="my" aria-pressed="true">自訂順序</button><button type="button" data-v="p" aria-pressed="false">漲跌幅</button><button type="button" data-v="fn" aria-pressed="false">淨流入</button></div>
-    <button type="button" class="mng" id="mng">管理自選股</button>
-  </div>
-  <div class="wl" id="wl"></div>
-  <footer>
-    <p>盤中資料來源：永豐金證券（每分鐘）；收盤後資料：臺灣證券交易所、證券櫃檯買賣中心。資金流入流出是用每分鐘價格方向推估的近似值。自選股只存在這台裝置（開了通知才會同步到伺服器）。</p>
-    <p>本站僅整理公開資訊供參考，不構成任何投資建議。</p>
-  </footer>
+  <main class="rh">
+    <section class="rh-hero" aria-label="大盤">
+      <div class="rh-k" id="ixTabs"><button type="button" data-k="tse" aria-pressed="true">加權指數</button><button type="button" data-k="otc" aria-pressed="false">櫃買指數</button></div>
+      <div class="rh-big num" id="hxBig">—</div>
+      <div class="rh-chg num" id="hxChg">&nbsp;</div>
+      <div class="rh-chart"><svg id="hxSvg" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="今日走勢"></svg>
+        <div class="rh-times"><span>9:00</span><span>11:15</span><span>13:30</span></div></div>
+    </section>
+    <div class="rh-sec"><h2>自選股<button type="button" class="rh-info" id="infoBtn" aria-expanded="false" aria-label="說明">?</button></h2>
+      <div class="acts" id="sortSeg"><button type="button" data-v="my" aria-pressed="true">自訂</button><button type="button" data-v="p" aria-pressed="false">漲跌</button><button type="button" data-v="fn" aria-pressed="false">資金</button><button type="button" class="edit" id="mng">編輯</button></div></div>
+    <p class="rh-help" id="help" hidden>右邊色塊點一下可以切換顯示漲跌幅、價格、今天資金淨流入。名字下面是這檔上了哪些訊號名單；走勢線是近 60 天收盤。點任一列看個股卡片。<span id="meta"></span></p>
+    <div id="wl"></div>
+    <p class="rh-foot">盤中資料：永豐金證券，每分鐘更新；資金流入流出是用每分鐘價格方向推估的近似值。收盤後資料：證交所、櫃買中心。僅供參考，不構成投資建議。</p>
+  </main>
 </div>
 
 <script>
@@ -147,18 +189,16 @@ var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_Xg
 function sbGet(q){ return fetch(SB.url+'/rest/v1/'+q, {headers:{apikey:SB.key}, cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
 function watchList(){ try{ return JSON.parse(localStorage.getItem('stock-rank-watch')) || []; }catch(e){ return []; } }
 function yiS(v){ return (v>0?'+':v<0?'−':'')+yi(v); }
-function sortSeg(){ var seg = $('sortSeg'), on = seg.querySelector('button[aria-pressed=true]'), th = seg.querySelector('.thumb'); if(on && on.offsetWidth){ if(window.jelly) jelly(th, on.offsetLeft, on.offsetLeft+on.offsetWidth, true); else { th.style.width = on.offsetWidth+'px'; th.style.transform = 'translateX('+on.offsetLeft+'px)'; } } }
-var SORT = 'my';
-try{ SORT = localStorage.getItem('stock-rank-wsort') || 'my'; }catch(e){}
-$('sortSeg').querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===SORT ? 'true' : 'false'); });
+var SORT = 'my', SHOW = 'p';
+try{ SORT = localStorage.getItem('stock-rank-wsort') || 'my'; SHOW = localStorage.getItem('stock-rank-wshow') || 'p'; }catch(e){}
+function paintSort(){ $('sortSeg').querySelectorAll('button[data-v]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===SORT ? 'true' : 'false'); }); }
+paintSort();
 $('sortSeg').addEventListener('click', function(e){
-  var b = e.target.closest('button'); if(!b) return; SORT = b.dataset.v;
-  $('sortSeg').querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true' : 'false'); });
-  var on = b, th = $('sortSeg').querySelector('.thumb'); if(window.jelly) jelly(th, on.offsetLeft, on.offsetLeft+on.offsetWidth); else sortSeg();
+  var b = e.target.closest('button[data-v]'); if(!b) return; SORT = b.dataset.v; paintSort();
   try{ localStorage.setItem('stock-rank-wsort', SORT); }catch(err){}
   render();
 });
-window.addEventListener('resize', sortSeg); if(document.fonts && document.fonts.ready) document.fonts.ready.then(sortSeg); sortSeg();
+$('infoBtn').addEventListener('click', function(){ var h = $('help'); h.hidden = !h.hidden; this.setAttribute('aria-expanded', !h.hidden); });
 $('mng').addEventListener('click', function(){ if(window.openNotify) openNotify(); });
 
 var Q = null, H = {}, SIG = null, LAG = null;
@@ -182,13 +222,19 @@ function spark(arr, up){
   var vs = p.map(function(x){ return x[1]; }), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs), rg = (hi-lo)||1, n = arr.length-1;
   return '<svg viewBox="0 0 120 36" preserveAspectRatio="none" role="img" aria-label="近 60 天收盤走勢"><title>近 60 天收盤走勢</title><polyline fill="none" stroke="'+(up?'var(--up)':'var(--down)')+'" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" points="'+p.map(function(x){ return (x[0]/n*120).toFixed(1)+','+((1-(x[1]-lo)/rg)*32+2).toFixed(1); }).join(' ')+'"/></svg>';
 }
+function pill(r){
+  var k = r.p==null ? 'z' : r.p>0 ? 'u' : r.p<0 ? 'd' : 'z', t;
+  if(SHOW==='c') t = r.c!=null ? fix(r.c, r.c>=1000?0:2) : '—';
+  else if(SHOW==='fn'){ t = r.fn!=null ? yiS(r.fn)+'億' : '—'; k = r.fn==null ? 'z' : r.fn>0 ? 'u' : r.fn<0 ? 'd' : 'z'; }
+  else t = r.p!=null ? (r.p>0?'+':'')+fix(r.p,2)+'%' : '—';
+  return '<button type="button" class="rh-pill '+k+'" aria-label="切換顯示">'+t+'</button>';
+}
 function render(){
   var wl = watchList();
   if(!wl.length){
-    $('wl').innerHTML = '<div class="empty"><b>還沒有自選股</b>在任何一檔的個股卡片按「☆ 自選」，或用下面的按鈕輸入代號加入。<br><button type="button" class="mng" onclick="window.openNotify&&openNotify()">加入自選股</button></div>';
+    $('wl').innerHTML = '<div class="rh-empty">還沒有自選股。<br>在任何一檔的個股卡片按「☆ 自選」，或從這裡輸入代號加入。<button type="button" onclick="window.openNotify&&openNotify()">加入自選股</button></div>';
     return;
   }
-  var live = Q && Q.date===tpeToday() && Q.phase==='open';
   var rows = wl.map(function(w, i){
     var code = w[0], q = Q && Q['s'+code], h = H[code] || {};
     var c = q ? q[0] : h.close && h.close[h.close.length-1], p = q ? q[1] : h.pct && h.pct[h.pct.length-1];
@@ -197,22 +243,78 @@ function render(){
   if(SORT==='p') rows.sort(function(a,b){ return (b.p==null?-99:b.p) - (a.p==null?-99:a.p); });
   if(SORT==='fn') rows.sort(function(a,b){ return (b.fn||0) - (a.fn||0); });
   $('wl').innerHTML = rows.map(function(r){
-    var tg = hits(r.code), cl = (r.closes||[]).filter(function(v){ return v!=null; }), up = cl.length < 2 || cl[cl.length-1] >= cl[0];   /* 線的顏色看 60 天的漲跌 */
-    var nums = r.v!=null ? '<span>成交值<b>'+yi(r.v)+' 億</b></span><span>今日淨流入<b class="'+cls(r.fn)+'">'+yiS(r.fn||0)+' 億</b></span>'+(live && r.f5!=null ? '<span>近 5 分鐘<b class="'+cls(r.f5)+'">'+yiS(r.f5)+' 億</b></span>' : '') : '<span>盤中資料開盤後才有</span>';
-    return '<div class="w" data-stock="'+esc(r.code)+'" data-name="'+esc(r.name)+'" tabindex="0" role="button">'
-      + '<div class="nm"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+(r.ind ? '・'+esc(r.ind) : '')+'</small></div>'
-      + '<div class="px"><b class="'+cls(r.p)+'">'+(r.c!=null ? fix(r.c,2) : '—')+'</b><span class="'+cls(r.p)+'">'+pct(r.p)+'</span></div>'
-      + '<div class="mid">'+spark(r.closes, up)+'<div class="nums">'+nums+'</div></div>'
-      + (tg.length ? '<div class="tags">'+tg.map(function(t){ return '<span class="'+t[0]+'">'+esc(t[1])+'</span>'; }).join('')+'</div>' : '')
-      + '</div>';
+    var tg = hits(r.code), cl = (r.closes||[]).filter(function(v){ return v!=null; }), up = cl.length < 2 || cl[cl.length-1] >= cl[0];
+    var sub = tg.length ? tg.slice(0,2).map(function(t){ return '<i class="'+(t[0]==='g'?'d':t[0]==='r'?'u':'')+'">'+esc(t[1])+'</i>'; }).join(' · ') : esc(r.code)+(r.ind ? ' · '+esc(r.ind) : '');
+    return '<div class="rh-row" data-stock="'+esc(r.code)+'" data-name="'+esc(r.name)+'" tabindex="0" role="button">'
+      + '<div class="n"><b>'+esc(r.name)+'</b><small>'+sub+'</small></div>'
+      + spark(r.closes, up) + pill(r) + '</div>';
   }).join('');
 }
+/* 點色塊：切換顯示（不要打開卡片） */
+window.addEventListener('click', function(e){            /* 掛在 window 的捕獲階段，比 card.js 先處理 */
+  var b = e.target.closest && e.target.closest('.rh-pill'); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  SHOW = {p:'c', c:'fn', fn:'p'}[SHOW]; try{ localStorage.setItem('stock-rank-wshow', SHOW); }catch(err){}
+  render();
+}, true);
+function spark(arr, up){
+  var p = (arr||[]).map(function(v,i){ return v==null ? null : [i, v]; }).filter(Boolean);
+  if(p.length < 2) return '<svg aria-hidden="true"></svg>';
+  var vs = p.map(function(x){ return x[1]; }), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs), rg = (hi-lo)||1, n = arr.length-1;
+  return '<svg viewBox="0 0 72 30" preserveAspectRatio="none" role="img" aria-label="近 60 天收盤走勢"><polyline fill="none" stroke="'+(up?'var(--rh-up)':'var(--rh-down)')+'" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" points="'+p.map(function(x){ return (x[0]/n*72).toFixed(1)+','+((1-(x[1]-lo)/rg)*26+2).toFixed(1); }).join(' ')+'"/></svg>';
+}
+
+/* ===== 上方大盤：大數字＋整條走勢線，手指在線上滑動會跟著顯示那一分鐘 ===== */
+var IX = null, IXK = 'tse';
+function ixPaint(i){
+  var x = IX && IX.filter(function(r){ return r.k===IXK; })[0];
+  if(!x){ $('hxBig').textContent = '—'; $('hxChg').innerHTML = '&nbsp;'; $('hxSvg').innerHTML = ''; return; }
+  var v = x.c, label = '今天';
+  if(i!=null && x.pts && x.pts[i]!=null){ v = x.pts[i]; var m = i+1; label = (9+Math.floor(m/60))+':'+('0'+m%60).slice(-2); }
+  var chg = v - x.ref, pc = chg / x.ref * 100, k = chg>0 ? 'var(--rh-up)' : chg<0 ? 'var(--rh-down)' : 'var(--rh-mute)';
+  $('hxBig').textContent = fix(v, 2);
+  $('hxChg').innerHTML = '<b style="color:'+k+'">'+(chg>0?'+':chg<0?'−':'')+fix(Math.abs(chg),2)+' ('+(pc>0?'+':'')+fix(pc,2)+'%)</b><span>'+label+'</span>';
+}
+function ixChart(){
+  var x = IX && IX.filter(function(r){ return r.k===IXK; })[0], svg = $('hxSvg');
+  if(!x || !x.pts){ svg.innerHTML = ''; return; }
+  var W = 600, H = 200, vals = x.pts.filter(function(v){ return v!=null; }).concat([x.ref]), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = (hi-lo)*0.08 || 1;
+  lo -= pad; hi += pad;
+  function X(i){ return (i+1)/270*W; } function Y(v){ return (1-(v-lo)/(hi-lo))*H; }
+  var d = '', last = null;
+  x.pts.forEach(function(v,i){ if(v==null) return; d += (d?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1); last = i; });
+  var col = x.c >= x.ref ? 'var(--rh-up)' : 'var(--rh-down)';
+  svg.innerHTML = '<line x1="0" x2="'+W+'" y1="'+Y(x.ref)+'" y2="'+Y(x.ref)+'" stroke="var(--rh-mute)" stroke-width="1.5" stroke-dasharray="1 5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+    + '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'
+    + '<line id="hxCur" x1="0" x2="0" y1="0" y2="'+H+'" stroke="var(--rh-mute)" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0"/>'
+    + (last!=null ? '<circle id="hxDot" cx="'+X(last)+'" cy="'+Y(x.pts[last])+'" r="4.5" fill="'+col+'" vector-effect="non-scaling-stroke"/>' : '');
+  ixPaint(null);
+}
+(function(){
+  var svg = $('hxSvg');
+  function at(e){
+    var x = IX && IX.filter(function(r){ return r.k===IXK; })[0]; if(!x || !x.pts) return;
+    var r = svg.getBoundingClientRect(), i = Math.max(0, Math.min(x.pts.length-1, Math.round((e.clientX - r.left)/r.width*270) - 1));
+    while(i>0 && x.pts[i]==null) i--;
+    var cur = $('hxCur'), cx = (i+1)/270*600; cur.setAttribute('x1', cx); cur.setAttribute('x2', cx); cur.setAttribute('opacity', 1);
+    ixPaint(i);
+  }
+  function off(){ var cur = $('hxCur'); if(cur) cur.setAttribute('opacity', 0); ixPaint(null); }
+  svg.addEventListener('pointermove', at); svg.addEventListener('pointerdown', at);
+  svg.addEventListener('pointerleave', off); svg.addEventListener('pointerup', function(e){ if(e.pointerType!=='mouse') off(); }); svg.addEventListener('pointercancel', off);
+})();
+$('ixTabs').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return; IXK = b.dataset.k;
+  this.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true' : 'false'); });
+  ixChart();
+});
 function tpeToday(){ var d = new Date(), t = new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000); return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2); }
 function fetchAll(){
   var wl = watchList(), codes = wl.map(function(w){ return w[0]; });
   render();
   var jobs = [load('signals_tw.json').then(function(d){ SIG = d; }, function(){}),
-    sbGet('live?id=eq.tw&select=date:data->>date,lag:data->lag').then(function(j){ LAG = j[0] && j[0].date===tpeToday() ? j[0].lag : null; }, function(){})];
+    (/[?&]mock\b/.test(location.search) ? fetch('data/live_tw_mock.json').then(function(r){ return r.json(); }).then(function(d){ return [d]; })
+      : sbGet('live?id=eq.tw&select=date:data->>date,lag:data->lag,ix:data->ix')).then(function(j){ LAG = j[0] && j[0].date===tpeToday() ? j[0].lag : null; IX = j[0] && j[0].ix; ixChart(); }, function(){})];
   if(codes.length){
     jobs.push(sbGet('live?id=eq.q&select=date:data->>date,t:data->>t,phase:data->>phase,'+codes.map(function(c){ return 's'+c+':data->q->s'+c; }).join(','))
       .then(function(j){ Q = j[0] || null; }, function(){}));
@@ -222,8 +324,8 @@ function fetchAll(){
   }
   return Promise.all(jobs).then(function(){
     var live = Q && Q.date===tpeToday() && Q.phase==='open';
-    $('meta').textContent = live ? '盤中 '+Q.t.slice(11,16)+' 更新・每分鐘自動更新'
-      : (Q && Q.date ? tradeDay(Q.date)+' 收盤' : '最近收盤') + (SIG ? '・訊號是 '+tradeDay(SIG.date)+' 收盤後的資料' : '');
+    $('meta').textContent = live ? '（盤中 '+Q.t.slice(11,16)+' 更新）'
+      : '（'+(Q && Q.date ? tradeDay(Q.date)+' 收盤' : '最近收盤') + (SIG ? '；訊號是 '+tradeDay(SIG.date)+' 收盤後的資料' : '')+'）';
     render();
   });
 }
