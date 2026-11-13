@@ -122,15 +122,55 @@
       if(!ab || sb[last] >= ab*3) keys.push('<span class="down">借券賣出 '+sb[last].toLocaleString('zh-TW')+' 張'+(ab ? '，平常的 '+fix(sb[last]/ab,1)+' 倍' : '')+'</span>');
     }
     if(dtr[last]!=null && dtr[last] >= 50) keys.push('<span>當沖比例 '+fix(dtr[last],0)+'%</span>');
+    var CF = cost(f, c.close), CT = cost(t, c.close), px0 = c.close[last];
+    [['投信', CT], ['外資', CF]].forEach(function(z){
+      var k = z[1]; if(!k.now || !px0 || k.pos <= 0) return;      /* 近 60 天整體是賣超的就不標，成本意義不大 */
+      var g = (px0 / k.now - 1) * 100;
+      keys.push('<span class="'+cls(g)+'">'+z[0]+'成本約 '+fix(k.now, k.now>=100?0:1)+'（現價'+(g>=0?'高':'低')+' '+fix(Math.abs(g),1)+'%）</span>');
+    });
     var p = c.pct[last], px = c.close[last];
     IN.innerHTML =
       '<div class="sc-top"><div><h2>'+esc(c.name)+'<small>'+esc(code)+(c.ind?'・'+esc(c.ind):'')+'</small></h2>'+star(code, c.name)+'</div>'
       +'<div style="display:flex;gap:12px;align-items:flex-start"><div class="sc-px"><b>'+(px!=null?fix(px,2):'—')+'</b><span class="'+cls(p)+'">'+pct(p)+'</span></div><button class="sc-close" aria-label="關閉">×</button></div></div>'
       +'<div class="sc-keys">'+keys.join('')+'</div>'
       +'<div class="sc-sec"><h3>'+n+' 天成交值<small>長條紅漲綠跌・虛線是 60 日平均・折線是收盤價</small></h3>'+valueChart(c)+'</div>'
+      +'<div class="sc-sec"><h3>法人成本<small>近 '+n+' 天買超的張數乘上當天收盤價，加權平均成買進均價（推估值）</small></h3>'+costChart(c, CF, CT)+'</div>'
       +'<div class="sc-sec"><h3>'+n+' 天法人買賣超<small>柱狀是每天買賣超（張）・折線是累計</small></h3>'+instChart(c)+'</div>'
       +'<div class="sc-sec"><h3>近 10 天明細</h3>'+table(c)+'</div>'
       +'<p class="sc-fine">資料每天盤後更新（法人資料晚上 9 點半左右齊全）。成交值單位億元，法人單位張。</p>';
+  }
+  /* 法人成本：近 60 天每次買超的張數 × 當天收盤價，加權平均成「買進均價」（賣超不影響均價）。
+     法人在 60 天前就有的持股算不進來，所以這是近期進場的成本推估，不是真正的總持股成本。
+     回傳每天累積到那天的均價、最後的均價、60 天合計買賣超張數 */
+  function cost(net, close){
+    var lots = 0, amt = 0, sum = 0, out = [];
+    for(var i=0;i<net.length;i++){
+      var x = net[i], p = close[i];
+      if(x!=null){ sum += x; if(x > 0 && p){ lots += x; amt += x*p; } }
+      out.push(lots ? amt/lots : null);
+    }
+    return {line: out, now: lots ? amt/lots : null, pos: sum};
+  }
+  function costChart(c, CF, CT){
+    if(!(c.f||[]).some(function(x){ return x!=null; })) return '<div class="sc-msg" style="padding:16px 0">還沒有法人資料。</div>';
+    var W=520, H=150, n=c.dates.length, bw=W/n, ac=cv('--accent'), mu=cv('--muted'), up=cv('--up');
+    var vals = c.close.concat(CF.line, CT.line).filter(function(v){ return v!=null; });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), pad = (hi-lo)*0.08 || hi*0.02; lo -= pad; hi += pad;
+    function X(i){ return (i+.5)*bw; } function Y(v){ return 6 + (1-(v-lo)/(hi-lo))*(H-12); }
+    function path(arr){ var d='', on=false; arr.forEach(function(v,i){ if(v==null){ on=false; return; } d += (on?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1); on=true; }); return d; }
+    var s = '<svg viewBox="0 0 '+W+' '+(H+18)+'" role="img" aria-label="收盤價與法人成本">'
+      + '<path d="'+path(c.close)+'" fill="none" stroke="'+up+'" stroke-width="2"/>'
+      + '<path d="'+path(CF.line)+'" fill="none" stroke="'+ac+'" stroke-width="2" stroke-dasharray="6 4"/>'
+      + '<path d="'+path(CT.line)+'" fill="none" stroke="'+mu+'" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>'
+      + '<text x="0" y="'+(H+14)+'" font-size="11" fill="'+mu+'">'+md(c.dates[0])+'</text><text x="'+W+'" y="'+(H+14)+'" font-size="11" text-anchor="end" fill="'+mu+'">'+md(c.dates[n-1])+'</text></svg>';
+    var px = c.close[n-1];
+    function line(name, k, col, dash){
+      var t = k.now ? '約 '+fix(k.now, k.now>=100?1:2)+(px ? '，現價'+(px>=k.now?'高':'低')+' '+fix(Math.abs(px/k.now-1)*100,1)+'%' : '')+'（'+n+' 天合計'+(k.pos>=0?'買超 ':'賣超 ')+Math.abs(k.pos).toLocaleString('zh-TW')+' 張）' : '近 '+n+' 天沒有買超';
+      return '<span><i style="background:'+col+(dash?';height:0;border-top:2px '+dash+' '+col:'')+'"></i>'+name+'成本 '+t+'</span>';
+    }
+    s += '<div class="sc-legend" style="flex-direction:column;gap:2px"><span><i style="background:'+up+'"></i>收盤價 '+(px!=null?fix(px,2):'—')+'</span>'
+      + line('外資', CF, ac, 'dashed') + line('投信', CT, mu, 'dotted') + '</div>';
+    return s;
   }
   function valueChart(c){
     var W=520,H=170,n=c.dates.length,bw=W/n, vals=c.value, mx=Math.max(robust(vals)*1.1, (c.avg||0)*1.2)||1;
