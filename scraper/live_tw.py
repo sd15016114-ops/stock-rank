@@ -500,6 +500,12 @@ def wait_until(t):
         time.sleep(min(left, 30))
 
 
+def save_quotes(quotes, names):
+    """全市場最新價（收盤推播的自選股漲跌用；只留在執行環境，不進 git）"""
+    q = {c: [x.get("c"), x.get("p"), names.get(c, c)] for c, x in quotes.items() if x.get("c")}
+    (DATA / "live_quotes_tw.json").write_text(json.dumps(q, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 def run():
     today = now().date()
     if not trading_day(today):
@@ -541,6 +547,7 @@ def run():
                 log("指數這一輪沒抓到：%s" % e)
             last = aggregate(quotes, names, groups, base, at, phase, past, hist, themes, flows.io, past_net, past_io, idx.payload())
             save_local(last)
+            save_quotes(quotes, names)
             ok = sb_put(last)
             log("%s 全市場 %.0f 億%s %s" % (phase, total / 1e8, "" if ok else "（未寫入 Supabase）", usage(api) if at.minute % 30 == 0 else ""))
         except Exception as e:                     # noqa: BLE001

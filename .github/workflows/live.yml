@@ -53,3 +53,11 @@ jobs:
           if git diff --cached --quiet; then echo "沒有變動"; exit 0; fi
           git commit -m "盤中資金 $(TZ=Asia/Taipei date +%F)"
           for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push origin HEAD:${{ github.ref_name }} && break; sleep 10; done
+
+      - name: 收盤推播
+        if: always() && (github.event.inputs.task || 'run') == 'run'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: pip install pywebpush && python scraper/push.py close
+        continue-on-error: true
