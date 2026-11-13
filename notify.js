@@ -1,11 +1,13 @@
-/* 自選股（跨裝置同步）與通知設定。
-   自選股：存在這台裝置，同時用「同步碼」存到 Supabase（watch_get／watch_put 函式）；
-           另一台裝置輸入同一組同步碼就會看到同一份清單，任何一台改了，其他台下次打開或切回來時會跟上。
+/* 帳號（email 驗證碼登入）、自選股（跟著帳號同步）與通知設定。
+   帳號：Supabase Auth。輸入 email → 收 6 位數驗證碼 → 輸入就登入，不用密碼（用驗證碼而不是信裡的連結，
+         因為 iPhone 主畫面的 App 點信裡的連結會跳去 Safari）。
+   自選股：存在這台裝置；登入後也存到 Supabase 的 user_data 表（只有本人讀寫得到），
+           其他登入同一個帳號的裝置，打開或切回來時會跟上。
    通知：右上角鈴鐺 → 開啟通知 → 瀏覽器訂閱推播 → 存到 Supabase（push_save），GitHub 排程依設定傳通知。 */
 (function(){
   var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
   var VAPID = 'BNUZB1N8x1Uq6LVZx7TVEAht49iFsl1iWOXonjJRjRWxo8klTSuPWoVBO6kVaahRlFkPJU9Sa2h1GIPnDqgP2qc';
-  var KW = 'stock-rank-watch', KP = 'stock-rank-push', KS = 'stock-rank-sync';
+  var KW = 'stock-rank-watch', KP = 'stock-rank-push', KS = 'stock-rank-sync', KA = 'stock-rank-auth';
 
   function lsGet(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v==null ? d : v; }catch(e){ return d; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -18,29 +20,76 @@
   /* ---------- 自選股 ---------- */
   var listeners = [];
   function fire(){ listeners.forEach(function(f){ try{ f(); }catch(e){} }); }
-  function syncInfo(){ return lsGet(KS, {}); }
-  function newId(){
-    var abc = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', a = new Uint8Array(10), id = '';     /* 拿掉容易看錯的 0/O、1/I/L */
-    (window.crypto || window.msCrypto).getRandomValues(a);
-    for(var i=0;i<10;i++) id += abc[a[i] % abc.length];
-    return id.slice(0,5)+'-'+id.slice(5);
+  function syncInfo(){ return lsGet(KS, {t:0}); }
+  function stamp(){ var s0 = syncInfo(); s0.t = Date.now(); lsSet(KS, s0); }
+  function saveLocal(l){ lsSet(KW, l); stamp(); pushCloud(); sync(); fire(); }
+
+  /* ---------- 帳號 ---------- */
+  function authGet(){ return lsGet(KA, null); }
+  function api(path, opt){
+    opt = opt || {};
+    var h = {apikey:SB.key, 'Content-Type':'application/json'};
+    for(var k in (opt.headers||{})) h[k] = opt.headers[k];
+    return fetch(SB.url+path, {method:opt.method||'GET', headers:h, body:opt.body ? JSON.stringify(opt.body) : undefined, cache:'no-store'})
+      .then(function(r){ return r.text().then(function(t){ var j = null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+        if(!r.ok){ var err = new Error((j && (j.msg || j.error_description || j.message)) || r.status); err.status = r.status; err.code = j && (j.error_code || j.code); throw err; }
+        return j; }); });
   }
-  function ensureId(){ var s0 = syncInfo(); if(!s0.id){ s0 = {id:newId(), t:lsGet(KW, []).length ? Date.now() : 0}; lsSet(KS, s0); } return s0; }
-  function saveLocal(l){ lsSet(KW, l); var s0 = ensureId(); s0.t = Date.now(); lsSet(KS, s0); pushCloud(); sync(); fire(); }
+  function keep(j){ var a0 = {at:j.access_token, rt:j.refresh_token, exp:Date.now() + (j.expires_in||3600)*1000, email:(j.user && j.user.email) || (authGet()||{}).email, uid:(j.user && j.user.id) || (authGet()||{}).uid}; lsSet(KA, a0); return a0; }
+  var refreshing = null;
+  function token(){                                 /* 拿可用的登入憑證，快過期就先換新的 */
+    var a0 = authGet(); if(!a0) return Promise.resolve(null);
+    if(a0.exp - Date.now() > 60000) return Promise.resolve(a0);
+    if(!refreshing) refreshing = api('/auth/v1/token?grant_type=refresh_token', {method:'POST', body:{refresh_token:a0.rt}})
+      .then(keep, function(e){ if(e.status===400 || e.status===401){ lsSet(KA, null); fireAuth(); } return null; })
+      .then(function(r){ refreshing = null; return r; });
+    return refreshing;
+  }
+  var authListeners = [];
+  function fireAuth(){ authListeners.forEach(function(f){ try{ f(); }catch(e){} }); }
+  window.Account = {
+    user: function(){ var a0 = authGet(); return a0 ? {email:a0.email} : null; },
+    sendCode: function(email){ return api('/auth/v1/otp', {method:'POST', body:{email:email, create_user:true}}); },
+    verify: function(email, code){
+      return api('/auth/v1/verify', {method:'POST', body:{type:'email', email:email, token:String(code).replace(/\D/g,'')}})
+        .then(function(j){ keep(j); fireAuth(); return pullCloud(true, true); });
+    },
+    logout: function(){
+      var a0 = authGet(); lsSet(KA, null); fireAuth();
+      if(a0) api('/auth/v1/logout', {method:'POST', headers:{Authorization:'Bearer '+a0.at}}).catch(function(){});
+    },
+    onChange: function(f){ authListeners.push(f); }
+  };
+
+  /* ---------- 雲端同步：誰比較新就用誰（第一次登入時把兩邊合併） ---------- */
   var pushTimer = null;
   function pushCloud(){
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(function(){ var s0 = ensureId(); rpc('watch_put', {wid:s0.id, w:{watch:lsGet(KW, []), t:s0.t}}).catch(function(){}); }, 400);
+    pushTimer = setTimeout(function(){
+      token().then(function(a0){ if(!a0) return;
+        return api('/rest/v1/user_data?on_conflict=uid', {method:'POST', headers:{Authorization:'Bearer '+a0.at, Prefer:'resolution=merge-duplicates,return=minimal'},
+          body:{uid:a0.uid, data:{watch:lsGet(KW, []), prefs:lsGet(KP, {}), t:syncInfo().t}}});
+      }).catch(function(){});
+    }, 400);
   }
   var lastPull = 0;
-  function pullCloud(force){
+  function pullCloud(force, merge){
     if(!force && Date.now() - lastPull < 15000) return Promise.resolve();
     lastPull = Date.now();
-    var s0 = ensureId();
-    return rpc('watch_get', {wid:s0.id}).then(function(r){
-      if(!r || !r.watch){ if(lsGet(KW, []).length) pushCloud(); return; }      /* 雲端還沒有：把這台的傳上去 */
-      if((r.t||0) > (s0.t||0)){ lsSet(KW, r.watch); s0.t = r.t; lsSet(KS, s0); sync(); fire(); }
-      else if((r.t||0) < (s0.t||0)) pushCloud();
+    return token().then(function(a0){
+      if(!a0) return;
+      return api('/rest/v1/user_data?select=data&uid=eq.'+a0.uid, {headers:{Authorization:'Bearer '+a0.at}}).then(function(rows){
+        var r = rows && rows[0] && rows[0].data, s0 = syncInfo();
+        if(!r || !r.watch){ pushCloud(); return; }                 /* 帳號裡還沒有：把這台的傳上去 */
+        if(merge){                                                   /* 剛登入：帳號裡的在前，這台多的接在後面 */
+          var have = {}, merged = r.watch.slice();
+          merged.forEach(function(x){ have[x[0]] = 1; });
+          lsGet(KW, []).forEach(function(x){ if(!have[x[0]]) merged.push(x); });
+          lsSet(KW, merged); if(r.prefs) lsSet(KP, r.prefs); stamp(); pushCloud(); sync(); fire(); return;
+        }
+        if((r.t||0) > (s0.t||0)){ lsSet(KW, r.watch); if(r.prefs) lsSet(KP, r.prefs); s0.t = r.t; lsSet(KS, s0); sync(); fire(); }
+        else if((r.t||0) < (s0.t||0)) pushCloud();
+      });
     }).catch(function(){});
   }
   window.Watch = {
@@ -60,21 +109,6 @@
       var t = l[i]; l[i] = l[j]; l[j] = t; saveLocal(l);
     },
     onChange: function(f){ listeners.push(f); },
-    syncId: function(){ return ensureId().id; },
-    /* 輸入另一台裝置的同步碼：改用那組，兩邊的清單合併（那邊的順序在前） */
-    link: function(code){
-      var id = String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
-      if(id.length!==10) return Promise.reject(new Error('format'));
-      id = id.slice(0,5)+'-'+id.slice(5);
-      return rpc('watch_get', {wid:id}).then(function(r){
-        if(!r || !r.watch) throw new Error('none');
-        var mine = lsGet(KW, []), have = {}, merged = r.watch.slice();
-        merged.forEach(function(x){ have[x[0]] = 1; });
-        mine.forEach(function(x){ if(!have[x[0]]) merged.push(x); });
-        lsSet(KS, {id:id, t:0}); saveLocal(merged);
-        return merged.length;
-      });
-    },
     pull: function(){ return pullCloud(true); }
   };
   pullCloud(true);
@@ -199,7 +233,7 @@
   });
   IN.addEventListener('change', function(e){
     var k = e.target.dataset && e.target.dataset.k; if(!k) return;
-    var p = lsGet(KP, {}); p[k] = e.target.checked; lsSet(KP, p); sync();
+    var p = lsGet(KP, {}); p[k] = e.target.checked; lsSet(KP, p); stamp(); pushCloud(); sync();
   });
   window.Watch.onChange(function(){ if(document.body.classList.contains('nt-open')) render(); });
 })();
