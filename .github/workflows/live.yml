@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: 安裝永豐 Shioaji
-        run: pip install shioaji
+        run: pip install shioaji pywebpush
 
       - name: 盤中資金
         env:
