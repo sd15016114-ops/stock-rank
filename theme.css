@@ -1,0 +1,74 @@
+/* 全站外觀（Robinhood 風格）：白底／夜間純黑、無襯線字、黑白為主，顏色只用在漲跌。
+   各頁面原本的樣式都用這些變數，所以這裡重新定義變數就能整站換裝；最後面是少數要另外調的元件。
+   這個檔案要放在每頁 <style> 之後載入，才會蓋過去。 */
+:root{
+  --paper:#FFFFFF; --sheet:#FFFFFF; --tint:#F5F6F7; --ink:#0B0D0F; --muted:#6A7178;
+  --rule:#ECEEF0; --fill:#0B0D0F; --on-fill:#FFFFFF; --accent:#0B0D0F; --soft:#EEF0F2; --seal:#F2463A;
+  --up:#F2463A; --down:#00A85A;
+  --sans:Inter,"Noto Sans TC",system-ui,-apple-system,sans-serif;
+  --serif:Inter,"Noto Sans TC",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#000000; --sheet:#000000; --tint:#121416; --ink:#FFFFFF; --muted:#8E949A;
+    --rule:#1F2225; --fill:#FFFFFF; --on-fill:#000000; --accent:#FFFFFF; --soft:#1A1D20; --seal:#FF5A4F;
+    --up:#FF5A4F; --down:#20D27A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#000000; --sheet:#000000; --tint:#121416; --ink:#FFFFFF; --muted:#8E949A;
+  --rule:#1F2225; --fill:#FFFFFF; --on-fill:#000000; --accent:#FFFFFF; --soft:#1A1D20; --seal:#FF5A4F;
+  --up:#FF5A4F; --down:#20D27A;
+}
+
+/* 字：標題改粗黑體、數字等寬 */
+body{font-family:var(--sans);letter-spacing:0}
+h1,h2,h3,.brand{font-family:var(--sans) !important;letter-spacing:-.01em}
+.hero h1{font-weight:800 !important}
+section.block h2,.rh-sec h2{font-weight:800 !important}
+.brand{font-weight:800 !important;font-size:20px !important;color:var(--ink) !important}
+strong,b{font-variant-numeric:tabular-nums}
+
+/* 頁首按鈕：拿掉圓框，只留圖示 */
+.refbtn{border:0 !important;background:transparent !important}
+.refbtn:hover{background:var(--tint) !important}
+.theme{background:var(--tint) !important;box-shadow:inset 0 0 0 1px var(--rule)}
+.theme span{color:var(--muted) !important}
+.theme i{background:var(--ink) !important;box-shadow:none !important}
+
+/* 切換鈕：外框拿掉，選中的是實心黑（夜間白）膠囊，跟 Robinhood 的時間區間按鈕一樣 */
+.seg{background:transparent !important;border:0 !important;padding:2px !important}
+.seg .thumb{box-shadow:none !important;top:2px !important;bottom:2px !important}
+.seg button{font-weight:600 !important}
+
+/* 卡片：去掉框和底色，改成細線分隔 */
+.card,.list{background:transparent !important;border:0 !important;border-top:1px solid var(--rule) !important;border-radius:0 !important}
+.ix,.lagc,.sum{background:transparent !important;border:0 !important;border-top:1px solid var(--rule) !important;border-radius:0 !important;box-shadow:none !important}
+.lagc .lh{background:transparent !important;padding-left:0 !important;padding-right:0 !important}
+.lagc .lr{padding-left:0 !important;padding-right:0 !important}
+
+/* 膠囊標籤：改成小字，顏色只看多空 */
+.badge,.sc-keys span,.lim span{background:transparent !important;border:0 !important;padding:0 !important;font-weight:600 !important}
+.badge{margin-left:8px !important}
+.badge.b{color:var(--muted) !important}
+
+/* 說明文字：收起來，標題旁的「?」點了才展開（nav.js 處理） */
+.helpq{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:8px;vertical-align:4px;border-radius:50%;border:1.5px solid var(--muted);background:none;color:var(--muted);font:700 12px/1 var(--sans);cursor:pointer;padding:0}
+.helpq[aria-expanded=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.is-help{display:none}
+.is-help.open{display:block}
+
+/* 個股卡片、通知面板 */
+.sc-sheet,.nt-sheet{background:var(--paper) !important}
+.sc-close,.nt-x{background:var(--tint) !important}
+.nt-main{background:var(--ink) !important;color:var(--paper) !important;border-radius:999px !important}
+.nt-main.off{background:var(--tint) !important;color:var(--ink) !important}
+.nt-st{background:var(--tint) !important}
+.nt-chips span{background:var(--tint) !important;border:0 !important}
+.histbtn{background:var(--ink) !important;color:var(--paper) !important;border:0 !important;border-radius:999px !important}
+.sc-star{background:transparent !important;border:1.5px solid var(--ink) !important;color:var(--ink) !important}
+.sc-star.on{background:var(--ink) !important;color:var(--paper) !important}
+
+/* 常駐大盤：去掉底色 */
+.tick{background:transparent !important;padding-left:12px !important}
+.tick:hover{background:var(--tint) !important}

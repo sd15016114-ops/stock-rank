@@ -230,6 +230,24 @@
     if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
   })();
 
+  /* ===== 說明文字收起來：標題旁加一個「?」，點了才展開 ===== */
+  function helpify(){
+    document.querySelectorAll('p.tag, p.lead').forEach(function(p, i){
+      if(p.dataset.help) return;
+      var h = p.previousElementSibling;
+      while(h && !/^H[1-3]$/.test(h.tagName)) h = h.previousElementSibling;
+      if(!h) return;
+      p.dataset.help = '1'; p.classList.add('is-help'); p.id = p.id || 'help'+i;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'helpq'; b.textContent = '?'; b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', p.id); b.setAttribute('aria-label', '說明');
+      b.addEventListener('click', function(){ var o = p.classList.toggle('open'); b.setAttribute('aria-expanded', o); });
+      var small = h.querySelector('small');
+      if(small) h.insertBefore(b, small); else h.appendChild(b);
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', helpify); else helpify();
+  setTimeout(helpify, 0);
+
   /* ===== 大盤常駐：電腦在左側選單最上面，平板與手機是頁首下面一條（往下滑收起、往上滑出現） ===== */
   (function(){
     var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};

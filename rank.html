@@ -275,6 +275,8 @@ footer a{color:var(--accent)}
   .rank th .pxh{display:inline}
 }
 </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="theme.css?v=202611131500">
 </head>
 <body>
 <div class="wrap">
@@ -286,11 +288,11 @@ footer a{color:var(--accent)}
       </button><button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
       <div class="calpanel" id="calPanel" hidden></div>
     </div></header>
-<script src="nav.js?v=202611131300"></script><script src="card.js?v=202611131300" defer></script><script src="notify.js?v=202611131300" defer></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="nav.js?v=202611131500"></script><script src="card.js?v=202611131300" defer></script><script src="notify.js?v=202611131300" defer></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 
   <section class="intro">
     <h1>成交值排行</h1>
-    <p>台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。</p>
+    <p class="tag">台股每天收盤後的成交值排行與三大法人籌碼，可以切換日期回看過去 60 個交易日。</p>
     <div class="updated" id="updated">資料載入中…</div>
     <div class="pickrow">
       <div class="seg modes" role="group" aria-label="市場" style="display:none"><i class="thumb" aria-hidden="true"></i>
@@ -1078,7 +1080,7 @@ function setMode(m){
   var T = {rank:['成交值排行', '台股每天收盤後的成交值排行與放大倍數，可以切換日期回看過去 60 個交易日。'],
            chips:['法人籌碼', '台股三大法人每天的買賣超：上市、上櫃的買賣金額，以及外資、投信、自營商各自買超、賣超最多的股票。'],
            us:['美股', 'NYSE、Nasdaq 每個交易日收盤後的成交值排行，台灣時間下午一點多更新，可以切換日期回看過去的排行。']}[page];
-  document.querySelector('.intro h1').textContent = T[0]; document.querySelector('.intro p').textContent = T[1];
+  document.querySelector('.intro h1').firstChild.nodeValue = T[0]; document.querySelector('.intro p').textContent = T[1];   /* 只換文字，保留標題旁的「?」 */
   document.title = T[0]+'｜股市動能排行';               /* 左側選單亮起來的跟著台股／美股切換 */
   if(typeof paintCalBtn==='function') paintCalBtn();
   $('marketSeg').hidden = MODE!=='tw';
