@@ -165,6 +165,24 @@ def build():
     return dates, stocks
 
 
+def sg(x):
+    return 0 if not x else 1 if x > 0 else -1
+
+
+def day_dirs(k, s, ok):
+    """最近 10 天每天的方向（1 紅、-1 綠、0 空心）：
+    法人連買：當天買超紅、賣超綠；同步買：兩個都買紅、兩個都賣綠；放量：有放量的那天看漲跌上色"""
+    if k == "f":
+        d = [sg(x) for x in s["f"]]
+    elif k == "t":
+        d = [sg(x) for x in s["t"]]
+    elif k == "ft":
+        d = [1 if sg(a) == sg(b) == 1 else -1 if sg(a) == sg(b) == -1 else 0 for a, b in zip(s["f"], s["t"])]
+    else:
+        d = [(sg(p) or 1) if o else 0 for o, p in zip(ok, s["pct"])]
+    return d[-10:]
+
+
 def signals(dates, stocks):
     out = {k: [] for k in ("vol", "f", "t", "ft")}
     for code, s in stocks.items():
@@ -183,7 +201,7 @@ def signals(dates, stocks):
                 arr = s["t"] if k == "t" else s["f"]
                 amt = sum(arr[-n:])
             out[k].append({"code": code, "name": s["name"], "ind": s["ind"], "close": s["close"][-1], "pct": s["pct"][-1],
-                           "n": n, "dots": ok[-10:], "amt": amt, "amt_t": sum(s["t"][-n:]) if k == "ft" else None,
+                           "n": n, "dots": ok[-10:], "dd": day_dirs(k, s, ok), "amt": amt, "amt_t": sum(s["t"][-n:]) if k == "ft" else None,
                            "value": s["value"][-1], "ratio": s["ratio"][-1]})
     for k in out:
         out[k].sort(key=lambda x: (-x["n"], -(x["amt"] if x["amt"] is not None else x["value"] or 0)))
@@ -198,7 +216,8 @@ def signals(dates, stocks):
             up = [i > 0 and sh[i] > sh[i - 1] for i in range(len(sh))]
             n = streak(up)
             if n >= 2 and sh[-1] >= 0.3:
-                sec.append({"kind": kind, "name": name, "n": n, "dots": up[-10:], "share": sh[-1], "chg": round(sh[-1] - sh[-1 - n], 3)})
+                dd = [0 if i == 0 else sg(round(sh[i] - sh[i - 1], 3)) for i in range(len(sh))][-10:]
+                sec.append({"kind": kind, "name": name, "n": n, "dots": up[-10:], "dd": dd, "share": sh[-1], "chg": round(sh[-1] - sh[-1 - n], 3)})
     sec.sort(key=lambda x: (-x["n"], -x["chg"]))
     chip_days = sum(1 for d in dates if (DATA / "full" / "chips" / ("%s.json" % d)).exists())
     return {"date": dates[-1], "updated": datetime.now(TPE).isoformat(timespec="seconds"), "chip_days": chip_days,
@@ -229,7 +248,8 @@ def extra_signals(stocks):
         up = [i > 0 and a is not None and b is not None and a > b for i, (a, b) in enumerate(zip(s["sblb"], [None] + s["sblb"][:-1]))]
         n = streak(up)
         if n >= MIN_STREAK and v >= MIN_VALUE:
-            sblb.append(dict(base, n=n, dots=up[-10:], bal=s["sblb"][-1], add=s["sblb"][-1] - s["sblb"][-1 - n]))
+            bal = s["sblb"]
+            sblb.append(dict(base, n=n, dots=up[-10:], dd=[0 if i == 0 or bal[i] is None or bal[i - 1] is None else -sg(bal[i] - bal[i - 1]) for i in range(len(bal))][-10:], bal=s["sblb"][-1], add=s["sblb"][-1] - s["sblb"][-1 - n]))
         r = s["dt"][-1]
         if r is not None and v >= DT_MIN_VALUE:
             dt.append(dict(base, r=r, avg=round(avg_prior(s["dt"]), 1) if avg_prior(s["dt"]) is not None else None))

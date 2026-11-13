@@ -80,6 +80,8 @@ header.top{display:flex;justify-content:space-between;align-items:center;gap:12p
 .dots{display:flex;gap:4px;margin-top:4px}
 .dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--rule)}
 .dots i.on{background:var(--up);border-color:var(--up)}
+.dots i.r{background:var(--up);border-color:var(--up)}
+.dots i.g{background:var(--down);border-color:var(--down)}
 .dots i.on.b{background:var(--accent);border-color:var(--accent)}
 .list .rt{text-align:right;white-space:nowrap}
 .list .rt b{display:block;font-weight:700}
@@ -106,7 +108,7 @@ footer p{margin:0 0 6px;max-width:50em}
 
   <section class="hero">
     <h1>連續訊號</h1>
-    <p class="tag">每天收盤後自動整理：哪些股票連續好幾天放量、被外資或投信連續買進，哪些板塊資金連續增加；另外列出借券賣出突然暴增、當沖比例特別高的股票。圓點是最近 10 個交易日，實心代表那天符合條件。點任一檔可以打開個股卡片。</p>
+    <p class="tag">每天收盤後自動整理：哪些股票連續好幾天放量、被外資或投信連續買進，哪些板塊資金連續增加；另外列出借券賣出突然暴增、當沖比例特別高的股票。圓點是最近 10 個交易日：紅色是那天買超（放量的話是收漲），綠色是賣超（收跌），空心是沒有。點任一檔可以打開個股卡片。</p>
     <div class="meta" id="meta">資料載入中…</div>
   </section>
 
@@ -185,6 +187,11 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncAll);
 syncAll();
 
 var D = null;
+/* 最近 10 天的圓點：紅＝買超（放量那天收漲、板塊占比增加），綠＝賣超（收跌、減少），空心＝沒有 */
+function dotsHtml(x){
+  var dd = x.dd || x.dots.map(function(o){ return o ? 1 : 0; });
+  return '<div class="dots" aria-hidden="true">'+dd.map(function(v){ return '<i class="'+(v>0?'r':v<0?'g':'')+'"></i>'; }).join('')+'</div>';
+}
 function render(){
   if(!D) return;
   var K = STATE.cat==='chip' ? STATE.ckind : STATE.kind, MIN = +STATE.min, html = '', items;
@@ -197,7 +204,7 @@ function render(){
         right = '<b class="down">'+yi(x.amt)+' 億</b><small>借券賣出 '+x.lots.toLocaleString('zh-TW')+' 張</small>';
       }else if(K==='sblb'){
         badge = '<span class="badge g">餘額連 '+x.n+' 天增加</span>';
-        dots = '<div class="dots">'+x.dots.map(function(o){ return '<i class="'+(o?'on g':'')+'"></i>'; }).join('')+'</div>';
+        dots = dotsHtml(x);
         right = '<b class="down">+'+x.add.toLocaleString('zh-TW')+' 張</b><small>餘額 '+x.bal.toLocaleString('zh-TW')+' 張</small>';
       }else{
         badge = x.avg!=null ? '<span class="badge '+(x.r>=x.avg*1.3?'r':'b')+'">平常 '+fix(x.avg,0)+'%</span>' : '';
@@ -217,7 +224,7 @@ function render(){
     items = (D.sec||[]).filter(function(x){ return x.n >= (MIN===3 ? 2 : MIN); });   /* 板塊很少連很多天，3 天選項放寬到 2 天 */
     html = items.map(function(x,i){
       return '<div class="it"><span class="no">'+(i+1)+'</span><div class="nm"><b>'+esc(x.name)+'</b><small>'+(x.kind==='th'?'概念股':'產業')+'</small>'
-        +'<span class="badge r">連 '+x.n+' 天增加</span><div class="dots">'+x.dots.map(function(o){ return '<i class="'+(o?'on':'')+'"></i>'; }).join('')+'</div></div>'
+        +'<span class="badge r">連 '+x.n+' 天增加</span>'+dotsHtml(x)+'</div>'
         +'<div class="rt"><b>占 '+fix(x.share,1)+'%</b><small class="up">'+x.n+' 天 +'+fix(x.chg,2)+'%</small></div></div>';
     }).join('');
     $('note').textContent = '板塊連續增加：每天占全市場成交值的比重都比前一天高（「3 天以上」這裡放寬成 2 天）。';
@@ -229,7 +236,7 @@ function render(){
         : K==='ft' ? '<b class="up">外 '+lots(x.amt)+'</b><small>投 '+lots(x.amt_t)+' 張</small>'
         : '<b class="up">'+lots(x.amt)+' 張</b><small>連續期間累計</small>';
       return '<div class="it" data-stock="'+esc(x.code)+'" data-name="'+esc(x.name)+'" tabindex="0" role="button"><span class="no">'+(i+1)+'</span><div class="nm"><b>'+esc(x.name)+'</b><small>'+esc(x.code)+(x.ind?'・'+esc(x.ind):'')+'　<span class="'+cls(x.pct)+'">'+pct(x.pct)+'</span></small>'
-        +'<span class="badge '+(K==='vol'?'b':'r')+'">'+lab.replace('N',x.n)+'</span><div class="dots">'+x.dots.map(function(o){ return '<i class="'+(o?'on':'')+(K==='vol'?' b':'')+'"></i>'; }).join('')+'</div></div>'
+        +'<span class="badge '+(K==='vol'?'b':'r')+'">'+lab.replace('N',x.n)+'</span>'+dotsHtml(x)+'</div>'
         +'<div class="rt">'+right+'</div></div>';
     }).join('');
     $('note').textContent = {vol:'放量：當天成交值是前 60 日平均的 1.5 倍以上（上市不到 60 個交易日的新股不列）。', f:'外資連買：外資（不含外資自營商）當天買超。', t:'投信連買：投信當天買超。', ft:'同步買：外資和投信同一天都買超；右邊是連續期間各自累計的張數。'}[K];
