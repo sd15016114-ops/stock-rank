@@ -72,3 +72,10 @@ strong,b{font-variant-numeric:tabular-nums}
 /* 常駐大盤：去掉底色 */
 .tick{background:transparent !important;padding-left:12px !important}
 .tick:hover{background:var(--tint) !important}
+
+/* 網站名稱前面加上 App 圖示 */
+.brand{display:inline-flex;align-items:center;gap:9px}
+.side .sb b{display:inline-flex;align-items:center;gap:9px;font-size:22px !important;letter-spacing:-.03em}
+body.side-mini .side .sb b{display:none}
+.brand::before,.side .sb b::before{content:"";flex:none;width:30px;height:30px;border-radius:8px;background:url(icons/icon-192.png) center/cover no-repeat;box-shadow:0 0 0 1px var(--rule)}
+.side .sb b::before{width:26px;height:26px;border-radius:7px}
