@@ -150,7 +150,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
     </section>
     <div class="rh-sec"><h2>自選股<button type="button" class="rh-info" id="infoBtn" aria-expanded="false" aria-label="說明">?</button></h2>
       <div class="acts" id="sortSeg"><button type="button" data-v="my" aria-pressed="true">自訂</button><button type="button" data-v="p" aria-pressed="false">漲跌</button><button type="button" data-v="fn" aria-pressed="false">資金</button><button type="button" class="edit" id="mng">編輯</button></div></div>
-    <p class="rh-help" id="help" hidden>右邊色塊點一下可以切換顯示漲跌幅、價格、今天資金淨流入。名字下面是這檔上了哪些訊號名單；走勢線是近 60 天收盤。點任一列看個股卡片。<span id="meta"></span></p>
+    <p class="rh-help" id="help" hidden>右邊色塊點一下可以切換顯示漲跌幅、價格、今天資金淨流入。名字下面是這檔上了哪些訊號名單；灰色小線是近 60 天收盤走勢。點任一列看個股卡片。<span id="meta"></span></p>
     <div id="wl"></div>
     <p class="rh-foot">盤中資料：永豐金證券，每分鐘更新；資金流入流出是用每分鐘價格方向推估的近似值。收盤後資料：證交所、櫃買中心。僅供參考，不構成投資建議。</p>
   </main>
@@ -261,7 +261,7 @@ function spark(arr, up){
   var p = (arr||[]).map(function(v,i){ return v==null ? null : [i, v]; }).filter(Boolean);
   if(p.length < 2) return '<svg aria-hidden="true"></svg>';
   var vs = p.map(function(x){ return x[1]; }), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs), rg = (hi-lo)||1, n = arr.length-1;
-  return '<svg viewBox="0 0 72 30" preserveAspectRatio="none" role="img" aria-label="近 60 天收盤走勢"><polyline fill="none" stroke="'+(up?'var(--rh-up)':'var(--rh-down)')+'" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" points="'+p.map(function(x){ return (x[0]/n*72).toFixed(1)+','+((1-(x[1]-lo)/rg)*26+2).toFixed(1); }).join(' ')+'"/></svg>';
+  return '<svg viewBox="0 0 72 30" preserveAspectRatio="none" role="img" aria-label="近 60 天收盤走勢"><title>近 60 天收盤走勢</title><polyline fill="none" stroke="var(--rh-mute)" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" points="'+p.map(function(x){ return (x[0]/n*72).toFixed(1)+','+((1-(x[1]-lo)/rg)*26+2).toFixed(1); }).join(' ')+'"/></svg>';
 }
 
 /* ===== 上方大盤：大數字＋整條走勢線，手指在線上滑動會跟著顯示那一分鐘 ===== */
