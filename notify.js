@@ -1,10 +1,11 @@
-/* 自選股與通知設定。
-   自選股：存在這台裝置（localStorage）；開了通知的話也一起存到 Supabase，推播時才知道要列哪些。
+/* 自選股（跨裝置同步）與通知設定。
+   自選股：存在這台裝置，同時用「同步碼」存到 Supabase（watch_get／watch_put 函式）；
+           另一台裝置輸入同一組同步碼就會看到同一份清單，任何一台改了，其他台下次打開或切回來時會跟上。
    通知：右上角鈴鐺 → 開啟通知 → 瀏覽器訂閱推播 → 存到 Supabase（push_save），GitHub 排程依設定傳通知。 */
 (function(){
   var SB = {url:'https://yydcsmxnqudluancdowo.supabase.co', key:'sb_publishable_XgJSPBpQXcNdTCDT4pvA3w_NXpbkCn6'};
   var VAPID = 'BNUZB1N8x1Uq6LVZx7TVEAht49iFsl1iWOXonjJRjRWxo8klTSuPWoVBO6kVaahRlFkPJU9Sa2h1GIPnDqgP2qc';
-  var KW = 'stock-rank-watch', KP = 'stock-rank-push';
+  var KW = 'stock-rank-watch', KP = 'stock-rank-push', KS = 'stock-rank-sync';
 
   function lsGet(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v==null ? d : v; }catch(e){ return d; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -17,8 +18,31 @@
   /* ---------- 自選股 ---------- */
   var listeners = [];
   function fire(){ listeners.forEach(function(f){ try{ f(); }catch(e){} }); }
-  function saveLocal(l){ lsSet(KW, l); sync(); fire(); }
-
+  function syncInfo(){ return lsGet(KS, {}); }
+  function newId(){
+    var abc = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', a = new Uint8Array(10), id = '';     /* 拿掉容易看錯的 0/O、1/I/L */
+    (window.crypto || window.msCrypto).getRandomValues(a);
+    for(var i=0;i<10;i++) id += abc[a[i] % abc.length];
+    return id.slice(0,5)+'-'+id.slice(5);
+  }
+  function ensureId(){ var s0 = syncInfo(); if(!s0.id){ s0 = {id:newId(), t:lsGet(KW, []).length ? Date.now() : 0}; lsSet(KS, s0); } return s0; }
+  function saveLocal(l){ lsSet(KW, l); var s0 = ensureId(); s0.t = Date.now(); lsSet(KS, s0); pushCloud(); sync(); fire(); }
+  var pushTimer = null;
+  function pushCloud(){
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(function(){ var s0 = ensureId(); rpc('watch_put', {wid:s0.id, w:{watch:lsGet(KW, []), t:s0.t}}).catch(function(){}); }, 400);
+  }
+  var lastPull = 0;
+  function pullCloud(force){
+    if(!force && Date.now() - lastPull < 15000) return Promise.resolve();
+    lastPull = Date.now();
+    var s0 = ensureId();
+    return rpc('watch_get', {wid:s0.id}).then(function(r){
+      if(!r || !r.watch){ if(lsGet(KW, []).length) pushCloud(); return; }      /* 雲端還沒有：把這台的傳上去 */
+      if((r.t||0) > (s0.t||0)){ lsSet(KW, r.watch); s0.t = r.t; lsSet(KS, s0); sync(); fire(); }
+      else if((r.t||0) < (s0.t||0)) pushCloud();
+    }).catch(function(){});
+  }
   window.Watch = {
     list: function(){ return lsGet(KW, []); },
     has: function(code){ return this.list().some(function(x){ return x[0]===code; }); },
@@ -36,7 +60,26 @@
       var t = l[i]; l[i] = l[j]; l[j] = t; saveLocal(l);
     },
     onChange: function(f){ listeners.push(f); },
+    syncId: function(){ return ensureId().id; },
+    /* 輸入另一台裝置的同步碼：改用那組，兩邊的清單合併（那邊的順序在前） */
+    link: function(code){
+      var id = String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+      if(id.length!==10) return Promise.reject(new Error('format'));
+      id = id.slice(0,5)+'-'+id.slice(5);
+      return rpc('watch_get', {wid:id}).then(function(r){
+        if(!r || !r.watch) throw new Error('none');
+        var mine = lsGet(KW, []), have = {}, merged = r.watch.slice();
+        merged.forEach(function(x){ have[x[0]] = 1; });
+        mine.forEach(function(x){ if(!have[x[0]]) merged.push(x); });
+        lsSet(KS, {id:id, t:0}); saveLocal(merged);
+        return merged.length;
+      });
+    },
+    pull: function(){ return pullCloud(true); }
   };
+  pullCloud(true);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') pullCloud(); });
+  window.addEventListener('focus', function(){ pullCloud(); });
 
   /* ---------- 推播訂閱 ---------- */
   var ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
