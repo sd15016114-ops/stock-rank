@@ -256,6 +256,7 @@ class Indexes:
         return [dict(self.data[k], k=k) for k, _, _, _ in INDEXES if k in self.data]
 
 
+ALERT_GAP = 15         # 盤中自選股提醒：同一台裝置至少隔 15 分鐘才傳下一則（中間的狀況合併）
 LAG_HOT = 6            # 最多列幾個熱門板塊
 LAG_MIN_P = 1.0        # 板塊平均漲幅至少 1% 才算「在漲」
 LAG_GAP = 1.5          # 個股漲幅比板塊平均少 1.5 個百分點以上才算落後
@@ -525,6 +526,7 @@ class WatchAlerts:
       還沒漲的：出現在熱門板塊落後名單"""
     def __init__(self):
         self.subs, self.loaded, self.sent = [], None, set()
+        self.pending, self.last = {}, {}           # 每個訂閱：還沒送出的狀況、上一則送出的時間
         self.avg = self.avg_value()
 
     @staticmethod
@@ -550,7 +552,7 @@ class WatchAlerts:
             log("讀取通知訂閱失敗：%s" % e)
 
     def check(self, at, quotes, names, io, past_io, lag):
-        if at.time() < dtime(9, 3) or at.time() >= CLOSE_T:
+        if at.time() < dtime(9, 3) or at.time() > dtime(13, 30):
             return
         self.refresh(at)
         if not self.subs:
@@ -582,27 +584,41 @@ class WatchAlerts:
                 ev.append(("lag", "%s 族群在漲、這檔還沒漲" % lagset[c]))
             if ev:
                 events[c] = ev
-        if not events:
-            return
         import push
-
-        def make(prefs):
-            lines, n = [], 0
-            for c in prefs["watch"]:
+        # 每個訂閱：新狀況先累積，距離上一則超過 ALERT_GAP 分鐘才合併成一則送出（大跌大漲的日子才不會每分鐘一直叫）
+        due = []
+        for r in self.subs:
+            ep = r["endpoint"]
+            q = self.pending.setdefault(ep, [])
+            for c in r["prefs"]["watch"]:
                 for kind, text in events.get(c, []):
-                    key = (prefs.get("_ep"), c, kind)
+                    key = (ep, c, kind)
                     if key in self.sent:
                         continue
                     self.sent.add(key)
-                    lines.append("%s %s" % (names.get(c, c), text))
-                    n += 1
-            if not lines:
-                return None
-            return {"title": "自選股提醒 %s" % at.strftime("%H:%M"), "body": "\n".join(lines[:6]), "url": push.SITE + "watch.html",
-                    "tag": "watch-" + at.strftime("%H%M"), "badge": n}
-        rows = [dict(r, prefs=dict(r["prefs"], _ep=r["endpoint"])) for r in self.subs]
+                    q.append((c, text))
+            last = self.last.get(ep)
+            closing = at.time() >= dtime(13, 25)
+            if q and (last is None or (at - last).total_seconds() >= ALERT_GAP * 60 or closing):
+                due.append(r)
+        if not due:
+            return
+        msgs = {}
+        for r in due:
+            ep = r["endpoint"]
+            q = self.pending.pop(ep)
+            self.last[ep] = at
+            by = {}                                # 同一檔的幾種狀況併成一行，例如「穩懋 大跌 -5.2%、跌停」
+            for c, t in q:
+                by.setdefault(c, []).append(t)
+            lines = ["%s %s" % (names.get(c, c), "、".join(ts)) for c, ts in by.items()]
+            stocks = len(lines)
+            body = "\n".join(lines[:6]) + ("\n…還有 %d 檔，打開自選看" % (stocks - 6) if stocks > 6 else "")
+            msgs[ep] = {"title": "自選股提醒 %s（%d 檔）" % (at.strftime("%H:%M"), stocks), "body": body,
+                        "url": push.SITE + "watch.html", "tag": "watch-" + at.strftime("%H%M"), "badge": stocks}
+        rows = [dict(r, prefs=dict(r["prefs"], _ep=r["endpoint"])) for r in due]
         try:
-            push.send(rows, make)
+            push.send(rows, lambda prefs: msgs.get(prefs.get("_ep")))
         except Exception as e:                     # noqa: BLE001
             log("自選股提醒傳送失敗：%s" % e)
 

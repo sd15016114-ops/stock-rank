@@ -87,7 +87,8 @@ def send(rows, make):
                 gone += 1
             else:
                 print("傳送失敗：%s" % str(e)[:200])
-    print("推播：傳出 %d 則，清掉失效訂閱 %d 個（共 %d 個訂閱）" % (ok, gone, len(rows)))
+    if ok or gone:
+        print("推播：傳出 %d 則，清掉失效訂閱 %d 個（共 %d 個訂閱）" % (ok, gone, len(rows)))
 
 
 # ---------------------------------------------------------------- 內容
