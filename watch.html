@@ -168,6 +168,14 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
 .rh-link{display:flex;gap:8px;margin-top:14px}
 .rh-link input{flex:1;min-width:0;height:42px;border-radius:12px;border:0;background:var(--rh-press);color:var(--rh-ink);font:600 16px Inter,monospace;letter-spacing:.06em;padding:0 14px;text-transform:uppercase;outline:none}
 .rh-msg{font-size:13px;color:var(--rh-mute);min-height:1.2em;margin-top:8px}
+.rh-chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;margin:0 -4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rh-chips::-webkit-scrollbar{display:none}
+.rh-chips[hidden]{display:none}
+.rh-chips button{flex:none;border:0;border-radius:999px;padding:8px 14px;background:var(--rh-press);color:var(--rh-ink);font:600 14px Inter,"Noto Sans TC",sans-serif;cursor:pointer;white-space:nowrap}
+.rh-chips button:first-child{margin-left:4px}
+.rh-chips button small{font-weight:500;color:var(--rh-mute);margin-left:4px}
+.rh-chips button[aria-selected=true]{background:var(--rh-ink);color:var(--rh-bg)}
+.rh-chips button[aria-selected=true] small{color:inherit;opacity:.7}
 .rh-grp{display:flex;justify-content:space-between;align-items:baseline;padding:22px 0 8px;border-bottom:1px solid var(--rh-line)}
 .rh-grp b{font-size:15px;font-weight:800}
 .rh-grp span{font-size:13px;color:var(--rh-mute)}
@@ -204,6 +212,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
     <div class="rh-sec"><h2>自選股<button type="button" class="rh-info" id="infoBtn" aria-expanded="false" aria-label="說明">?</button></h2>
       <div class="acts" id="sortSeg"><button type="button" data-v="my" aria-pressed="true">自訂</button><button type="button" data-v="p" aria-pressed="false">漲跌</button><button type="button" data-v="fn" aria-pressed="false">資金</button><button type="button" data-v="ind" aria-pressed="false">產業</button><button type="button" class="edit" id="mng" aria-pressed="false">編輯</button></div></div>
     <p class="rh-help" id="help" hidden>右邊色塊點一下可以切換顯示漲跌幅、價格、今天資金淨流入。按「編輯」可以調整順序或移除。名字下面是這檔上了哪些訊號名單；灰色小線是近 60 天收盤走勢。點任一列看個股卡片。<span id="meta"></span></p>
+    <div class="rh-chips" id="indTabs" hidden role="tablist" aria-label="產業"></div>
     <form class="rh-search" id="srch" autocomplete="off" role="search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
       <input id="q" type="search" placeholder="搜尋代號或名稱，加入自選" aria-label="搜尋股票" enterkeyhint="search">
@@ -264,7 +273,14 @@ $('sortSeg').addEventListener('click', function(e){
   render();
 });
 $('infoBtn').addEventListener('click', function(){ var h = $('help'); h.hidden = !h.hidden; this.setAttribute('aria-expanded', !h.hidden); });
-var EDIT = false;
+var EDIT = false, IND = '全部';
+try{ IND = localStorage.getItem('stock-rank-wind') || '全部'; }catch(e){}
+$('indTabs').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-ind]'); if(!b) return;
+  IND = b.dataset.ind; try{ localStorage.setItem('stock-rank-wind', IND); }catch(err){}
+  var x = this.scrollLeft; render(); this.scrollLeft = x;
+  var on = this.querySelector('[aria-selected=true]'); if(on && on.scrollIntoView) on.scrollIntoView({inline:'nearest', block:'nearest', behavior:'smooth'});
+});
 $('mng').addEventListener('click', function(){
   EDIT = !EDIT; this.textContent = EDIT ? '完成' : '編輯'; this.setAttribute('aria-pressed', EDIT);
   $('sortSeg').querySelectorAll('button[data-v]').forEach(function(b){ b.hidden = EDIT; });      /* 編輯時照自訂順序排，排序按鈕先藏起來 */
@@ -361,6 +377,7 @@ function render(){
     return {i:i, code:code, name:(q && q[5]) || h.name || w[1], ind:h.ind, c:c, p:p, v:q ? q[2] : null, fn:q ? q[3] : null, f5:q ? q[4] : null, closes:h.close};
   });
   if(EDIT){
+    $('indTabs').hidden = true;
     $('wl').innerHTML = rows.map(function(r, k){
       return '<div class="rh-row" style="cursor:default"><div class="n"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+'</small></div>'
         + '<div class="ed"><button type="button" data-mv="-1" data-c="'+esc(r.code)+'" aria-label="上移" '+(k===0?'disabled':'')+'>↑</button><button type="button" data-mv="1" data-c="'+esc(r.code)+'" aria-label="下移" '+(k===rows.length-1?'disabled':'')+'>↓</button><button type="button" class="del" data-del="'+esc(r.code)+'">移除</button></div></div>';
@@ -376,10 +393,15 @@ function render(){
       + '<div class="n"><b>'+esc(r.name)+'</b><small>'+sub+'</small></div>'
       + spark(r.closes, up) + pill(r) + '</div>';
   }
-  if(SORT==='ind'){
+  if(SORT==='ind' && !EDIT){
     /* 依產業分組：組的順序照每個產業第一檔在自選裡的位置；組名旁邊是這組今天的平均漲跌 */
     var groups = [], at = {};
     rows.forEach(function(r){ var k = r.code.indexOf('00')===0 ? 'ETF' : (r.ind || '其他'); if(!(k in at)){ at[k] = groups.length; groups.push({n:k, rows:[]}); } groups[at[k]].rows.push(r); });
+    if(IND!=='全部' && !(IND in at)) IND = '全部';
+    var tabs = [['全部', rows.length]].concat(groups.map(function(g){ return [g.n, g.rows.length]; }));
+    $('indTabs').innerHTML = tabs.map(function(t){ return '<button type="button" role="tab" aria-selected="'+(t[0]===IND)+'" data-ind="'+esc(t[0])+'">'+esc(t[0])+'<small>'+t[1]+'</small></button>'; }).join('');
+    $('indTabs').hidden = false;
+    if(IND!=='全部') groups = [groups[at[IND]]];
     $('wl').innerHTML = groups.map(function(g){
       var ps = g.rows.map(function(r){ return r.p; }).filter(function(p){ return p!=null; }), avg = ps.length ? ps.reduce(function(a,b){ return a+b; },0)/ps.length : null;
       return '<div class="rh-grp"><b>'+esc(g.n)+'</b><span>'+g.rows.length+' 檔'+(avg!=null ? '　平均 <em class="'+(avg>0?'u':avg<0?'d':'')+'">'+(avg>0?'+':'')+fix(avg,2)+'%</em>' : '')+'</span></div>'
@@ -387,6 +409,7 @@ function render(){
     }).join('');
     return;
   }
+  $('indTabs').hidden = true;
   $('wl').innerHTML = rows.map(rowHtml).join('');
 }
 $('wl').addEventListener('click', function(e){
