@@ -171,6 +171,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
 .rh-chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;margin:0 -4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .rh-chips::-webkit-scrollbar{display:none}
 .rh-chips[hidden]{display:none}
+@media (hover:hover) and (pointer:fine){.rh-chips{flex-wrap:wrap;overflow:visible;margin:0}.rh-chips button:first-child{margin-left:0}}   /* 電腦用滑鼠：標籤直接換行全部列出，不用左右滑 */
 .rh-chips button{flex:none;border:0;border-radius:999px;padding:8px 14px;background:var(--rh-press);color:var(--rh-ink);font:600 14px Inter,"Noto Sans TC",sans-serif;cursor:pointer;white-space:nowrap}
 .rh-chips button:first-child{margin-left:4px}
 .rh-chips button small{font-weight:500;color:var(--rh-mute);margin-left:4px}
