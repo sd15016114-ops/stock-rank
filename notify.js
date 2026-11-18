@@ -81,6 +81,21 @@
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') pullCloud(); });
   window.addEventListener('focus', function(){ pullCloud(); });
 
+  /* ---------- 自選標記：任何列表裡，在自選中的股票名字後面加一顆星 ---------- */
+  var markT = null;
+  function markAll(){
+    var set = {}; window.Watch.list().forEach(function(x){ set[x[0]] = 1; });
+    document.querySelectorAll('[data-stock]').forEach(function(el){
+      if(el.classList.contains('rh-row') || el.classList.contains('histbtn')) return;   /* 自選頁本身、按鈕不用標 */
+      var on = !!set[el.dataset.stock];
+      if(el.classList.contains('inwatch')!==on) el.classList.toggle('inwatch', on);
+    });
+  }
+  function scheduleMark(){ clearTimeout(markT); markT = setTimeout(markAll, 50); }
+  new MutationObserver(scheduleMark).observe(document.body, {childList:true, subtree:true});
+  listeners.push(scheduleMark);
+  scheduleMark();
+
   /* ---------- 推播訂閱 ---------- */
   var ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;

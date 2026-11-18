@@ -84,3 +84,6 @@ body.side-mini .side .sb b{display:none}
 html,body{overscroll-behavior:none;overflow-x:clip}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 @media (max-width:899px){input,select,textarea{font-size:16px !important}}   /* iPhone 輸入框字小於 16px 會自動放大畫面 */
+
+/* 自選中的股票：名字後面一顆星（notify.js 會幫列表裡的自選股加上 inwatch） */
+.inwatch .nm > b::after,.inwatch td.l > b::after{content:"★";color:#F5A623;font-size:.82em;margin-left:5px;vertical-align:1px}
