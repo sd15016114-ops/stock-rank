@@ -14,6 +14,8 @@
   + '.sc-top h2{font-family:var(--serif);font-weight:900;font-size:28px;margin:0;line-height:1.2}'
   + '.sc-top h2 small{font-family:var(--sans);font-size:14px;font-weight:500;color:var(--muted);margin-left:8px}'
   + '.sc-px{text-align:right}.sc-px b{font-size:24px;font-weight:700;display:block;line-height:1.2}'
+  + '.sc-when{display:block;font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap}'
+  + '.sc-live{font-size:13px;color:var(--muted);margin-top:4px}.sc-live b{color:var(--ink);font-weight:700}'
   + '.sc-close{border:0;background:var(--tint);color:var(--ink);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;flex:none}'
   + '.sc-keys{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}'
   + '.sc-keys span{font-size:13px;font-weight:700;border-radius:10px;padding:6px 10px;background:var(--tint);border:1px solid var(--rule)}'
@@ -89,7 +91,8 @@
     lastFocus = document.activeElement;
     IN.innerHTML = '<div class="sc-top"><div><h2>'+esc((hint&&hint.name)||code)+'<small>'+esc(code)+'</small></h2></div><button class="sc-close" aria-label="關閉">×</button></div><div class="sc-msg">資料載入中…</div>';
     document.body.classList.add('sc-open'); sheet.scrollTop = 0;
-    fetchStock(code).then(function(c){ render(code, c); }, function(){
+    CUR = code;
+    fetchStock(code).then(function(c){ if(CUR===code){ render(code, c); liveQuote(code); } }, function(){
       IN.querySelector('.sc-msg').textContent = '找不到這檔的歷史資料（可能是剛上市，或今天的資料還在更新）。';
     });
   };
@@ -105,6 +108,31 @@
     window.openStockCard(el.dataset.stock, {name: el.dataset.name});
   }, true);   /* 捕獲階段先處理，頁面本身「點列展開」的程式就不會被觸發 */
 
+  /* 盤中：右上角改成今天的即時價格（盤中資金每分鐘更新的那份），下面加一行今天的成交值和資金 */
+  var CUR = null;
+  setInterval(function(){ if(CUR && document.body.classList.contains('sc-open') && document.visibilityState==='visible') liveQuote(CUR); }, 60000);   /* 卡片開著就每分鐘更新 */
+  function tpeNow(){ var d = new Date(); return new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000); }
+  function liveQuote(code){
+    var t = tpeNow(), m = t.getHours()*60 + t.getMinutes();
+    if(t.getDay()===0 || t.getDay()===6 || m < 540 || m > 900) return;          /* 平日 9:00–15:00 才去抓 */
+    var today = t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);
+    fetch(SB.url+'/rest/v1/live?id=eq.q&select=date:data->>date,t:data->>t,phase:data->>phase,s:data->q->s'+encodeURIComponent(code), {headers:{apikey:SB.key}, cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : []; }).then(function(j){
+        var d = j && j[0], q = d && d.s;
+        if(!q || d.date!==today || !document.body.classList.contains('sc-open')) return;
+        var box = IN.querySelector('.sc-px'); if(!box) return;
+        var hm = (d.t||'').slice(11,16), open = d.phase==='open';
+        box.innerHTML = '<b class="'+cls(q[1])+'">'+fix(q[0], 2)+'</b><span class="'+cls(q[1])+'">'+pct(q[1])+'</span><small class="sc-when">'+(open ? '盤中 '+hm : '今日收盤')+'</small>';
+        var keys = IN.querySelector('.sc-keys'), old = IN.querySelector('.sc-live');
+        if(old) old.remove();
+        if(keys && q[2]!=null){
+          var line = document.createElement('div'); line.className = 'sc-live';
+          line.innerHTML = (open ? '今天到 '+hm : '今天')+'：成交值 <b>'+yi(q[2]/1e6)+' 億</b>，資金淨流入 <b class="'+cls(q[3])+'">'+(q[3]>0?'+':q[3]<0?'−':'')+yi((q[3]||0)/1e6)+' 億</b>'
+            + (open && q[4]!=null ? '（近 5 分鐘 <span class="'+cls(q[4])+'">'+(q[4]>0?'+':q[4]<0?'−':'')+yi(q[4]/1e6)+' 億</span>）' : '');
+          keys.parentNode.insertBefore(line, keys);
+        }
+      }).catch(function(){});
+  }
   function render(code, c){
     var n = c.dates.length, last = n-1, f = c.f||[], t = c.t||[];
     var v5 = c.value.slice(-5).filter(function(x){ return x!=null; });
@@ -131,7 +159,7 @@
     var p = c.pct[last], px = c.close[last];
     IN.innerHTML =
       '<div class="sc-top"><div><h2>'+esc(c.name)+'<small>'+esc(code)+(c.ind?'・'+esc(c.ind):'')+'</small></h2>'+star(code, c.name)+'</div>'
-      +'<div style="display:flex;gap:12px;align-items:flex-start"><div class="sc-px"><b>'+(px!=null?fix(px,2):'—')+'</b><span class="'+cls(p)+'">'+pct(p)+'</span></div><button class="sc-close" aria-label="關閉">×</button></div></div>'
+      +'<div style="display:flex;gap:12px;align-items:flex-start"><div class="sc-px"><b>'+(px!=null?fix(px,2):'—')+'</b><span class="'+cls(p)+'">'+pct(p)+'</span><small class="sc-when">'+md(c.dates[last])+' 收盤</small></div><button class="sc-close" aria-label="關閉">×</button></div></div>'
       +'<div class="sc-keys">'+keys.join('')+'</div>'
       +'<div class="sc-sec"><h3>'+n+' 天成交值<small>長條紅漲綠跌・虛線是 60 日平均・折線是收盤價</small></h3>'+valueChart(c)+'</div>'
       +'<div class="sc-sec"><h3>法人成本<small>近 '+n+' 天買超的張數乘上當天收盤價，加權平均成買進均價（推估值）</small></h3>'+costChart(c, CF, CT)+'</div>'
