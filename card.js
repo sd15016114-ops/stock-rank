@@ -92,7 +92,7 @@
     IN.innerHTML = '<div class="sc-top"><div><h2>'+esc((hint&&hint.name)||code)+'<small>'+esc(code)+'</small></h2></div><button class="sc-close" aria-label="關閉">×</button></div><div class="sc-msg">資料載入中…</div>';
     document.body.classList.add('sc-open'); sheet.scrollTop = 0;
     CUR = code;
-    fetchStock(code).then(function(c){ if(CUR===code){ render(code, c); liveQuote(code); } }, function(){
+    fetchStock(code).then(function(c){ if(CUR===code){ LASTC = c; render(code, c); liveQuote(code); } }, function(){
       IN.querySelector('.sc-msg').textContent = '找不到這檔的歷史資料（可能是剛上市，或今天的資料還在更新）。';
     });
   };
@@ -109,7 +109,7 @@
   }, true);   /* 捕獲階段先處理，頁面本身「點列展開」的程式就不會被觸發 */
 
   /* 盤中：右上角改成今天的即時價格（盤中資金每分鐘更新的那份），下面加一行今天的成交值和資金 */
-  var CUR = null;
+  var CUR = null, LASTC = null;
   setInterval(function(){ if(CUR && document.body.classList.contains('sc-open') && document.visibilityState==='visible') liveQuote(CUR); }, 60000);   /* 卡片開著就每分鐘更新 */
   function tpeNow(){ var d = new Date(); return new Date(d.getTime() + (d.getTimezoneOffset()+480)*60000); }
   function liveQuote(code){
@@ -131,6 +131,50 @@
             + (open && q[4]!=null ? '（近 5 分鐘 <span class="'+cls(q[4])+'">'+(q[4]>0?'+':q[4]<0?'−':'')+yi(q[4]/1e6)+' 億</span>）' : '');
           keys.parentNode.insertBefore(line, keys);
         }
+        dayChart(code, q[0], d, today);
+      }).catch(function(){});
+  }
+  /* 當天走勢：每 5 分鐘一個點（盤中程式存的），最後接上現在的價格；虛線是昨天收盤 */
+  function dayChart(code, nowPx, d, today){
+    fetch(SB.url+'/rest/v1/live?id=eq.k5&select=date:data->>date,s:data->s->s'+encodeURIComponent(code), {headers:{apikey:SB.key}, cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : []; }).then(function(j){
+        var k = j && j[0]; if(CUR!==code || !document.body.classList.contains('sc-open')) return;
+        var c = LASTC; if(!c) return;
+        var n = c.dates.length, ref = c.dates[n-1] < today ? c.close[n-1] : c.close[n-2];
+        var pts = [];
+        ((k && k.date===today && k.s) || []).forEach(function(v,i){ if(v!=null) pts.push([5*(i+1), v]); });
+        var hm = (d.t||'').slice(11,16), m = hm ? (+hm.slice(0,2)-9)*60 + (+hm.slice(3)) : 270;
+        if(nowPx!=null) pts.push([Math.max(1, Math.min(270, m)), nowPx]);
+        var old = IN.querySelector('.sc-day'); if(old) old.remove();
+        if(pts.length < 2 || !ref) return;
+        var W=520, H=130, vs = pts.map(function(p){ return p[1]; }).concat([ref]), lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs), pad = (hi-lo)*0.1 || ref*0.003;
+        lo -= pad; hi += pad;
+        function X(mn){ return mn/270*W; } function Y(v){ return (1-(v-lo)/(hi-lo))*H; }
+        var col = pts[pts.length-1][1] >= ref ? cv('--up') : cv('--down'), mu = cv('--muted');
+        var path = pts.map(function(p,i){ return (i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1); }).join('');
+        var last = pts[pts.length-1];
+        var sec = document.createElement('div'); sec.className = 'sc-sec sc-day';
+        sec.innerHTML = '<h3>今日走勢<small id="scDayLab">昨收 '+fix(ref,2)+'</small></h3>'
+          + '<svg viewBox="0 0 '+W+' '+(H+18)+'" role="img" aria-label="今日走勢" style="touch-action:pan-y">'
+          + '<line x1="0" x2="'+W+'" y1="'+Y(ref)+'" y2="'+Y(ref)+'" stroke="'+mu+'" stroke-dasharray="2 5" stroke-linecap="round"/>'
+          + '<path d="'+path+'" fill="none" stroke="'+col+'" stroke-width="2.2" stroke-linejoin="round"/>'
+          + '<circle cx="'+X(last[0])+'" cy="'+Y(last[1])+'" r="4" fill="'+col+'"/>'
+          + '<line class="cur" x1="0" x2="0" y1="0" y2="'+H+'" stroke="'+mu+'" opacity="0"/>'
+          + '<text x="0" y="'+(H+15)+'" font-size="11" fill="'+mu+'">9:00</text><text x="'+(W/2)+'" y="'+(H+15)+'" font-size="11" text-anchor="middle" fill="'+mu+'">11:15</text><text x="'+W+'" y="'+(H+15)+'" font-size="11" text-anchor="end" fill="'+mu+'">13:30</text></svg>';
+        var first = IN.querySelector('.sc-sec');
+        if(first) first.parentNode.insertBefore(sec, first);
+        /* 手指或滑鼠在線上移動：標題旁顯示那個時間點的價格 */
+        var svg = sec.querySelector('svg'), lab = sec.querySelector('#scDayLab'), cur = sec.querySelector('.cur'), def = lab.textContent;
+        function at(e){
+          var r = svg.getBoundingClientRect(), mn = (e.clientX - r.left)/r.width*270, best = pts[0];
+          pts.forEach(function(p){ if(Math.abs(p[0]-mn) < Math.abs(best[0]-mn)) best = p; });
+          var t = best[0], g = (best[1]/ref - 1)*100;
+          lab.innerHTML = (9+Math.floor(t/60))+':'+('0'+t%60).slice(-2)+'　<b class="'+cls(g)+'">'+fix(best[1],2)+'（'+(g>0?'+':'')+fix(g,2)+'%）</b>';
+          cur.setAttribute('x1', X(t)); cur.setAttribute('x2', X(t)); cur.setAttribute('opacity', .6);
+        }
+        function off(){ lab.textContent = def; cur.setAttribute('opacity', 0); }
+        svg.addEventListener('pointermove', at); svg.addEventListener('pointerdown', at);
+        svg.addEventListener('pointerleave', off); svg.addEventListener('pointerup', function(e){ if(e.pointerType!=='mouse') off(); });
       }).catch(function(){});
   }
   function render(code, c){

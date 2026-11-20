@@ -506,6 +506,32 @@ def save_quotes(quotes, names):
     (DATA / "live_quotes_tw.json").write_text(json.dumps(q, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
+class Intraday5:
+    """個股卡片的當天走勢：全市場每檔每 5 分鐘一個價格（9:00 之後第 i 個 5 分鐘），每到新的 5 分鐘寫一次 Supabase。
+    全部 1 分鐘一筆的話一天要上傳好幾百 MB，5 分鐘一筆、每 5 分鐘寫一次只要十幾 MB；最新那一分鐘的價格卡片另外從報價拿。"""
+    def __init__(self):
+        self.s, self.slot = {}, None
+
+    def update(self, at, quotes, phase):
+        slot = min(max((at.hour - 9) * 60 + at.minute - 1, 0) // 5, 53)
+        for c, x in quotes.items():
+            p = x.get("c")
+            if p is None:
+                continue
+            arr = self.s.setdefault(c, [])
+            while len(arr) < slot:
+                arr.append(arr[-1] if arr else None)     # 中間漏抓的用前一筆補
+            if len(arr) == slot:
+                arr.append(p)
+            else:
+                arr[slot] = p
+        if slot != self.slot or phase == "closed":
+            self.slot = slot
+            return {"date": at.date().isoformat(), "t": at.isoformat(), "phase": phase,
+                    "s": {"s" + c: v for c, v in self.s.items()}}
+        return None
+
+
 def quotes_row(quotes, names, io, past_io, at, phase):
     """自選股頁用：全市場每檔 [價, 漲跌幅, 成交值, 淨流入, 近 5 分鐘淨流入]，鍵是 "s"+代號（數字開頭的鍵 Supabase 會當成陣列索引）"""
     q = {}
@@ -622,7 +648,7 @@ def run():
     api, relogin = sj_login(), 0
     cons, names = sj_contracts(api, uni)
     hist, recent, scale, fails, last = {"ts": [], "ind": {}, "th": {}}, deque(maxlen=FLOW_MIN + 3), None, 0, None
-    flows, idx = Flows(), Indexes()
+    flows, idx, k5 = Flows(), Indexes(), Intraday5()
     idx.connect(api)
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     try:
@@ -658,6 +684,9 @@ def run():
             ok = sb_put(last)
             try:
                 sb_put(quotes_row(quotes, names, flows.io, past_io, at, phase), row="q")
+                k = k5.update(at, quotes, phase)
+                if k:
+                    sb_put(k, row="k5")
             except Exception as e:                 # noqa: BLE001
                 log("自選股報價沒寫入：%s" % e)
             if alerts:
