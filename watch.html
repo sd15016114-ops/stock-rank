@@ -142,7 +142,9 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
 .rh-row .n small .u{color:var(--rh-up)}.rh-row .n small .d{color:var(--rh-down)}
 .rh-row svg{width:72px;height:30px;display:block;overflow:visible}
 .rh-pill{border:0;border-radius:8px;height:36px;font:600 15px/36px Inter,"Noto Sans TC",sans-serif;color:#fff;text-align:center;cursor:pointer;padding:0 6px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.rh-pill.u{background:var(--rh-up)}.rh-pill.d{background:var(--rh-down)}.rh-pill.z{background:var(--rh-mute)}
+.rh-pill{background:transparent;text-align:right;padding:0;font-weight:700}
+.rh-pill.u{color:var(--rh-up)}.rh-pill.d{color:var(--rh-down)}.rh-pill.z{color:var(--rh-mute)}
+.rh-pill.lim{color:#fff;text-align:center;padding:0 6px;font-size:14px}.rh-pill.lim.u{background:var(--rh-up)}.rh-pill.lim.d{background:var(--rh-down)}
 .rh-search{position:relative;margin:14px 0 6px}
 .rh-search input{width:100%;box-sizing:border-box;height:46px;border-radius:12px;border:0;background:var(--rh-press);color:var(--rh-ink);font:500 16px Inter,"Noto Sans TC",sans-serif;padding:0 14px 0 42px;outline:none}
 .rh-search input:focus{box-shadow:0 0 0 2px var(--rh-ink)}
@@ -190,7 +192,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
 @media (max-width:599px){.rh-big{font-size:38px}.rh-row{grid-template-columns:minmax(0,1fr) 60px 86px;gap:10px}.rh-row svg{width:60px}.rh-chart svg{height:170px}}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="theme.css?v=202611181150">
+<link rel="stylesheet" href="theme.css?v=202611241650">
 </head>
 <body>
 <div class="wrap">
@@ -200,7 +202,7 @@ body{background:var(--rh-bg);color:var(--rh-ink)}
       <button type="button" class="theme" id="theme" role="switch" aria-checked="false" aria-label="夜間版" title="切換日間版／夜間版"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span><i></i></button>
     </div>
   </header>
-<script src="nav.js?v=202611131515"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
+<script src="nav.js?v=202611241640"></script>   <!-- 改了 nav.js 就換版本號，瀏覽器才會馬上抓新的 -->
 <script src="card.js?v=202611201215"></script><script src="notify.js?v=202611181150" defer></script>
   <main class="rh">
     <section class="rh-hero" aria-label="大盤">
@@ -364,7 +366,8 @@ function pill(r){
   if(SHOW==='c') t = r.c!=null ? fix(r.c, r.c>=1000?0:2) : '—';
   else if(SHOW==='fn'){ t = r.fn!=null ? yiS(r.fn)+'億' : '—'; k = r.fn==null ? 'z' : r.fn>0 ? 'u' : r.fn<0 ? 'd' : 'z'; }
   else t = r.p!=null ? (r.p>0?'+':'')+fix(r.p,2)+'%' : '—';
-  return '<button type="button" class="rh-pill '+k+'" aria-label="切換顯示">'+t+'</button>';
+  var lim = SHOW!=='fn' && window.limitOf ? limitOf(r.c, r.p) : 0;      /* 只有漲停、跌停是實心色塊，一般漲跌只有字的顏色 */
+  return '<button type="button" class="rh-pill '+k+(lim ? ' lim' : '')+'" aria-label="'+(lim ? (lim>0?'漲停，':'跌停，') : '')+'切換顯示" title="'+(lim ? (lim>0?'漲停':'跌停') : '')+'">'+t+'</button>';
 }
 function render(){
   var wl = watchList();

@@ -297,6 +297,16 @@
     window.checkNewVersion = function(){ last = 0; check(); };
   })();
 
+  /* ===== 漲停／跌停判斷：用昨收推回漲跌停價（台股 ±10%，依價位的跳動單位往內取），現價到了就算 ===== */
+  window.limitOf = function(c, p){
+    if(c==null || p==null || Math.abs(p) < 9) return 0;
+    var ref = c / (1 + p/100);
+    function tick(x){ return x < 10 ? .01 : x < 50 ? .05 : x < 100 ? .1 : x < 500 ? .5 : x < 1000 ? 1 : 5; }
+    var up = ref * 1.1, dn = ref * 0.9, tu = tick(up), td = tick(dn);
+    up = Math.floor(up / tu + 1e-6) * tu; dn = Math.ceil(dn / td - 1e-6) * td;
+    return c >= up - 1e-6 ? 1 : c <= dn + 1e-6 ? -1 : 0;
+  };
+
   /* ===== 加到主畫面（PWA）：離線備援、狀態列顏色跟著日間／夜間 ===== */
   if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')) navigator.serviceWorker.register('sw.js').catch(function(){});
   /* 打開 App 就把主畫面圖示上的數字清掉 */

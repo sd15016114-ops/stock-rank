@@ -87,3 +87,8 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 
 /* 自選中的股票：名字後面一顆星（notify.js 會幫列表裡的自選股加上 inwatch） */
 .inwatch .nm > b::after,.inwatch td.l > b::after{content:"★";color:#F5A623;font-size:.82em;margin-left:5px;vertical-align:1px}
+
+/* 漲停、跌停：價格那格整塊塗滿（看盤軟體的「實體」），一般漲跌只用字的顏色 */
+.lim-u,.lim-d{color:#fff !important;border-radius:4px;padding:1px 6px;display:block !important;width:fit-content;margin:2px 0 2px auto}
+.lim-u{background:var(--up)}.lim-d{background:var(--down)}
+td.limcell{text-align:right}
