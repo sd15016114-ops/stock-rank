@@ -366,7 +366,7 @@ function pill(r){
   if(SHOW==='c') t = r.c!=null ? fix(r.c, r.c>=1000?0:2) : '—';
   else if(SHOW==='fn'){ t = r.fn!=null ? yiS(r.fn)+'億' : '—'; k = r.fn==null ? 'z' : r.fn>0 ? 'u' : r.fn<0 ? 'd' : 'z'; }
   else t = r.p!=null ? (r.p>0?'+':'')+fix(r.p,2)+'%' : '—';
-  var lim = SHOW!=='fn' && window.limitOf ? limitOf(r.c, r.p) : 0;      /* 只有漲停、跌停是實心色塊，一般漲跌只有字的顏色 */
+  var lim = SHOW==='c' && window.limitOf ? limitOf(r.c, r.p) : 0;       /* 漲停、跌停時只有「價格」是實心色塊，漲跌幅和資金只用字的顏色 */
   return '<button type="button" class="rh-pill '+k+(lim ? ' lim' : '')+'" aria-label="'+(lim ? (lim>0?'漲停，':'跌停，') : '')+'切換顯示" title="'+(lim ? (lim>0?'漲停':'跌停') : '')+'">'+t+'</button>';
 }
 function render(){
