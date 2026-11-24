@@ -760,7 +760,7 @@ function renderLiveStocks(d, open){
       return gap+'<tr class="stocklink'+(r._no<=3?' top3':'')+'" data-stock="'+esc(r.code)+'" data-name="'+esc(r.name)+'" tabindex="0" title="看 '+esc(r.name)+' 的資金歷史"><td class="no l">'+r._no+'</td>'
         + '<td class="who l"><b>'+esc(r.name)+'</b><small>'+esc(r.code)+(r.ind && r.ind!=='其他' ? '・'+esc(r.ind) : '')+'</small></td>'
         + (function(){ var lim = window.limitOf ? limitOf(r.c, r.p) : 0;     /* 漲停、跌停：整格塗滿（實體） */
-            return '<td'+(lim ? ' class="limcell"' : '')+'><span class="'+(lim>0?'lim-u':lim<0?'lim-d':'')+'" style="display:block;font-weight:700">'+price(r.c)+'</span><span class="'+(lim>0?'lim-u':lim<0?'lim-d':cls(r.p))+'" style="font-size:13px">'+pctTxt(r.p)+'</span></td>'; })()
+            return '<td'+(lim ? ' class="limcell"' : '')+'><span class="'+(lim>0?'lim-u':lim<0?'lim-d':'')+'" style="display:block;font-weight:700">'+price(r.c)+'</span><span class="'+cls(r.p)+'" style="font-size:13px">'+pctTxt(r.p)+'</span></td>'; })()
         + '<td class="lb">'+(M.dv
           ? '<div class="lbar dv"><div class="neg">'+(w<0?'<i class="down" style="width:'+(-w*100).toFixed(2)+'%"></i>':'')+'</div><div class="pos">'+(w>0?'<i class="up" style="width:'+(w*100).toFixed(2)+'%"></i>':'')+'</div><span class="'+cls(w)+'">'+M.txt(r)+'</span></div>'
           : '<div class="lbar"><i class="'+(cls(r.p)||'flat')+'" style="width:calc((100% - 78px) * '+w.toFixed(4)+')"></i><span>'+M.txt(r)+'</span></div>')+'</td></tr>';
